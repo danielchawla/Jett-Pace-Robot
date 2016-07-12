@@ -3,15 +3,17 @@
 #include <LiquidCrystal.h> //LCD funcs
 
 #define N 0
-#define E 1
-#define S 2
-#define W 3
+#define E 90
+#define S 180
+#define W 270
 #define STRAIGHT 0
 #define RIGHT 1
 #define BACK -2
 #define LEFT -1
+#define F 0
+#define T 1
+#define MAXMOTOR 255
 
-void MainMenu(void);
 void Menu(void);
 void ViewDigital(void);
 void ViewAnalog(void);
@@ -19,6 +21,7 @@ void ControlArm(void);
 int PickupPassenger(int);
 void PickupPassengerMain(void);
 void altMotor(void);
+void processIntersection(void);
 
 void (*menuFunctions[])() = {Menu, ViewDigital, ViewAnalog, ControlArm, PickupPassengerMain, altMotor};
 int countMainMenu = 6;
@@ -53,33 +56,35 @@ MenuItem ProportionalGain = MenuItem("P-gain");
 MenuItem DerivativeGain   = MenuItem("D-gain");
 MenuItem IntersectionGain = MenuItem("Int-Gain");
 MenuItem menuItems[]      = {Gain, ProportionalGain, DerivativeGain, Speed, IntersectionGain};
-int divisors[] = {16, 16, 16, 1, 4}; //divides gains and speeds by this number
+int divisors[] = {8, 8, 8, 1, 4}; //divides gains and speeds by this number
 
 
 /*
 Define ALL Pins
 */
-  // Digital:
+
+  // --- DIGITAL --- //
+
 // Tape follwing QRDs
 /*q0:far left, q1:left centre, q2right centre, q3: far right*/
 int q0 = 15; 
 int q1 = 14;
 int q2 = 13;
-int q3 = 12; int qrdVals[4];
+int q3 = 12;
+int qrdVals[4];
+
 //Switches?
 
 // Claw trip
 int clawTrip = 0;
 
-  // Analog
+  // --- ANALOG --- //
 //IR
 int ArmIRpin = 0; 
 int leftIR = 0;   int leftIRVal = -1;   int leftIRValMax = -1;
 int rightIR = 1;  int rightIRVal = -1;  int rightIRValMax = -1;
 
-/*
-GLOBAL VARIABLES
-*/
+// --- GLOBAL VARIABLES --- //
 int numOfIttrs = 0;
 
 // Tape vollowing variables
@@ -95,7 +100,8 @@ int m = 0;
 int vel;
 int p;
 int d;
-int correction; 
+int correction;
+int intGain;
 
 //NAV VARIABLES
 double topIR0, ir0 = 0;
@@ -113,31 +119,8 @@ int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
   {  1, 2,  -1, -1, -1, -1, 5,  6,  4,  10, 9,  3,  -1, 12, 8,  -1, 14, 11, -1, 17}, //S
   { -1, -1, -1, 2,  3,  4,  8,  -1, 9,  -1, 11, 1,  10, -1, -1, 14, -1, 18, -1, -1} //W
 }; //dont change this   
-// Need to initialize the following two arrays
-int intersectionType[20] = {2, 14, 12, 13, 13, 9, 11, 2, 15, 14, 11, 15, 13, 2, 14, 1, 2, 11, 4, 2}; // stores type of each intersection ie. 4-way, 4 bit boolean {NSEW} T/F values
-int dirToDropoff[20] = {}; // Direction of dropoff zone from each intersection
-
-int currentEdge[2];
-int currentDir;
-int dirPrev = 0;
-int possibleTurns[3] = {0}; // left, straight, right True/False values - necessary??
-int desiredTurn = -2;
-int turnActual;
-int nodeMat[20][20] = {0}; //nodeMat[fromIndex][toIndex] = dir
-int countInIntersection = 0;
-int maxInIntersection = 4000;
-int countTurning = 0;
-int maxTurning = 3000;
-int leftTurnPossible = 0;
-int rightTurnPossible = 0;
-int intGain;
-int lostCount = 0;
-int qrdToCheck;
-int loopNum = 1;
-int statusCount = 0;
-int statusLast = 0;
-int pathConfidence = 3;
-int loopsSinceLastInt = 0;
+//                      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
+int dirToDropoff[20] = {S, S, E, E, W, W, S, S, S, E, W, S, E, S, S, W, S, S, E, S}; // Direction of dropoff zone from each intersection
 
 // Loop timing variables
 unsigned long t1 = 0;
@@ -149,24 +132,17 @@ int armHome = 95;
 int clawHome = 110;
 int clawClose = 10;
 
-int desiredTurns[] = {LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, RIGHT};
-int turnCount = 0;
-
 /*
 Frequency values for different sensor checks
 */
 int passengerCheckFreq = 10;
-int printToLCDFreq = 500;
+int printToLCDFreq = 500; // measured in per what?
 
 
 // State Variables
-int atIntersection = 0;
-int turning = 0;
-int turn180 = 0;
-int hasPassenger = 0;
-int lostTape = 0;
-int foundTape = 0;
-int positionLost = 0; // Change to 1 if sensor data contradicts what is expected based on currentEdge[][]
+int hasPassenger = F;
+int lostTape = F;
+int positionLost = F; // Change to 1 if sensor data contradicts what is expected based on currentEdge[][]
 
 void setup()
 {
@@ -180,32 +156,21 @@ void setup()
   delay(100);
   motor.stop_all();
 
-  // Create Edge Matrix
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 20; j++) {
-      if (theMap[i][j] != -1) {
-        nodeMat[j][theMap[i][j]] = i;
-      }
-    }
-  }
 
-  // Set initial edge
-  currentEdge[0] = 0;
-  currentEdge[1] = 1;
 
   // Initialize important variables with stored values
-  g = menuItems[0].Value;
-  kp = menuItems[1].Value;
-  kd = menuItems[2].Value;
   vel = menuItems[3].Value;
-  intGain = menuItems[4].Value;
+  g = menuItems[0].Value * (vel / 100); //proportional to vel
+  kp = menuItems[1].Value * (vel / 100);
+  kd = menuItems[2].Value * (vel / 100);
+  intGain = menuItems[3].Value;
 
   // Home Servos
   RCServo0.write(clawHome);
   RCServo1.write(armHome);
   // Probably should home GM7 too
 
-  LCD.print("Press Start To Begin");
+  LCD.print("H-Bridges Ready! Press Start To Begin.");
   while (true) {
     delay(200);
     LCD.scrollDisplayLeft();
@@ -225,7 +190,6 @@ void setup()
 
 void loop() {
   numOfIttrs++;
-  loopsSinceLastInt++;
   /*TAPE FOLLOWING*/
   //low reading == white. High reading == black tape.
   qrdVals[0] = digitalRead(q0);
@@ -235,6 +199,8 @@ void loop() {
 
   leftIRVal = analogRead(leftIR);
   rightIRVal = analogRead(rightIR);
+
+
 
 /*
   Check for passengers on either side
@@ -246,8 +212,8 @@ void loop() {
       leftIRValMax = leftIRVal;
     }else if(leftIRVal < leftIRValMax-10){
       // Stop motors and pick up passenger
-      motor.speed(0,-255);
-      motor.speed(0,-255);
+      motor.speed(0,-MAXMOTOR);
+      motor.speed(0,-MAXMOTOR);
       delay(100);
       motor.speed(0,0);
       motor.speed(0,0);
@@ -259,8 +225,8 @@ void loop() {
       // Stop motors and pick up passenger
       rightIRValMax = rightIRVal;
     }else if(rightIRVal < rightIRValMax-10){
-      motor.speed(0,-255);
-      motor.speed(0,-255);
+      motor.speed(0,-MAXMOTOR);
+      motor.speed(0,-MAXMOTOR);
       delay(100);
       motor.speed(0,0);
       motor.speed(0,0);
@@ -268,35 +234,11 @@ void loop() {
       rightIRValMax = -1;
     }
   }
-  
-  /*
-    Determine features of the next intersection and possible directions to turn
-  */
-  if (possibleTurns[0] == 0 && possibleTurns[1] == 0 && possibleTurns[1] == 0){
-    currentDir = nodeMat[currentEdge[0]][currentEdge[1]];
 
-    for(int i=0;i<3;i++){
-      possibleTurns[i] = 0;
-    }
-    for (int i = 0; i < 4; i++) {
-      if (theMap[i][currentEdge[1]] != -1) {
-        if (currentDir - i == -3 || currentDir - i == 1) {  // Can turn Left
-          possibleTurns[0] = 1;
-        }
-        if (currentDir - i == 3 || currentDir - i == -1) {  // Can turn Right
-          possibleTurns[2] = 1;
-        }
-        if (currentDir - i == 0) {                          // Can go Straight
-          possibleTurns[1] = 1;
-        }
-      }
-    }
-  }
 
-  /*
-    Determine which direction to turn
-  */
-  if (desiredTurn == -2) {
+
+
+  if(false){ //if we want to find out where the IR is coming from, relative to the robot. Set to directionOfDropZone
     topIR0 = analogRead(ir0);
     topIR1 = analogRead(ir1);
     topIR2 = analogRead(ir2);
@@ -332,264 +274,66 @@ void loop() {
     strongestVal = analogRead(strongest);
     offset = 120.0 * (float)secondStrongestVal / (float)(secondStrongestVal + strongestVal); // Need to be cast as doubles? - analogRead gives int
     if ( (strongest + 1) % 3 == secondStrongest ){
-      directionOfDropZone = (directionOfDropZone + offset+360) % 360;
+      directionOfDropZone = (directionOfDropZone + offset) % 360;
     }
     else{
-      directionOfDropZone = (directionOfDropZone - offset+360) % 360;
+      directionOfDropZone = (directionOfDropZone - offset) % 360;
     }
-
-    // For testing, turn left, right, straight, left ...
-    desiredTurn = desiredTurns[turnCount];//(dirPrev+1)%3;
-    turnCount++;
-    dirPrev = desiredTurn; 
   }
+
+
+
 
   /*
-    Check if at an intersection if not already
+    Check if at an intersection
   */
-
-  if(atIntersection < 6 && loopsSinceLastInt > 5000){
-    if((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) || (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW)){
-      atIntersection++;
-    }// || (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
-     //one of outside sensors tape && one of inside sensors tape OR all QRDS off tape
-    //if(atIntersection){ // If all QRDs lost, need to turn 180 degrees
-      //turn180 = (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
-    //}
-    if(atIntersection > 5){
-      LCD.clear();
-      LCD.print("Going Straight");
-      turn180 = (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
-    }
+  if(((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH)) || (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW)){
+    processIntersection();
   }
 
-  /*
-    TAKE ACTION AT INTERSECTION
-    When you come to and intersection there are 5 posibilities:
-      1. It is a dead end - must make 180 degree turn
-      2. You want to go straight, and this is an option - continue in straight line
-      3. You want to go straight, this is not an option - need to make a turn (random direction?)
-      4. You want to turn in a specific direction, and this is an option - make the turn successfully
-      5. You want to turn in a specific direction, this is not an option 
-        5a. Go straight if possible
-        5b. Turn in other direction if necessary
-
-    General approach to intersections
-      • Make 180 turn if necessary
-        • Otherwise continue straight
-          • Write same speeds to motors for predefined number of loops, then continue tape following after intersection
-      • If outside QRD identifies option to turn in desired direction, make the turn
-      • If all QRDs are lost while in the intersection and not turning, going straight is not an option - turn in one possible direction
-        • Possible directions are the outside QRDs that have seen tape while in the intersection - these must be recorded
-        • If both directions are possible, choose which direction to continue at random
-          • This is probably only relevant in testing, where directions to turn are random
-  */
-  if (atIntersection > 5) {
-    countInIntersection++;
-    
-
-    // Check if it is possible to turn left or right
-    if(!turning){
-      if(countInIntersection > maxInIntersection){
-        atIntersection = 0;
-      }
-      // Collect error values so that Tape Following continues nicely after intersection - do we really need this?
-      if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
-        if (pastError < 0) {
-          error = -5;
-        }
-        if (pastError > 0) {
-          error = 5;
-        }
-      }else if ( qrdVals[1] == LOW) {
-        error = -1;
-      }else if (qrdVals[2] == LOW) {
-        error = 1;
-      }else {
-        error = 0;
-      }
-
-       if (!error == pastError) {
-        recError = prevError;
-        q = m;
-        m = 1;
-      }
-
-      // Write same speed to both motors
-      motor.speed(0,vel/2);
-      motor.speed(1,vel/2);
-      
-      if(qrdVals[0]){      
-        leftTurnPossible++;
-      }
-      if(qrdVals[3]){
-        rightTurnPossible++;
-      }
-
-      if(leftTurnPossible && !qrdVals[0] && rightTurnPossible < pathConfidence){
-        leftTurnPossible--;
-      }
-      if(rightTurnPossible && !qrdVals[3] && rightTurnPossible < pathConfidence){
-        rightTurnPossible--;
-      }
-
-      // Check if all QRDs are lost
-      if(qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW){
-        motor.stop_all();
-        // need to turn
-        if(leftTurnPossible>pathConfidence){
-          turnActual = LEFT;
-          turning = 1;
-          qrdToCheck = q0;
-          LCD.clear();
-          LCD.print("Turning Left");
-        } else if(rightTurnPossible>pathConfidence){
-          turnActual = RIGHT;
-          turning = 1;
-          qrdToCheck = q3;
-          LCD.clear();
-          LCD.print("Turning Right");  
-        } else{ // reached dead end
-          // 180 turn
-        }
-      }
-
-       // Determine if we can turn the desired direction
-      if(desiredTurn == LEFT && leftTurnPossible > pathConfidence){
-        turnActual = LEFT;
-        turning = 1;
-        qrdToCheck = q0;
-        LCD.clear();
-        LCD.print("Turning Left");
-      }
-      if(desiredTurn == RIGHT && rightTurnPossible > pathConfidence){
-        turnActual = RIGHT;
-        turning = 1;
-        qrdToCheck = q3;
-        LCD.clear();
-        LCD.print("Turning Right");
-      }
+  //Tape follow
+  if (qrdVals[1] == LOW && qrdVals[2] == LOW) { //both white
+    if (pastError < 0) {
+      error = -5;
+    }else if (pastError > 0) {
+      error = 5;
+    }else if (pastError == 0){
+      // Do we need to do anything? Just go straight?
     }
-
-    if(turning){
-      if(loopNum == 1){
-        if(digitalRead(qrdToCheck) == LOW){
-          statusCount++;
-          if(statusCount == 3){
-            loopNum = 2;
-            statusCount = 0;
-          }
-        }else{
-          statusCount = 0;
-        } //one of outside is high so keep going 
-        motor.speed(0,vel/2);
-        motor.speed(1,vel/2);
-      }
-      if(loopNum == 2){
-        if(digitalRead(qrdToCheck) == HIGH){
-          statusCount++;
-          if(statusCount == 3){
-            loopNum = 3;
-            statusCount = 0;
-          }
-        }else{
-          statusCount = 0;
-        }
-        motor.speed(0,vel/2 + turnActual*intGain); //minus should be plus and vise versa when turning right.
-        motor.speed(1,vel/2 - turnActual*intGain);
-        }
-      if(loopNum == 3){
-        if(digitalRead(qrdToCheck) == LOW){
-          statusCount++;
-          if(statusCount == 3){
-            loopNum = 0;
-            statusCount = 0;
-          }
-        }else{
-          statusCount = 0;
-        }
-        motor.speed(0,vel/2 + turnActual*intGain/3);
-        motor.speed(1,vel/2 - turnActual*intGain/3);
-      }
-      if(loopNum == 0){
-        atIntersection = 0;
-        pastError = turnActual*-1;
-      }
-      if(statusCount < -10){
-        motor.stop_all();
-        LCD.clear();LCD.print("Stuck turning");
-        while(true){
-          delay(1000);
-        }
-      }
-    }
-    if(!atIntersection){ // If no longer at intersection reset apropriate variables
-      // FOR TESTING
-      desiredTurn = -2;
-      
-      // Need to change q if robot turned???
-      
-      currentDir = (nodeMat[currentEdge[1]][currentEdge[0]]+2)%4; // This should probably be somewhere else, here for testing
-      currentEdge[0] = currentEdge[1]; 
-      currentEdge[1] = theMap[(currentDir + turnActual + 4)%4][currentEdge[0]];
-      if(currentEdge[1]==-1){
-        positionLost = 1;
-      }
-
-      countInIntersection = 0;
-      turning = 0;
-      leftTurnPossible = 0;
-      rightTurnPossible = 0;
-
-      loopsSinceLastInt = 0;
-
-      loopNum = 1;
-    }
-  } else{  //keep tape following
-
-    if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
-      if (pastError < 0) {
-        error = -5;
-      }else if (pastError > 0) {
-        error = 5;
-      }else if (pastError == 0){
-        // Do we need to do anything? Just go straight?
-      }
-    }else if ( qrdVals[1] == LOW) {
-      error = -1;
-    }else if (qrdVals[2] == LOW) {
-      error = 1;
-    }else {
-      error = 0;
-    }
-
-    if (!error == pastError) {
-      recError = prevError;
-      q = m;
-      m = 1;
-    }
-
-    p = kp * error;
-    d = (int)((float)kd * (float)(error - recError) / (float)(q + m));
-    correction = p + d;
-
-    pastError = error;
-    m++;
-    motor.speed(0, vel - correction);
-    motor.speed(1, vel + correction);
+  }else if ( qrdVals[1] == LOW) {
+    error = -1; //too far left
+  }else if (qrdVals[2] == LOW) {
+    error = 1; //too far right
+  }else {
+    error = 0;
   }
+
+  if (!error == pastError) {
+    recError = prevError;
+    q = m;
+    m = 1;
+  }
+
+  p = kp * error;
+  d = (int)((float)kd * (float)(error - recError) / (float)(q + m));
+  correction = p + d;
+
+  pastError = error;
+  m++;
+  motor.speed(0, vel - correction);
+  motor.speed(1, vel + correction);
+  
+
+
 
 
   if (numOfIttrs == printToLCDFreq) {
+    LCD.clear();
     t2 = millis();
     loopTime = ((t2-t1)*1000)/printToLCDFreq;
     t1 = t2;
     numOfIttrs = 0;
-    if(!atIntersection){
-      LCD.clear();
-      LCD.print("LoopTime: "); LCD.print(loopTime);
-      LCD.setCursor(0,1); LCD.print("Next: "); LCD.print(currentEdge[1]);
-    }
+    LCD.print("Loop Time: "); LCD.print(loopTime);
   }
 
   // Enter Menu if startbutton
@@ -706,7 +450,6 @@ void Menu()
         kp = menuItems[1].Value;
         kd = menuItems[2].Value;
         vel = menuItems[3].Value;
-        intGain = menuItems[4].Value;
         delay(500);
 
         return;
@@ -937,3 +680,57 @@ void altMotor(void){
 }
 
 
+
+  /*
+    TAKE ACTION AT INTERSECTION
+    When you come to and intersection there are 5 posibilities:
+      1. It is a dead end - must make 180 degree turn
+      2. You want to go straight, and this is an option - continue in straight line
+      3. You want to go straight, this is not an option - need to make a turn (random direction?)
+      4. You want to turn in a specific direction, and this is an option - make the turn successfully
+      5. You want to turn in a specific direction, this is not an option 
+        5a. Go straight if possible
+        5b. Turn in other direction if necessary
+
+    General approach to intersections
+      • Make 180 turn if necessary
+        • Otherwise continue straight
+          • Write same speeds to motors for predefined number of loops, then continue tape following after intersection
+      • If outside QRD identifies option to turn in desired direction, make the turn
+      • If all QRDs are lost while in the intersection and not turning, going straight is not an option - turn in one possible direction
+        • Possible directions are the outside QRDs that have seen tape while in the intersection - these must be recorded
+        • If both directions are possible, choose which direction to continue at random
+          • This is probably only relevant in testing, where directions to turn are random
+  */
+
+  
+
+
+
+int idealDirection = LEFT; //for testing. This will be determined below.;
+void processIntersection(void){
+  /*
+  find which direction we're heading using theMap
+  Decide which way we want to go. That value becomes the second entry of currentEdge after that value becomes the first.
+  */
+  LCD.clear();
+  LCD.setCursor(0,1);
+  LCD.print("INTERSECTION!!");
+
+  
+  if(idealDirection == LEFT && qrdVals[0] == HIGH){
+    while(digitalRead(q0) == HIGH){ //one of outside is high so keep going 
+      motor.speed(0,vel/3);
+      motor.speed(1,vel/3);
+    }
+    pastError = 1;
+    while(digitalRead(q0) == LOW){
+      motor.speed(0,vel/3 - intGain); //minus should be plus and vise versa when turning right.
+      motor.speed(1,vel/3 + intGain);
+    }
+    while(digitalRead(q0) == HIGH){
+      motor.speed(0,vel/3 - intGain/3);
+      motor.speed(1,vel/3 + intGain/3);
+    }
+  }
+}
