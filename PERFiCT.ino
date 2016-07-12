@@ -339,7 +339,7 @@ void loop() {
     }
 
     // For testing, turn left, right, straight, left ...
-    desiredTurn = LEFT;//(dirPrev+1)%3;
+    desiredTurn = STRAIGHT;//desiredTurns[turnCount];
     turnCount++;
     dirPrev = desiredTurn; 
   }
@@ -349,7 +349,15 @@ void loop() {
   */
 
   if(!atIntersection){
-    atIntersection = (qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH);
+    if((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH)){
+      statusCount++;
+    }else if(statusCount > 0){
+      statusCount--;
+    }
+    if(statusCount == 5){
+      atIntersection = 1;
+      statusCount = 0;
+    }
     //if((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH)){
     //  atIntersection++;
     //}// || (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
@@ -387,18 +395,18 @@ void loop() {
   */
   if (atIntersection == 1) {
     countInIntersection++;
-    if(countInIntersection > maxInIntersection){
-      atIntersection = 0;
-      LCD.clear();
-      LCD.print("Leaving");
-    }
 
     // Check if it is possible to turn left or right
     if(!turning){
 
+      if(countInIntersection > maxInIntersection){
+        atIntersection = 0;
+        LCD.clear();
+        LCD.print("Leaving");
+      }
 
       // Collect error values so that Tape Following continues nicely after intersection - do we really need this?
-      /*if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
+      if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
         if (pastError < 0) {
           error = -5;
         }
@@ -417,11 +425,16 @@ void loop() {
         recError = prevError;
         q = m;
         m = 1;
-      }*/
+      }
 
-      // Write same speed to both motors
-      //motor.speed(0,vel/2);
-      //motor.speed(1,vel/2);
+      p = kp * error;
+      d = (int)((float)kd * (float)(error - recError) / (float)(q + m));
+      correction = p + d;
+
+      pastError = error;
+      m++;
+      motor.speed(0, vel/2 - correction/4);
+      motor.speed(1, vel/2 + correction/4);
       
       if(qrdVals[0]){      
         leftTurnPossible++;
@@ -430,7 +443,7 @@ void loop() {
         rightTurnPossible++;
       }
 
-      /*if(leftTurnPossible && !qrdVals[0] && rightTurnPossible < pathConfidence){
+      if(leftTurnPossible && !qrdVals[0] && rightTurnPossible < pathConfidence){
         leftTurnPossible--;
       }
       if(rightTurnPossible && !qrdVals[3] && rightTurnPossible < pathConfidence){
@@ -438,8 +451,10 @@ void loop() {
       }
 
       // Check if all QRDs are lost
-      if(qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW){
-        motor.stop_all();
+      /*if(qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW){
+        countStatus++;
+
+
         // need to turn
         if(leftTurnPossible>pathConfidence){
           turnActual = LEFT;
@@ -939,5 +954,6 @@ void altMotor(void){
     i = i*-1;
   }
 }
+
 
 
