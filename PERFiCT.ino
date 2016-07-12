@@ -113,14 +113,14 @@ double strongestVal, secondStrongestVal;
 int offset;
 //edge matrix stuff
 int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
-  //0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19
-  { -1, 0,  1,  11, 8,  6,  7,  -1, 14, 12, 12, 17, 13, -1, 16, -1, -1, 19, -1, -1}, //N
-  { -1, 11, 3,  4,  5,  -1, -1, -1, 6,  8,  -1, 10, 9,  -1, 15, -1, -1, -1, 17, -1}, //E
-  {  1, 2,  -1, -1, -1, -1, 5,  6,  4,  10, 9,  3,  -1, 12, 8,  -1, 14, 11, -1, 17}, //S
-  { -1, -1, -1, 2,  3,  4,  8,  -1, 9,  -1, 11, 1,  10, -1, -1, 14, -1, 18, -1, -1} //W
+  //0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
+  {-1,-1,-1,-1,-1,-1, 1, 2, 3,-1, 0, 6, 7, 7, 8, 4,10,11,14,15}, //N
+  {-1,-1,-1,-1,-1, 6,-1,13, 9,-1,11,12,-1,14,15,-1,17,18,19,-1}, //E
+  {10, 6, 7, 8,15,-1,11,-1,14,-1,16,17,13,12,18,19,-1,-1,-1,-1}, //S
+  {-1,-1,-1,-1,-1,-1, 5,12,-1, 8,-1,10,11,-1,13,14,-1,16,17,18} //W
 }; //dont change this   
 //                      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
-int dirToDropoff[20] = {S, S, E, E, W, W, S, S, S, E, W, S, E, S, S, W, S, S, E, S}; // Direction of dropoff zone from each intersection
+int dirToDropoff[20] = {S, S, S, S, S, E, S, E, S, W, S, S, W, E, S, S, E, E, W, W}; // Direction of dropoff zone from each intersection
 
 // Loop timing variables
 unsigned long t1 = 0;
