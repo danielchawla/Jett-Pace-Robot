@@ -190,8 +190,8 @@ void setup()
   }
 
   // Set initial edge
-  currentEdge[0] = 0;
-  currentEdge[1] = 1;
+  currentEdge[0] = 3;
+  currentEdge[1] = 4;
 
   // Initialize important variables with stored values
   g = menuItems[0].Value;
@@ -339,7 +339,7 @@ void loop() {
     }
 
     // For testing, turn left, right, straight, left ...
-    desiredTurn = desiredTurns[turnCount];//(dirPrev+1)%3;
+    desiredTurn = LEFT;//(dirPrev+1)%3;
     turnCount++;
     dirPrev = desiredTurn; 
   }
@@ -348,15 +348,16 @@ void loop() {
     Check if at an intersection if not already
   */
 
-  if(atIntersection < 6 && loopsSinceLastInt > 5000){
-    if((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) || (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW)){
-      atIntersection++;
-    }// || (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
+  if(!atIntersection){
+    atIntersection = (qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH);
+    //if((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH)){
+    //  atIntersection++;
+    //}// || (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
      //one of outside sensors tape && one of inside sensors tape OR all QRDS off tape
     //if(atIntersection){ // If all QRDs lost, need to turn 180 degrees
       //turn180 = (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
     //}
-    if(atIntersection > 5){
+    if(atIntersection == 1){
       LCD.clear();
       LCD.print("Going Straight");
       turn180 = (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
@@ -384,17 +385,20 @@ void loop() {
         • If both directions are possible, choose which direction to continue at random
           • This is probably only relevant in testing, where directions to turn are random
   */
-  if (atIntersection > 5) {
+  if (atIntersection == 1) {
     countInIntersection++;
-    
+    if(countInIntersection > maxInIntersection){
+      atIntersection = 0;
+      LCD.clear();
+      LCD.print("Leaving");
+    }
 
     // Check if it is possible to turn left or right
     if(!turning){
-      if(countInIntersection > maxInIntersection){
-        atIntersection = 0;
-      }
+
+
       // Collect error values so that Tape Following continues nicely after intersection - do we really need this?
-      if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
+      /*if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
         if (pastError < 0) {
           error = -5;
         }
@@ -413,11 +417,11 @@ void loop() {
         recError = prevError;
         q = m;
         m = 1;
-      }
+      }*/
 
       // Write same speed to both motors
-      motor.speed(0,vel/2);
-      motor.speed(1,vel/2);
+      //motor.speed(0,vel/2);
+      //motor.speed(1,vel/2);
       
       if(qrdVals[0]){      
         leftTurnPossible++;
@@ -426,7 +430,7 @@ void loop() {
         rightTurnPossible++;
       }
 
-      if(leftTurnPossible && !qrdVals[0] && rightTurnPossible < pathConfidence){
+      /*if(leftTurnPossible && !qrdVals[0] && rightTurnPossible < pathConfidence){
         leftTurnPossible--;
       }
       if(rightTurnPossible && !qrdVals[3] && rightTurnPossible < pathConfidence){
@@ -452,7 +456,7 @@ void loop() {
         } else{ // reached dead end
           // 180 turn
         }
-      }
+      }*/
 
        // Determine if we can turn the desired direction
       if(desiredTurn == LEFT && leftTurnPossible > pathConfidence){
@@ -587,8 +591,8 @@ void loop() {
     numOfIttrs = 0;
     if(!atIntersection){
       LCD.clear();
-      LCD.print("LoopTime: "); LCD.print(loopTime);
-      LCD.setCursor(0,1); LCD.print("Next: "); LCD.print(currentEdge[1]);
+      LCD.print("LoopTime: "); LCD.print(loopTime); 
+      LCD.setCursor(0,1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
     }
   }
 
