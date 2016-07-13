@@ -160,9 +160,9 @@ void setup()
 
   // Initialize important variables with stored values
   vel = menuItems[3].Value;
-  g = menuItems[0].Value * (vel / 100); //proportional to vel
-  kp = menuItems[1].Value * (vel / 100);
-  kd = menuItems[2].Value * (vel / 100);
+  g = menuItems[0].Value; //proportional to vel?
+  kp = menuItems[1].Value;
+  kd = menuItems[2].Value;
   intGain = menuItems[3].Value;
 
   // Home Servos
@@ -707,7 +707,9 @@ void altMotor(void){
 
 
 
-int idealDirection = LEFT; //for testing. This will be determined below.;
+int idealDirection = STRAIGHT; //for testing. This will be determined below.;
+int leftPossible = F;
+int rightPossible = F;
 void processIntersection(void){
   /*
   find which direction we're heading using theMap
@@ -733,4 +735,40 @@ void processIntersection(void){
       motor.speed(1,vel/3 + intGain/3);
     }
   }
+
+	if(idealDirection == RIGHT && qrdVals[3] == HIGH){
+	    while(digitalRead(q3) == HIGH){ //one of outside is high so keep going 
+	      motor.speed(0,vel/3);
+	      motor.speed(1,vel/3);
+	    }
+	    pastError = 1;
+	    while(digitalRead(q3) == LOW){
+	      motor.speed(0,vel/3 + intGain); //minus should be plus and vise versa when turning right.
+	      motor.speed(1,vel/3 - intGain);
+	    }
+	    while(digitalRead(q3) == HIGH){
+	      motor.speed(0,vel/3 + intGain/3);
+	      motor.speed(1,vel/3 - intGain/3);
+	    }
+ 	}
+
+ 	if(idealDirection == STRAIGHT){
+ 		if(qrdVals[0] == LOW && qrdVals[3] == LOW){//must have lost all of em
+ 			if(leftPossible){
+ 				pastError = 1;
+ 			}
+ 			else{
+ 				pastError = -1;
+ 			}
+ 		}
+ 		else{
+ 			motor.speed(0,vel/3);
+ 			motor.speed(1,vel/3);
+ 			if(!leftPossible && !rightPossible){
+ 				leftPossible = qrdVals[0];
+ 				rightPossible = qrdVals[3];
+ 			}
+ 		}
+ 	}
+
 }
