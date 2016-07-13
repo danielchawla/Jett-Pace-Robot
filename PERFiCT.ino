@@ -123,8 +123,16 @@ int strongest, secondStrongest; //signals from topIRs (0,1,2)
 double strongestVal, secondStrongestVal;
 int offset;
 int currentNode;
+int robotDirection;
+int discrepancyInLocation = false;
+int accuracyInIR = 60;
+int tempInt;
+int direction;
+int nextTempNode;
+int desredDirection;
+int highestProfit;
 
-int bearingToDropoff[20] = {120, 160, 180, 200, 240, 120, 150, 180, 210, 240, 110, 120, 160, 200, 240, 250, 100, 100, 260, 260}; // gives bearing to dropoff from each node
+int profitMatrix[20][20];
 
 //edge matrix stuff
 int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
@@ -136,6 +144,8 @@ int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
 }; //dont change this
 //                      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
 int dirToDropoff[20] = {S, S, S, S, S, E, S, E, S, W, S, S, W, E, S, S, E, E, W, W}; // Direction of dropoff zone from each intersection
+int bearingToDropoff[20] = {120, 160, 180, 200, 240, 120, 150, 180, 210, 240, 110, 120, 160, 200, 240, 250, 100, 100, 260, 260}; // gives bearing to dropoff from each node
+int distToDropoff[20] = {4, 4, 5, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 3, 2, 1, 1, 2};
 int intersectionType[20]; // stores type of each intersection ie. 4-way, 4 bit boolean {NSEW} T/F values
 
 int currentEdge[2];
@@ -209,6 +219,13 @@ void setup()
         nodeMat[j][theMap[i][j]] = i;
       }
     }
+  }
+
+  //create profitMatrix
+  for(int i = 0; i<20; i++){
+  	for(int j = i; j <20; j++){
+  		profitMatrix[i][j] = 10 - distToDropoff[j];
+  	}
   }
 
   // Set initial edge
