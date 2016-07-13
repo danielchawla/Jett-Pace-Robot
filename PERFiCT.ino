@@ -8,7 +8,7 @@
 #define W 3
 #define STRAIGHT 0
 #define RIGHT 1
-#define BACK -2
+#define BACK 2
 #define LEFT -1
 #define MAX_MOTOR_SPEED 255
 
@@ -70,7 +70,7 @@ MenuItem ProportionalGain = MenuItem("P-gain");
 MenuItem DerivativeGain   = MenuItem("D-gain");
 MenuItem IntersectionGain = MenuItem("Int-Gain");
 MenuItem menuItems[]      = {Gain, ProportionalGain, DerivativeGain, Speed, IntersectionGain};
-int divisors[] = {16, 16, 16, 1, 4}; //divides gains and speeds by this number
+int divisors[] = {8, 8, 8, 1, 4}; //divides gains and speeds by this number
 
 
 /*
@@ -129,11 +129,11 @@ int bearingToDropoff[20] = {120, 160, 180, 200, 240, 120, 150, 180, 210, 240, 11
 //edge matrix stuff
 int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
   //0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
-  {-1,-1,-1,-1,-1,-1, 1, 2, 3,-1, 0, 6, 7, 7, 8, 4,10,11,14,15}, //N
-  {-1,-1,-1,-1,-1, 6,-1,13, 9,-1,11,12,-1,14,15,-1,17,18,19,-1}, //E
-  {10, 6, 7, 8,15,-1,11,-1,14,-1,16,17,13,12,18,19,-1,-1,-1,-1}, //S
-  {-1,-1,-1,-1,-1,-1, 5,12,-1, 8,-1,10,11,-1,13,14,-1,16,17,18} //W
-}; //dont change this   
+  { -1, -1, -1, -1, -1, -1, 1, 2, 3, -1, 0, 6, 7, 7, 8, 4, 10, 11, 14, 15}, //N
+  { -1, -1, -1, -1, -1, 6, -1, 13, 9, -1, 11, 12, -1, 14, 15, -1, 17, 18, 19, -1}, //E
+  {10, 6, 7, 8, 15, -1, 11, -1, 14, -1, 16, 17, 13, 12, 18, 19, -1, -1, -1, -1}, //S
+  { -1, -1, -1, -1, -1, -1, 5, 12, -1, 8, -1, 10, 11, -1, 13, 14, -1, 16, 17, 18} //W
+}; //dont change this
 //                      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
 int dirToDropoff[20] = {S, S, S, S, S, E, S, E, S, W, S, S, W, E, S, S, E, E, W, W}; // Direction of dropoff zone from each intersection
 int intersectionType[20]; // stores type of each intersection ie. 4-way, 4 bit boolean {NSEW} T/F values
@@ -142,7 +142,7 @@ int currentEdge[2];
 int currentDir;
 int possibleTurns[3] = {0}; // left, straight, right True/False values - necessary??
 int desiredTurn = -2;
-int turnActual;
+int turnActual = -2;
 int nodeMat[20][20] = {0}; //nodeMat[fromIndex][toIndex] = dir
 int countInIntersection = 0;
 int maxInIntersection = 1300;
@@ -169,7 +169,7 @@ int armHome = 95;
 int clawHome = 110;
 int clawClose = 10;
 
-int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT}; //these are temporary and only for testing
+int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 //int desiredTurns[] = {LEFT, STRAIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 int turnCount = 0;
@@ -250,7 +250,7 @@ void loop() {
     A NOTE ON FUNCTIONS IN THE MAIN LOOP:
       It is expected that functions will be called every loop iteration, so must behave accordingly
       For a function to not always be called, it must alter some variable so it will not be called next loop
-      Other functions may also change this variable as appropriate 
+      Other functions may also change this variable as appropriate
         ie. ProcessIntersection sets desiredTurn = -2 after successful completion of intersection
   */
 
@@ -279,21 +279,24 @@ void loop() {
     TurnDecision();
   }
 
-  //Check if at an intersection if not already
-  if (!atIntersection) {
+  if(!atIntersection){
     AreWeThereYet();
+    /*LCD.clear();
+    LCD.print("Checking for Int");*/
   }
 
   //Continue on
-  if (atIntersection == 1) {
+  if (atIntersection) {
     ProcessIntersection();
   } else { //keep tape following
     TapeFollow();
   }
 
+
   //Print useful information
   if (numOfIttrs == printToLCDFreq) {
-    PrintToLCD();
+    LCD.clear();
+    //PrintToLCD();
   }
 
   // Enter Menu if startbutton
@@ -307,7 +310,7 @@ void loop() {
   }
 }
 
-void TapeFollow(){ 
+void TapeFollow() {
   if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
     if (pastError < 0) {
       error = -5;
@@ -340,14 +343,14 @@ void TapeFollow(){
   motor.speed(1, vel + correction);
 }
 
-void PrintToLCD(){
+void PrintToLCD() {
   t2 = millis();
   loopTime = ((t2 - t1) * 1000) / printToLCDFreq;
   t1 = t2;
   numOfIttrs = 0;
-  if (!atIntersection) {
+  if (1/*!atIntersection*/) {
     LCD.clear();
-    LCD.print(loopTime); LCD.print("us");
+    LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);
     LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
