@@ -43,4 +43,5 @@ void TurnDecision(){
     // For testing, turn left, right, straight, left ...
     desiredTurn = desiredTurns[turnCount];
     turnCount++;
+    turnCount = turnCount%15;
 }

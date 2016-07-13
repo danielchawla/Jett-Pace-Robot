@@ -1,12 +1,14 @@
 void AreWeThereYet(){
-  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) && loopsSinceLastInt > 2000) {
+  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) || 
+      (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW) && loopsSinceLastInt > 2000) {
       statusCount++;
-    } else if (statusCount > 0) {
-      statusCount--;
+    } else if (statusCount > 10) {
+      statusCount-=10;
     }
-    if (statusCount == 15) {
+    if (statusCount == 30) {
       motor.speed(0, -1 * MAX_MOTOR_SPEED);
       motor.speed(1, -1 * MAX_MOTOR_SPEED);
+      motor.stop_all();
       atIntersection = 1;
       statusCount = 0;
     }
@@ -50,7 +52,7 @@ void ProcessIntersection() {
   */
   countInIntersection++;
 
-  if(turnActual == 2){ // Need to deal with cases where QRDs cross tape or never leave tape.
+  if(turnActual == BACK){ // Need to deal with cases where QRDs cross tape or never leave tape.
     // Currently only works with dead ends
     if(!lostTape){
       motor.speed(0,-1*MAX_MOTOR_SPEED/2);
@@ -61,16 +63,16 @@ void ProcessIntersection() {
     }
     if(qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW){
       lostTape = 1;
-    }else{
+    }else if(qrdVals[1] == LOW || qrdVals[2] == LOW){
       lostTape = 0;
       atIntersection = 0;
     }
   }
 
-  if (!turning && !turnActual==2) {
+  if (!turning && !(turnActual==BACK)) {
     // Check if 180 is desired.  This is always possible
-    if(desiredTurn == 2){
-      turnActual == 2;
+    if(desiredTurn == BACK){
+      turnActual == BACK;
     }
 
     if (countInIntersection > maxInIntersection) {
@@ -214,13 +216,13 @@ void ProcessIntersection() {
       atIntersection = 0;
       pastError = turnActual * -1;
     }
-    if (statusCount < -10) {
+    /*if (statusCount < -10) {
       motor.stop_all();
       LCD.clear(); LCD.print("Stuck turning");
       while (true) {
         delay(1000);
       }
-    }
+    }*/
   }
   if (!atIntersection) { // If no longer at intersection reset apropriate variables
     // FOR TESTING
