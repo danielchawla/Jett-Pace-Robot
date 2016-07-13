@@ -10,6 +10,7 @@
 #define RIGHT 1
 #define BACK -2
 #define LEFT -1
+#define MAX_MOTOR_SPEED 255
 
 void MainMenu(void);
 void Menu(void);
@@ -149,7 +150,7 @@ int armHome = 95;
 int clawHome = 110;
 int clawClose = 10;
 
-int desiredTurns[] = {LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, RIGHT};
+int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT};
 int turnCount = 0;
 
 /*
@@ -339,7 +340,7 @@ void loop() {
     }
 
     // For testing, turn left, right, straight, left ...
-    desiredTurn = STRAIGHT;//desiredTurns[turnCount];
+    desiredTurn = desiredTurns[turnCount];
     turnCount++;
     dirPrev = desiredTurn; 
   }
@@ -355,6 +356,8 @@ void loop() {
       statusCount--;
     }
     if(statusCount == 5){
+      motor.speed(0,-1*MAX_MOTOR_SPEED);
+      motor.speed(1,-1*MAX_MOTOR_SPEED);
       atIntersection = 1;
       statusCount = 0;
     }
@@ -433,8 +436,8 @@ void loop() {
 
       pastError = error;
       m++;*/
-      motor.speed(0, vel/2 - correction/2);
-      motor.speed(1, vel/2 + correction/2);
+      motor.speed(0, vel/4 - correction/2);
+      motor.speed(1, vel/4 + correction/2);
       
       if(qrdVals[0]){      
         leftTurnPossible++;
@@ -505,8 +508,8 @@ void loop() {
         }else{
           statusCount = 0;
         } //one of outside is high so keep going 
-        motor.speed(0,vel/2);
-        motor.speed(1,vel/2);
+        motor.speed(0,vel/4);
+        motor.speed(1,vel/4);
       }
       if(loopNum == 2){
         if(digitalRead(qrdToCheck) == HIGH){
