@@ -175,7 +175,10 @@ unsigned long t2 = 0;
 int loopTime;
 
 // Passenger Pickup
-int SideIRMin = 400;
+int sideIRMin = 400;
+int passengerPosition;
+int stopTime1 = 0;
+int stopTime2 = 0; 
 
 // Angles of straight arm and open claw
 int armHome = 95;
@@ -288,9 +291,20 @@ void loop() {
   rightIRVal = analogRead(rightIR);
 
 
-  //Check for passengers on either side
-  if (/*numOfIttrs%passengerCheckFreq == 0*/false) {
-    CheckForPassenger();
+  //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
+  if (numOfIttrs%passengerCheckFreq == 0) {
+    passengerPosition = CheckForPassenger();
+    if(passengerPosition){
+      if(stopTime1 == stopTime2){
+        stopTime1 == millis();
+      }
+      stopTime2 = millis();
+      if(stopTime2 - stopTime1 > 100){
+        stopTime1 = stopTime2;
+        hasPassenger = pickupPassenger(passengerPosition);
+        passengerPosition = 0;
+      }
+    }
   }
 
 
@@ -359,8 +373,10 @@ void TapeFollow() {
 
   pastError = error;
   m++;
-  motor.speed(0, vel - correction);
-  motor.speed(1, vel + correction);
+  if(!passengerPosition){ // If passenger has not been seen, go forward
+    motor.speed(0, vel - correction);
+    motor.speed(1, vel + correction);
+  }
 }
 
 void PrintToLCD() {

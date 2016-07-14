@@ -1,26 +1,23 @@
-void CheckForPassenger() { 
+int CheckForPassenger() { 
   leftIRVal = analogRead(leftIR);
   rightIRVal = analogRead(rightIR);
   // Check left side
   if (leftIRVal > leftIRValMax) {
     leftIRValMax = leftIRVal;
-  } else if (leftIRVal < leftIRValMax - 10 && leftIRValMax > SideIRMin) {
+  } else if (leftIRVal < leftIRValMax - 10 && leftIRValMax > sideIRMin) {
     // Stop motors and pick up passenger
     motor.stop_all();
-    delay(500);
-    hasPassenger = PickupPassenger(LEFT);
-    leftIRValMax = -1;
+    return LEFT;
   }
   // Check right side
   if (rightIRVal > rightIRValMax) {
     // Stop motors and pick up passenger
     rightIRValMax = rightIRVal;
-  } else if (rightIRVal < rightIRValMax - 10 && rightIRValMax > SideIRMin) {
+  } else if (rightIRVal < rightIRValMax - 10 && rightIRValMax > sideIRMin) {
     motor.stop_all();
-    delay(500);
-    hasPassenger = PickupPassenger(RIGHT);
-    rightIRValMax = -1;
+    return RIGHT;
   }
+  return 0;
 }
 
 int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
