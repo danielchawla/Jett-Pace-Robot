@@ -127,9 +127,9 @@ int robotDirection;
 int discrepancyInLocation = false;
 int accuracyInIR = 60;
 int tempInt;
-int direction;
+int dir;
 int nextTempNode;
-int desredDirection;
+int desiredDirection;
 int highestProfit;
 
 int profitMatrix[20][20];

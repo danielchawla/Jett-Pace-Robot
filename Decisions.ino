@@ -45,21 +45,21 @@ void TurnDecision(){
 
   //just after the intersection at currentNode (currentEdge[0]),
   currentDir = nodeMat[currentEdge[0]][currentEdge[1]];
-  robotDirection = (bearingToDropoff - directionOfDropZone + 360)%360;
+  robotDirection = (bearingToDropoff[currentEdge[0]] - directionOfDropZone + 360) % 360;
   tempInt = (currentDir*90 -robotDirection + 360) % 360; //change of temp int!
   if(!(tempInt < accuracyInIR || tempInt > 360 - accuracyInIR)){
     discrepancyInLocation = true;
   }
 
   if(!discrepancyInLocation){
-    hghestProfit = 0;
-    for(int direction = 0; direction < 4; direction++){
-      nextTempNode = theMap[direction][currentEdge[1]];
+    highestProfit = 0;
+    for(int dir = 0; dir < 4; dir++){
+      nextTempNode = theMap[dir][currentEdge[1]];
       if(nextTempNode != -1){
         tempInt = profitMatrix[currentEdge[1]][nextTempNode]; //change of temp int!
         if(tempInt > highestProfit){
           highestProfit = tempInt;
-          desiredDirection = direction;
+          desiredDirection = dir;
         }
       }
     }
@@ -79,5 +79,5 @@ void TurnDecision(){
     // For testing, turn left, right, straight, left ...
     desiredTurn = desiredTurns[turnCount];
     turnCount++;
-    turnCount = turnCount%15;
+    turnCount = (turnCount) % 15;
 }
