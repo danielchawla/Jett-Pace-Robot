@@ -60,6 +60,8 @@ class MenuItem
     }
 };
 
+
+
 uint16_t MenuItem::MenuItemCount = 0;
 /* Add the menu items here */
 MenuItem Gain             = MenuItem("Total Gain");
@@ -112,7 +114,7 @@ int p;
 int d;
 int correction;
 
-//NAV VARIABLES
+//NAV VARIABLES -- decisions
 double topIR0, ir0 = 0;
 double topIR1, ir1 = 1;
 double topIR2, ir2 = 2;
@@ -120,6 +122,18 @@ int directionOfDropZone; // 0 to 359 degrees (bearings).
 int strongest, secondStrongest; //signals from topIRs (0,1,2)
 double strongestVal, secondStrongestVal;
 int offset;
+int currentNode;
+int robotDirection;
+int discrepancyInLocation = false;
+int accuracyInIR = 60;
+int tempInt;
+int direction;
+int nextTempNode;
+int desredDirection;
+int highestProfit;
+
+int profitMatrix[20][20];
+
 //edge matrix stuff
 int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
   //0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
@@ -130,7 +144,9 @@ int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
 }; //dont change this
 //                      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
 int dirToDropoff[20] = {S, S, S, S, S, E, S, E, S, W, S, S, W, E, S, S, E, E, W, W}; // Direction of dropoff zone from each intersection
-int intersectionType[20] = {}; // stores type of each intersection ie. 4-way, 4 bit boolean {NSEW} T/F values
+int bearingToDropoff[20] = {120, 160, 180, 200, 240, 120, 150, 180, 210, 240, 110, 120, 160, 200, 240, 250, 100, 100, 260, 260}; // gives bearing to dropoff from each node
+int distToDropoff[20] = {4, 4, 5, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 3, 2, 1, 1, 2};
+int intersectionType[20]; // stores type of each intersection ie. 4-way, 4 bit boolean {NSEW} T/F values
 
 int currentEdge[2];
 int currentDir;
@@ -166,7 +182,7 @@ int armHome = 95;
 int clawHome = 110;
 int clawClose = 10;
 
-int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK};
+int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 //int desiredTurns[] = {LEFT, STRAIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 int turnCount = 0;
@@ -184,7 +200,7 @@ int turning = 0;
 int turn180 = 0;
 int hasPassenger = 0;
 int lostTape = 0;
-int foundTape = 0;
+int foundTape = 0; //this should be the opposite of lostTape..
 int positionLost = 0; // Change to 1 if sensor data contradicts what is expected based on currentEdge[][]
 
 void setup()
@@ -206,6 +222,13 @@ void setup()
         nodeMat[j][theMap[i][j]] = i;
       }
     }
+  }
+
+  //create profitMatrix
+  for(int i = 0; i<20; i++){
+  	for(int j = i; j <20; j++){
+  		profitMatrix[i][j] = 10 - distToDropoff[j];
+  	}
   }
 
   // Set initial edge
