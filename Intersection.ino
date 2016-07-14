@@ -1,6 +1,6 @@
 void AreWeThereYet(){
-  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) || 
-      (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW) && loopsSinceLastInt > 2000) {
+  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) /*|| 
+      (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW) */ && loopsSinceLastInt > 2000) {
       statusCount++;
     } else if (statusCount > 10) {
       statusCount-=10;
@@ -109,8 +109,8 @@ void ProcessIntersection() {
     */
     pastError = error;
     m++;
-    motor.speed(0, vel / 4 - correction / 2);
-    motor.speed(1, vel / 4 + correction / 2);
+    motor.speed(0, vel / 4 - correction);
+    motor.speed(1, vel / 4 + correction);
 
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {

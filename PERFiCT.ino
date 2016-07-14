@@ -158,6 +158,9 @@ unsigned long t1 = 0;
 unsigned long t2 = 0;
 int loopTime;
 
+// Passenger Pickup
+int SideIRMin = 400;
+
 // Angles of straight arm and open claw
 int armHome = 95;
 int clawHome = 110;
@@ -289,8 +292,8 @@ void loop() {
 
   //Print useful information
   if (numOfIttrs == printToLCDFreq) {
-    LCD.clear();
-    //PrintToLCD();
+    //LCD.clear();
+    PrintToLCD();
   }
 
   // Enter Menu if startbutton
