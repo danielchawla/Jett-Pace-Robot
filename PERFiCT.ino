@@ -11,6 +11,7 @@
 #define BACK 2
 #define LEFT -1
 #define MAX_MOTOR_SPEED 255
+#define BUZZER_PIN 4
 
 /*
     Function Prototypes by File
@@ -34,10 +35,11 @@ void ViewAnalog(void);
 void ControlArm(void);
 void altMotor(void);
 void PickupPassengerMain(void);
+void jettPace(void);
 
-void (*menuFunctions[])() = {Menu, ViewDigital, ViewAnalog, ControlArm, PickupPassengerMain, altMotor};
+void (*menuFunctions[])() = {Menu, ViewDigital, ViewAnalog, ControlArm, PickupPassengerMain, altMotor, jettPace};
 int countMainMenu = 6;
-const char *mainMenuNames[] = {"Change Vars", "View Digital In", "View Analog In", "Control Arm", "Pickup Passenger", "Alt Motor"};
+const char *mainMenuNames[] = {"Change Vars", "View Digital In", "View Analog In", "Control Arm", "Pickup Passenger", "Alt Motor", "Jett Pace"};
 
 /** Store a variable in TINAH mem*/
 class MenuItem
