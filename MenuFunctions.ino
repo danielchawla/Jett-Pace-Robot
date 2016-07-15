@@ -154,9 +154,9 @@ void jettPace(){
   int lengthOfSilence = 600;
   int l = 600;
   int s = 300;
-  int sequence[27] = {s,l,l,l,0,s,0,l,0,l,0,0,0,s,l,l,s,0,s,l,0,l,s,l,s,0,s}
+  int sequence[27] = {s,l,l,l,0,s,0,l,0,l,0,0,0,s,l,l,s,0,s,l,0,l,s,l,s,0,s};
 
-  for(int i; i < 27; i++){
+  for(int i = 0; i < 27; i++){
     motor.speed(BUZZER_PIN,MAX_MOTOR_SPEED);
     delay(sequence[i]);
     motor.stop_all();
