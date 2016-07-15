@@ -151,13 +151,13 @@ void jettPace(){
   LCD.clear();
   LCD.setCursor(0,0);
   LCD.print("JETT PACE!!");
-  int lengthOfSilence = 600;
-  int l = 600;
-  int s = 300;
+  int lengthOfSilence = 150;
+  int l = 300;
+  int s = 150;
   int sequence[27] = {s,l,l,l,0,s,0,l,0,l,0,0,0,s,l,l,s,0,s,l,0,l,s,l,s,0,s};
 
   for(int i = 0; i < 27; i++){
-    motor.speed(BUZZER_PIN,MAX_MOTOR_SPEED);
+    motor.speed(BUZZER_PIN,MAX_MOTOR_SPEED/2);
     delay(sequence[i]);
     motor.stop_all();
     delay(lengthOfSilence);
