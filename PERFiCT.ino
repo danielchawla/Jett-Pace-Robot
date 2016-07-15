@@ -115,12 +115,11 @@ int d;
 int correction;
 
 //NAV VARIABLES -- decisions
-double topIR0, ir0 = 0;
-double topIR1, ir1 = 1;
-double topIR2, ir2 = 2;
+int topIR0, ir0 = 0;
+int topIR1, ir1 = 1;
+int topIR2, ir2 = 2;
 int directionOfDropZone; // 0 to 359 degrees (bearings).
-int strongest, secondStrongest; //signals from topIRs (0,1,2)
-double strongestVal, secondStrongestVal;
+int topIRSensitivity = 200;
 int offset;
 int currentNode;
 int robotDirection;
@@ -131,6 +130,7 @@ int dir;
 int nextTempNode;
 int desiredDirection;
 int highestProfit;
+int lastIntersectionType;
 
 int profitMatrix[20][20];
 

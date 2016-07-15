@@ -72,7 +72,7 @@ void ProcessIntersection() {
   if (!turning && !(turnActual==BACK)) {
     // Check if 180 is desired.  This is always possible
     if(desiredTurn == BACK){
-      turnActual == BACK;
+      turnActual == BACK; //once this executes the rest of this if statement will execute as well. this is not good. -Ryan
     }
 
     if (countInIntersection > maxInIntersection) {
@@ -156,19 +156,29 @@ void ProcessIntersection() {
       }*/
 
     // Determine if we can turn the desired direction
-    if (desiredTurn == LEFT && leftTurnPossible > pathConfidence) {
-      turnActual = LEFT;
-      turning = 1;
-      qrdToCheck = q0;
-      LCD.clear();
-      LCD.print("Turning Left");
+    if (desiredTurn == LEFT){
+      if(leftTurnPossible > pathConfidence) {
+        turnActual = LEFT;
+        turning = 1;
+        qrdToCheck = q0;
+        LCD.clear();
+        LCD.print("Turning Left");
+      }
+      else{
+        discrepancyInLocation = true;
+      }
     }
-    if (desiredTurn == RIGHT && rightTurnPossible > pathConfidence) {
-      turnActual = RIGHT;
-      turning = 1;
-      qrdToCheck = q3;
-      LCD.clear();
-      LCD.print("Turning Right");
+    if (desiredTurn == RIGHT){
+      if(rightTurnPossible > pathConfidence) {
+        turnActual = RIGHT;
+        turning = 1;
+        qrdToCheck = q3;
+        LCD.clear();
+        LCD.print("Turning Right");
+      }
+      else{
+        discrepancyInLocation = true;
+      }
     }
   }
 
