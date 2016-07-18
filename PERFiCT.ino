@@ -116,6 +116,11 @@ int p;
 int d;
 int correction;
 
+//Interrupt Counts:
+volatile unsigned int leftCount = 0;
+volatile unsigned int rightCount = 0;
+volatile unsigned int collisionDetected = 0;
+
 //NAV VARIABLES -- decisions
 int topIR0, ir0 = 0;
 int topIR1, ir1 = 1;
@@ -214,6 +219,11 @@ void setup()
 #include <phys253setup.txt>
   LCD.clear();
   LCD.home();
+
+  // Attach 3 interrupts
+  enableExternalInterrupt(INT0, RISING);
+  enableExternalInterrupt(INT1, RISING);
+  enableExternalInterrupt(INT2, RISING);
 
   for (int i = 0; i < 4; i++) {
     motor.speed(i, 50);
@@ -398,11 +408,31 @@ void PrintToLCD() {
   numOfIttrs = 0;
   if (1/*!atIntersection*/) {
     LCD.clear();
-    LCD.print("LT: "); LCD.print(loopTime);
+    /*LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);
-    LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(turnCount); LCD.print(" Dir: "); LCD.print(desiredTurn);
+    LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(turnCount); LCD.print(" Dir: "); LCD.print(desiredTurn);*/
+    LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount); LCD.print(" "); LCD.print(collisionDetected);
   }
 }
+
+void enableExternalInterrupt(unsigned int INTX, unsigned int mode)
+{
+  if (INTX > 3 || mode > 3 || mode == 1) return;
+  cli();
+  /* Allow pin to trigger interrupts        */
+  EIMSK |= (1 << INTX);
+  /* Clear the interrupt configuration bits */
+  EICRA &= ~(1 << (INTX*2+0));
+  EICRA &= ~(1 << (INTX*2+1));
+  /* Set new interrupt configuration bits   */
+  EICRA |= mode << (INTX*2);
+  sei();
+}
+
+ISR(INT0_vect) {leftCount++;};
+ISR(INT1_vect) {rightCount++;};
+ISR(INT2_vect) {collisionDetected = 1;};
+
 
 
 
