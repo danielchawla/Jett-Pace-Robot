@@ -149,6 +149,9 @@ int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
   {10, 6, 7, 8, 15, -1, 11, -1, 14, -1, 16, 17, 13, 12, 18, 19, -1, -1, -1, -1}, //S
   { -1, -1, -1, -1, -1, -1, 5, 12, -1, 8, -1, 10, 11, -1, 13, 14, -1, 16, 17, 18} //W
 }; //dont change this
+int rotEncoder[4][20] = {
+	//?? Idk if we need this but it'd be in the same format as theMap.
+}
 //                      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
 int dirToDropoff[20] = {S, S, S, S, S, E, S, E, S, W, S, S, W, E, S, S, E, E, W, W}; // Direction of dropoff zone from each intersection
 int bearingToDropoff[20] = {120, 160, 180, 200, 240, 120, 150, 180, 210, 240, 110, 120, 160, 200, 240, 250, 100, 100, 260, 260}; // gives bearing to dropoff from each node
