@@ -20,7 +20,7 @@ void TapeFollow(void);
 void PrintToLCD(void);
 // PassengerPickup
 int PickupPassenger(int);
-void CheckForPassenger(void);
+int CheckForPassenger(void);
 // Intersection
 void AreWeThereYet(void);
 void ProcessIntersection(void);
@@ -90,7 +90,7 @@ int clawTrip = 0;
 
 // Analog
 //IR
-int ArmIRpin = 0;
+int ArmIRpin = 3;
 int leftIR = 0;   int leftIRVal = -1;   int leftIRValMax = -1;
 int rightIR = 1;  int rightIRVal = -1;  int rightIRValMax = -1;
 
@@ -166,7 +166,7 @@ int qrdToCheck;
 int loopNum = 1;
 int statusCount = 0;
 int statusLast = 0;
-int pathConfidence = 2;
+int pathConfidence = 5;
 int loopsSinceLastInt = 0;
 
 // Loop timing variables
@@ -185,7 +185,8 @@ int armHome = 95;
 int clawHome = 110;
 int clawClose = 10;
 
-int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
+//int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
+int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, RIGHT};
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 //int desiredTurns[] = {LEFT, STRAIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 int turnCount = 0;
@@ -235,8 +236,8 @@ void setup()
   }
 
   // Set initial edge
-  currentEdge[0] = 3;
-  currentEdge[1] = 4;
+  currentEdge[0] = 0;
+  currentEdge[1] = 1;
 
   // Initialize important variables with stored values
   g = menuItems[0].Value;
@@ -246,7 +247,7 @@ void setup()
   intGain = menuItems[4].Value;
 
   // Home Servos
-  RCServo0.write(clawHome);
+  //RCServo0.write(clawHome);
   RCServo1.write(armHome);
   // Probably should home GM7 too
 
@@ -292,8 +293,13 @@ void loop() {
 
 
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
-  if (numOfIttrs%passengerCheckFreq == 0) {
-    passengerPosition = CheckForPassenger();
+  if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
+    hasPassenger = 1;
+    kp = kp*1.5;
+    kd = kd*1.25;
+    intGain = intGain*1.5;
+
+    /*passengerPosition = CheckForPassenger();
     if(passengerPosition){
       if(stopTime1 == stopTime2){
         stopTime1 == millis();
@@ -301,10 +307,14 @@ void loop() {
       stopTime2 = millis();
       if(stopTime2 - stopTime1 > 100){
         stopTime1 = stopTime2;
-        hasPassenger = pickupPassenger(passengerPosition);
-        passengerPosition = 0;
+        hasPassenger = PickupPassenger(passengerPosition);
+        if(hasPassenger){
+          passengerPosition = 0;
+          kp = kp*1.25;
+          kd = kd*1.25;
+        }
       }
-    }
+    }*/
   }
 
 
@@ -388,7 +398,7 @@ void PrintToLCD() {
     LCD.clear();
     LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);
-    LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
+    LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(turnCount); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
 }
 

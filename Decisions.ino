@@ -79,5 +79,9 @@ void TurnDecision(){
     // For testing, turn left, right, straight, left ...
     desiredTurn = desiredTurns[turnCount];
     turnCount++;
-    turnCount = (turnCount) % 15;
+    if(turnCount == 15){
+      motor.stop_all();
+      while(true){}
+    }
+   // turnCount = (turnCount) % 15;
 }

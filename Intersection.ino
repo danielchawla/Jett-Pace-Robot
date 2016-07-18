@@ -176,7 +176,7 @@ void ProcessIntersection() {
     if (loopNum == 1) {
       if (digitalRead(qrdToCheck) == LOW) {
         statusCount++;
-        if (statusCount == 3) {
+        if (statusCount == 10) {
           loopNum = 2;
           statusCount = 0;
         }
@@ -189,7 +189,7 @@ void ProcessIntersection() {
     if (loopNum == 2) {
       if (digitalRead(qrdToCheck) == HIGH) {
         statusCount++;
-        if (statusCount == 3) {
+        if (statusCount == 10) {
           loopNum = 3;
           statusCount = 0;
         }
@@ -202,7 +202,7 @@ void ProcessIntersection() {
     if (loopNum == 3) {
       if (digitalRead(qrdToCheck) == LOW) {
         statusCount++;
-        if (statusCount == 3) {
+        if (statusCount == 10) {
           loopNum = 0;
           statusCount = 0;
         }

@@ -5,15 +5,19 @@ int CheckForPassenger() {
   if (leftIRVal > leftIRValMax) {
     leftIRValMax = leftIRVal;
   } else if (leftIRVal < leftIRValMax - 10 && leftIRValMax > sideIRMin) {
-    // Stop motors and pick up passenger
+    // Stop motors, reset maxima and pick up passenger
     motor.stop_all();
+    leftIRValMax = -1;
+    rightIRValMax = -1;
     return LEFT;
   }
   // Check right side
   if (rightIRVal > rightIRValMax) {
-    // Stop motors and pick up passenger
     rightIRValMax = rightIRVal;
   } else if (rightIRVal < rightIRValMax - 10 && rightIRValMax > sideIRMin) {
+    // Stop motors, reset maxima and pick up passenger
+    leftIRValMax = -1;
+    rightIRValMax = -1;
     motor.stop_all();
     return RIGHT;
   }
@@ -39,9 +43,12 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
     RCServo1.write(armHome + i * side);
     delay(armDelay);
     newIR = analogRead(ArmIRpin);
-    if (newIR > maxIR && maxIR > 60) {
+    if (newIR > maxIR) {
       maxIR = newIR;
-    } else if (newIR < maxIR - 10) {
+    } else if (newIR < maxIR - 20 && maxIR > 300) {
+      LCD.clear();
+      LCD.print("Found Max"); LCD.setCursor(0,1);LCD.print(maxIR);
+      delay(300);
       finalI = i;
       break;
     }
@@ -81,6 +88,5 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   // Home Claw
   //RCServo0.write(clawHome);
   //delay(1000);
-  loopsSinceLastInt = 0;
   return 1;
 }
