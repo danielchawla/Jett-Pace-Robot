@@ -2,51 +2,22 @@ void TurnDecision(){
   topIR0 = analogRead(ir0);
   topIR1 = analogRead(ir1);
   topIR2 = analogRead(ir2);
-  //determine strongest and second strongest values
-  if (topIR0 > topIR1 && topIR0 > topIR2) {
-    strongest = ir0;
-    if (topIR1 > topIR2) {
-      secondStrongest = ir1;
-    }
-    else {
-      secondStrongest = ir2;
-    }
-  }
-  else if (topIR1 > topIR2 && topIR1 > topIR0) {
-    strongest = ir1;
-    if (topIR0 > topIR2) {
-      secondStrongest = ir0;
-    }
-    else {
-      secondStrongest = ir2;
-    }
-  }
-  else {
-    strongest = ir2;
-    if (topIR0 > topIR1) {
-      secondStrongest = ir0;
-    }
-    else {
-      secondStrongest = ir1;
-    }
-  }
 
-  //calculate direction based on ir values
-  directionOfDropZone = 120 * strongest;
-  secondStrongestVal = analogRead(secondStrongest);
-  strongestVal = analogRead(strongest);
-  offset = 120.0 * (float)secondStrongestVal / (float)(secondStrongestVal + strongestVal); // Need to be cast as doubles? - analogRead gives int
-  if ( (strongest + 1) % 3 == secondStrongest ) {
-    directionOfDropZone = (directionOfDropZone + offset + 360) % 360;
+  directionOfDropZone = -1;
+  if(topIR0 > topIRSensitivity){
+  	directionOfDropZone = 90;
   }
-  else {
-    directionOfDropZone = (directionOfDropZone - offset + 360) % 360;
+  else if(topIR1 > topIRSensitivity){
+  	directionOfDropZone = 210;
+  }
+  else if(topIR2 > topIRSensitivity){
+  	directionOfDropZone = 330;
   }
 
   //just after the intersection at currentNode (currentEdge[0]),
   currentDir = nodeMat[currentEdge[0]][currentEdge[1]];
   robotDirection = (bearingToDropoff[currentEdge[0]] - directionOfDropZone + 360) % 360;
-  tempInt = (currentDir*90 -robotDirection + 360) % 360; //change of temp int!
+  tempInt = (currentDir*90 -robotDirection + 360) % 360; //change of temp int! should be close to 0 if we know our location correctly.
   if(!(tempInt < accuracyInIR || tempInt > 360 - accuracyInIR)){
     discrepancyInLocation = true;
   }
@@ -72,7 +43,11 @@ void TurnDecision(){
     }
   }
   else{
-    //idk we're facked
+  	discrepancyInLocation = false; //maybe if we can confidently reslove the issue.
+    if (directionOfDropZone > 0){
+    	//we can do something about this. it increases our confidence.
+    } 
+    
   }
 
 

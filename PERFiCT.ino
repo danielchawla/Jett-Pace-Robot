@@ -11,6 +11,7 @@
 #define BACK 2
 #define LEFT -1
 #define MAX_MOTOR_SPEED 255
+#define BUZZER_PIN 3
 
 /*
     Function Prototypes by File
@@ -34,10 +35,11 @@ void ViewAnalog(void);
 void ControlArm(void);
 void altMotor(void);
 void PickupPassengerMain(void);
+void jettPace(void);
 
-void (*menuFunctions[])() = {Menu, ViewDigital, ViewAnalog, ControlArm, PickupPassengerMain, altMotor};
-int countMainMenu = 6;
-const char *mainMenuNames[] = {"Change Vars", "View Digital In", "View Analog In", "Control Arm", "Pickup Passenger", "Alt Motor"};
+void (*menuFunctions[])() = {Menu, ViewDigital, ViewAnalog, ControlArm, PickupPassengerMain, altMotor, jettPace};
+int countMainMenu = 7;
+const char *mainMenuNames[] = {"Change Vars", "View Digital In", "View Analog In", "Control Arm", "Pickup Passenger", "Alt Motor", "Jett Pace"};
 
 /** Store a variable in TINAH mem*/
 class MenuItem
@@ -115,12 +117,11 @@ int d;
 int correction;
 
 //NAV VARIABLES -- decisions
-double topIR0, ir0 = 0;
-double topIR1, ir1 = 1;
-double topIR2, ir2 = 2;
+int topIR0, ir0 = 0;
+int topIR1, ir1 = 1;
+int topIR2, ir2 = 2;
 int directionOfDropZone; // 0 to 359 degrees (bearings).
-int strongest, secondStrongest; //signals from topIRs (0,1,2)
-double strongestVal, secondStrongestVal;
+int topIRSensitivity = 200;
 int offset;
 int currentNode;
 int robotDirection;
@@ -131,6 +132,7 @@ int dir;
 int nextTempNode;
 int desiredDirection;
 int highestProfit;
+int lastIntersectionType;
 
 int profitMatrix[20][20];
 
