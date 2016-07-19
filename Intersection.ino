@@ -6,8 +6,8 @@ void AreWeThereYet(){
       statusCount-=10;
     }
     if (statusCount == 30) {
-      motor.speed(0, -1 * MAX_MOTOR_SPEED);
-      motor.speed(1, -1 * MAX_MOTOR_SPEED);
+      motor.speed(LEFT_MOTOR, -1 * MAX_MOTOR_SPEED);
+      motor.speed(RIGHT_MOTOR, -1 * MAX_MOTOR_SPEED);
       motor.stop_all();
       atIntersection = 1;
       statusCount = 0;
@@ -55,11 +55,11 @@ void ProcessIntersection() {
   if(turnActual == BACK){ // Need to deal with cases where QRDs cross tape or never leave tape.
     // Currently only works with dead ends
     if(!lostTape){
-      motor.speed(0,-1*MAX_MOTOR_SPEED/2);
-      motor.speed(0,-1*MAX_MOTOR_SPEED/2);
+      motor.speed(LEFT_MOTOR,-1*MAX_MOTOR_SPEED/2);
+      motor.speed(RIGHT_MOTOR,1*MAX_MOTOR_SPEED/2);
     }else{
-      motor.speed(0,-1*MAX_MOTOR_SPEED);
-      motor.speed(0,-1*MAX_MOTOR_SPEED);
+      motor.speed(LEFT_MOTOR,-1*MAX_MOTOR_SPEED);
+      motor.speed(RIGHT_MOTOR,1*MAX_MOTOR_SPEED);
     }
     if(qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW){
       lostTape = 1;
@@ -109,8 +109,8 @@ void ProcessIntersection() {
     */
     pastError = error;
     m++;
-    motor.speed(0, vel / 4 - correction);
-    motor.speed(1, vel / 4 + correction);
+    motor.speed(LEFT_MOTOR, vel / 4 - correction);
+    motor.speed(RIGHT_MOTOR, vel / 4 + correction);
 
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {
@@ -193,8 +193,8 @@ void ProcessIntersection() {
       } else {
         statusCount = 0;
       } //one of outside is high so keep going
-      motor.speed(0, vel / 4);
-      motor.speed(1, vel / 4);
+      motor.speed(LEFT_MOTOR, vel / 4);
+      motor.speed(RIGHT_MOTOR, vel / 4);
     }
     if (loopNum == 2) {
       if (digitalRead(qrdToCheck) == HIGH) {
@@ -206,8 +206,8 @@ void ProcessIntersection() {
       } else {
         statusCount = 0;
       }
-      motor.speed(0, vel / 2 + turnActual * intGain); //minus should be plus and vise versa when turning right.
-      motor.speed(1, vel / 2 - turnActual * intGain);
+      motor.speed(LEFT_MOTOR, vel / 2 + turnActual * intGain); //minus should be plus and vise versa when turning right.
+      motor.speed(RIGHT_MOTOR, vel / 2 - turnActual * intGain);
     }
     if (loopNum == 3) {
       if (digitalRead(qrdToCheck) == LOW) {
@@ -219,8 +219,8 @@ void ProcessIntersection() {
       } else {
         statusCount = 0;
       }
-      motor.speed(0, vel / 2 + turnActual * intGain / 3);
-      motor.speed(1, vel / 2 - turnActual * intGain / 3);
+      motor.speed(LEFT_MOTOR, vel / 2 + turnActual * intGain / 3);
+      motor.speed(RIGHT_MOTOR, vel / 2 - turnActual * intGain / 3);
     }
     if (loopNum == 0) {
       atIntersection = 0;

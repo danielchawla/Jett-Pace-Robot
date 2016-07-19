@@ -220,12 +220,12 @@ void ControlArm()
     RCServo0.write(clawAngle);
 
     if (!startbutton() && !stopbutton()) {
-      motor.speed(2, 0);
+      motor.speed(GM7, 0);
       RCServo1.write((int)(armAngle));
     }
 
     else if (stopbutton()) {
-      motor.speed(2, spd);
+      motor.speed(GM7, spd);
     }
 
     if (count == 2000) {

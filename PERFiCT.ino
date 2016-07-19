@@ -12,6 +12,9 @@
 #define LEFT -1
 #define MAX_MOTOR_SPEED 255
 #define BUZZER_PIN 3
+#define LEFT_MOTOR 0
+#define RIGHT_MOTOR 2
+#define GM7 1
 
 /*
     Function Prototypes by File
@@ -202,7 +205,7 @@ int turnCount = 0;
   Frequency values for different sensor checks
 */
 int passengerCheckFreq = 10;
-int printToLCDFreq = 500;
+int printToLCDFreq = 2000;
 
 
 // State Variables
@@ -300,10 +303,6 @@ void loop() {
   qrdVals[2] = digitalRead(q2);
   qrdVals[3] = digitalRead(q3);
 
-  leftIRVal = analogRead(leftIR);
-  rightIRVal = analogRead(rightIR);
-
-
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
   if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
     hasPassenger = 1;
@@ -337,8 +336,6 @@ void loop() {
 
   if(!atIntersection){
     AreWeThereYet();
-    /*LCD.clear();
-    LCD.print("Checking for Int");*/
   }
 
   //Continue on
@@ -350,8 +347,7 @@ void loop() {
 
 
   //Print useful information
-  if (numOfIttrs == printToLCDFreq) {
-    //LCD.clear();
+  if (numOfIttrs == printToLCDFreq) 
     PrintToLCD();
   }
 
@@ -396,8 +392,8 @@ void TapeFollow() {
   pastError = error;
   m++;
   if(!passengerPosition){ // If passenger has not been seen, go forward
-    motor.speed(0, vel - correction);
-    motor.speed(1, vel + correction);
+    motor.speed(LEFT_MOTOR, vel - correction);
+    motor.speed(RIGHT_MOTOR, vel + correction);
   }
 }
 
@@ -408,10 +404,9 @@ void PrintToLCD() {
   numOfIttrs = 0;
   if (1/*!atIntersection*/) {
     LCD.clear();
-    /*LCD.print("LT: "); LCD.print(loopTime);
+    LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);
-    LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(turnCount); LCD.print(" Dir: "); LCD.print(desiredTurn);*/
-    LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount); LCD.print(" "); LCD.print(collisionDetected);
+    LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
 }
 
