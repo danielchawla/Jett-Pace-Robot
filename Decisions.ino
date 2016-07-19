@@ -8,10 +8,10 @@ void TurnDecision(){
   	directionOfDropZone = 90;
   }
   else if(topIR1 > topIRSensitivity){
-  	directionOfDropZone = 210;
+  	directionOfDropZone = 180;
   }
   else if(topIR2 > topIRSensitivity){
-  	directionOfDropZone = 330;
+  	directionOfDropZone = 270;
   }
 
   //just after the intersection at currentNode (currentEdge[0]),
