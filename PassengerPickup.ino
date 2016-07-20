@@ -59,12 +59,7 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   LCD.clear(); LCD.print("Closing Claw");
   // Position Claw
   motor.speed(GM7, 150);
-  for (int i = 0; i < 2000; i++) { // Will need to change this
-    if (!digitalRead(clawTrip)) {
-      break;
-    }
-    delay(1);
-  }
+  delay(2000);
   motor.speed(GM7, 0);
 
   // Close Claw
@@ -73,20 +68,45 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
 
   // Retract Claw
   motor.speed(GM7, -150);
-  delay(400);
+  delay(600);
   // Home Arm
   for (int i = 0; i <= finalI; i++) {
     RCServo1.write(armHome + (finalI - i)*side);
     delay(armDelay);
   }
 
-  if (1600 - range * armDelay > 0) {
-    delay(1600 - range * armDelay);
+  if (1400 - range * armDelay > 0) {
+    delay(1400 - range * armDelay);
   }
   motor.speed(GM7, 0);
+
+
+  if(side == LEFT){
+    if(analogRead(leftIR) > passengerGoneThresh){
+      PickupPassenger(LEFT);
+    }
+  } else if(analogRead(rightIR) > passengerGoneThresh){
+    PickupPassenger(RIGHT);
+  }
+
+
 
   // Home Claw
   //RCServo0.write(clawHome);
   //delay(1000);
   return 1;
+}
+
+void DropoffPassenger(int side){
+  return;
+  int range = 80;
+  int armDelay = 15;
+    // Position Arm
+  for (int i = 0; i <= range; i++) {
+    RCServo1.write(armHome + i * side);
+    delay(armDelay);
+  }
+
+  // Open Claw
+  RCServo0.write(clawHome);
 }

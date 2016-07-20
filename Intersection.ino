@@ -1,34 +1,40 @@
 void AreWeThereYet(){
-  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) /*|| 
-      (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW) */ && loopsSinceLastInt > 2000) {
-      statusCount++;
-    } else if (statusCount > 10) {
-      statusCount-=10;
+  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) && loopsSinceLastInt > 2000) {
+    statusCount++;
+    if (qrdVals[0]) {
+      leftTurnPossible++;
     }
-    if (statusCount == 30) {
-      motor.speed(LEFT_MOTOR, -1 * MAX_MOTOR_SPEED);
-      motor.speed(RIGHT_MOTOR, -1 * MAX_MOTOR_SPEED);
-      motor.stop_all();
-      atIntersection = 1;
-      statusCount = 0;
+    if (qrdVals[3]) {
+      rightTurnPossible++;
     }
-    //if((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH)){
-    //  atIntersection++;
-    //}// || (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
-    //one of outside sensors tape && one of inside sensors tape OR all QRDS off tape
-    //if(atIntersection){ // If all QRDs lost, need to turn 180 degrees
-    //turn180 = (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
-    //}
-    if (atIntersection == 1) {
-      LCD.clear();
-      LCD.print("Going Straight");
+    if (leftTurnPossible && !qrdVals[0] && leftTurnPossible < pathConfidence) {
+      leftTurnPossible--;
+    }
+    if (rightTurnPossible && !qrdVals[3] && rightTurnPossible < pathConfidence) {
+      rightTurnPossible--;
+    }
 
-      turn180 = (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
-    }
+  } else if (statusCount > 10) {
+    statusCount-=10;
+  }
+  if (statusCount == 30) {
+    motor.speed(LEFT_MOTOR, -1 * MAX_MOTOR_SPEED);
+    motor.speed(RIGHT_MOTOR, -1 * MAX_MOTOR_SPEED);
+    motor.stop_all();
+    atIntersection = 1;
+    statusCount = 0;
+  }
+  if (atIntersection == 1) {
+    LCD.clear();
+    LCD.print("Going Straight");
+
+    turn180 = (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
+  }
 }
 
 
 void ProcessIntersection() {
+  motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED*3/4);
   /*
     TAKE ACTION AT INTERSECTION
     When you come to and intersection there are 5 posibilities:
@@ -103,10 +109,6 @@ void ProcessIntersection() {
       m = 1;
     }
 
-    /*p = kp * error;
-      d = (int)((float)kd * (float)(error - recError) / (float)(q + m));
-      correction = p + d;
-    */
     pastError = error;
     m++;
     motor.speed(LEFT_MOTOR, vel / 4 - correction);
@@ -120,7 +122,7 @@ void ProcessIntersection() {
       rightTurnPossible++;
     }
 
-    if (leftTurnPossible && !qrdVals[0] && rightTurnPossible < pathConfidence) {
+    if (leftTurnPossible && !qrdVals[0] && leftTurnPossible < pathConfidence) {
       leftTurnPossible--;
     }
     if (rightTurnPossible && !qrdVals[3] && rightTurnPossible < pathConfidence) {
@@ -128,8 +130,11 @@ void ProcessIntersection() {
     }
 
     if (!qrdVals[0] && !qrdVals[3]) {
+      leavingCount++;
       LCD.clear(); LCD.print("STRAIGHT");
-      atIntersection = 0;
+      if(leavingCount > 10){
+        atIntersection = 0;
+      }
     }
 
     // Check if all QRDs are lost
@@ -154,7 +159,6 @@ void ProcessIntersection() {
         // 180 turn
       }
       }*/
-
     // Determine if we can turn the desired direction
     if (desiredTurn == LEFT){
       if(leftTurnPossible > pathConfidence) {
@@ -186,7 +190,7 @@ void ProcessIntersection() {
     if (loopNum == 1) {
       if (digitalRead(qrdToCheck) == LOW) {
         statusCount++;
-        if (statusCount == 10) {
+        if (statusCount == 7) {
           loopNum = 2;
           statusCount = 0;
         }
@@ -199,28 +203,28 @@ void ProcessIntersection() {
     if (loopNum == 2) {
       if (digitalRead(qrdToCheck) == HIGH) {
         statusCount++;
-        if (statusCount == 10) {
+        if (statusCount == 7) {
           loopNum = 3;
           statusCount = 0;
         }
       } else {
         statusCount = 0;
       }
-      motor.speed(LEFT_MOTOR, vel / 2 + turnActual * intGain); //minus should be plus and vise versa when turning right.
-      motor.speed(RIGHT_MOTOR, vel / 2 - turnActual * intGain);
+      motor.speed(LEFT_MOTOR, vel / 3 + turnActual * intGain); //minus should be plus and vise versa when turning right.
+      motor.speed(RIGHT_MOTOR, vel / 3 - turnActual * intGain);
     }
     if (loopNum == 3) {
       if (digitalRead(qrdToCheck) == LOW) {
         statusCount++;
-        if (statusCount == 10) {
+        if (statusCount == 7) {
           loopNum = 0;
           statusCount = 0;
         }
       } else {
         statusCount = 0;
       }
-      motor.speed(LEFT_MOTOR, vel / 2 + turnActual * intGain / 3);
-      motor.speed(RIGHT_MOTOR, vel / 2 - turnActual * intGain / 3);
+      motor.speed(LEFT_MOTOR, vel / 3 + turnActual * intGain / 3);
+      motor.speed(RIGHT_MOTOR, vel / 3 - turnActual * intGain / 3);
     }
     if (loopNum == 0) {
       atIntersection = 0;
@@ -240,7 +244,9 @@ void ProcessIntersection() {
       if(countInIntersection > 20){
       desiredTurn = -2;
       }*/
+    motor.speed(BUZZER_PIN, 0);
     desiredTurn = -2;
+
     turnActual = -2;
 
     currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4; // This should probably be somewhere else, here for testing
@@ -254,6 +260,7 @@ void ProcessIntersection() {
     turning = 0;
     leftTurnPossible = 0;
     rightTurnPossible = 0;
+    leavingCount = 0;
 
     loopsSinceLastInt = 0;
 

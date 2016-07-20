@@ -11,20 +11,22 @@
 #define BACK 2
 #define LEFT -1
 #define MAX_MOTOR_SPEED 255
-#define BUZZER_PIN 3
+#define BUZZER_PIN 1
 #define LEFT_MOTOR 0
 #define RIGHT_MOTOR 2
-#define GM7 1
+#define GM7 3
 
 /*
-    Function Prototypes by File
+  Function Prototypes by File
 */
 // Main
 void TapeFollow(void);
 void PrintToLCD(void);
+void enableExternalInterrupt(unsigned int, unsigned int);
 // PassengerPickup
 int PickupPassenger(int);
 int CheckForPassenger(void);
+void DropoffPassenger(int);
 // Intersection
 void AreWeThereYet(void);
 void ProcessIntersection(void);
@@ -44,7 +46,7 @@ void (*menuFunctions[])() = {Menu, ViewDigital, ViewAnalog, ControlArm, PickupPa
 int countMainMenu = 7;
 const char *mainMenuNames[] = {"Change Vars", "View Digital In", "View Analog In", "Control Arm", "Pickup Passenger", "Alt Motor", "Jett Pace"};
 
-/** Store a variable in TINAH mem*/
+/* Store a variable in TINAH mem*/
 class MenuItem
 {
   public:
@@ -84,20 +86,35 @@ int divisors[] = {8, 8, 8, 1, 4}; //divides gains and speeds by this number
 // Digital:
 // Tape follwing QRDs
 /*q0:far left, q1:left centre, q2right centre, q3: far right*/
-int q0 = 15;
-int q1 = 14;
-int q2 = 13;
-int q3 = 12; int qrdVals[4];
-//Switches?
+#define q0 4
+#define q1 5
+#define q2 6
+#define q3 7
+int qrdVals[4];
 
-// Claw trip
-int clawTrip = 0;
+//Switches
+#define FRONT_BUMPER 0
+#define FRONT_RIGHT_BUMPER 1
+#define RIGHT_BUMPER 2
+#define REAR_BUMPER 3
+#define LEFT_BUMPER 4
+#define FRONT_LEFT_BUMPER 5
+
+#define FRONT_BUMPER_PIN 0
+#define FRONT_RIGHT_BUMPER_PIN 1
+#define RIGHT_BUMPER_PIN 2
+#define REAR_BUMPER_PIN 3
+#define LEFT_BUMPER_PIN 4
+#define FRONT_LEFT_BUMPER_PIN 5
+int switchVals[6] = {0};
 
 // Analog
 //IR
-int ArmIRpin = 3;
-int leftIR = 0;   int leftIRVal = -1;   int leftIRValMax = -1;
-int rightIR = 1;  int rightIRVal = -1;  int rightIRValMax = -1;
+#define ArmIRpin 1
+#define leftIR 4  
+int leftIRVal = -1;   int leftIRValMax = -1;
+#define rightIR 5  
+int rightIRVal = -1;  int rightIRValMax = -1;
 
 /*
   GLOBAL VARIABLES
@@ -123,6 +140,7 @@ int correction;
 volatile unsigned int leftCount = 0;
 volatile unsigned int rightCount = 0;
 volatile unsigned int collisionDetected = 0;
+volatile unsigned int collisionCount = 0;
 
 //NAV VARIABLES -- decisions
 int topIR0, ir0 = 0;
@@ -154,9 +172,10 @@ int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
 }; //dont change this
 int rotEncoder[4][20] = {
 	//?? Idk if we need this but it'd be in the same format as theMap.
-}
-//                      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
-int dirToDropoff[20] = {S, S, S, S, S, E, S, E, S, W, S, S, W, E, S, S, E, E, W, W}; // Direction of dropoff zone from each intersection
+};
+//                             0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
+int dirToDropoff[20]        = {S, S, S, S, S, E, S, E, S, W, S, S, W, E, S, S, E, E, W, W}; // Direction of dropoff zone from each intersection
+int secondDirToDropoff[20]  = {S, S, S, S, S, E, N, W, N, W, E, W, S, S, E, W, N, N, N, N};
 int bearingToDropoff[20] = {120, 160, 180, 200, 240, 120, 150, 180, 210, 240, 110, 120, 160, 200, 240, 250, 100, 100, 260, 260}; // gives bearing to dropoff from each node
 int distToDropoff[20] = {4, 4, 5, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 3, 2, 1, 1, 2};
 int intersectionType[20]; // stores type of each intersection ie. 4-way, 4 bit boolean {NSEW} T/F values
@@ -168,9 +187,9 @@ int desiredTurn = -2;
 int turnActual = -2;
 int nodeMat[20][20] = {0}; //nodeMat[fromIndex][toIndex] = dir
 int countInIntersection = 0;
-int maxInIntersection = 1300;
+#define maxInIntersection 1300
 int countTurning = 0;
-int maxTurning = 3000;
+#define maxTurning 3000
 int leftTurnPossible = 0;
 int rightTurnPossible = 0;
 int intGain;
@@ -179,8 +198,9 @@ int qrdToCheck;
 int loopNum = 1;
 int statusCount = 0;
 int statusLast = 0;
-int pathConfidence = 5;
+#define pathConfidence 10
 int loopsSinceLastInt = 0;
+int leavingCount = 0;
 
 // Loop timing variables
 unsigned long t1 = 0;
@@ -188,34 +208,38 @@ unsigned long t2 = 0;
 int loopTime;
 
 // Passenger Pickup
-int sideIRMin = 400;
+#define sideIRMin 400
 int passengerPosition;
 int stopTime1 = 0;
 int stopTime2 = 0; 
+#define passengerGoneThresh 50
+int leftInitial = -1;
+int rightInitial = -1;
+#define countToDropoff 250
 
 // Angles of straight arm and open claw
-int armHome = 95;
-int clawHome = 110;
-int clawClose = 10;
+#define armHome 85
+#define clawHome 110
+#define clawClose 10
 
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
-int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, RIGHT};
+int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, LEFT, STRAIGHT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
-//int desiredTurns[] = {LEFT, STRAIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
+// int desiredTurns[] = {LEFT, STRAIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 int turnCount = 0;
 
 /*
   Frequency values for different sensor checks
 */
-int passengerCheckFreq = 10;
-int printToLCDFreq = 2000;
+#define passengerCheckFreq 10
+#define printToLCDFreq 2000
 
 
 // State Variables
 int atIntersection = 0;
 int turning = 0;
 int turn180 = 0;
-int hasPassenger = 0;
+int hasPassenger = 1;
 int lostTape = 0;
 int foundTape = 0; //this should be the opposite of lostTape..
 int positionLost = 0; // Change to 1 if sensor data contradicts what is expected based on currentEdge[][]
@@ -229,7 +253,7 @@ void setup()
   // Attach 3 interrupts
   enableExternalInterrupt(INT0, RISING);
   enableExternalInterrupt(INT1, RISING);
-  enableExternalInterrupt(INT2, RISING);
+  enableExternalInterrupt(INT3, RISING);
 
   for (int i = 0; i < 4; i++) {
     motor.speed(i, 50);
@@ -331,6 +355,11 @@ void loop() {
     }*/
   }
 
+  if(collisionDetected){
+    collisionDetected = false;
+    MainMenu();
+  }
+
 
   //Determine which direction to turn
   if (desiredTurn == -2) {
@@ -348,9 +377,24 @@ void loop() {
     TapeFollow();
   }
 
+  if(hasPassenger && (currentEdge[0] == 17 || currentEdge[0] == 18)){
+    //Going towards dropoff - count with encoders
+    if(leftInitial == -1){
+      leftInitial = leftCount;
+      rightInitial = rightCount;
+    }
+    if((leftCount - leftInitial > countToDropoff) && (rightCount - rightInitial > countToDropoff)){
+      // Have reached dropoff zone
+      DropoffPassenger(currentEdge[0]*2-35);
+      leftInitial = -1;
+      rightInitial = -1;
+    }
+
+
+  }
 
   //Print useful information
-  if (numOfIttrs == printToLCDFreq) 
+  if (numOfIttrs == printToLCDFreq){ 
     PrintToLCD();
   }
 
@@ -367,16 +411,22 @@ void loop() {
 
 void TapeFollow() {
   if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
-    if (pastError < 0) {
-      error = -5;
-    } else if (pastError > 0) {
-      error = 5;
-    } else if (pastError == 0) {
-      // Do we need to do anything? Just go straight?
+    if(qrdVals[0] == HIGH){
+      error = 8;
+    }else if(qrdVals[3] == HIGH){
+      error = -8;
+    }else{
+      if (pastError < 0) {
+        error = -5;
+      } else if (pastError > 0) {
+        error = 5;
+      } else if (pastError == 0) {
+        // Do we need to do anything? Just go straight?
+      }
     }
-  } else if ( qrdVals[1] == LOW) {
+  } else if ( qrdVals[2] == HIGH) {
     error = -1;
-  } else if (qrdVals[2] == LOW) {
+  } else if (qrdVals[1] == HIGH) {
     error = 1;
   } else {
     error = 0;
@@ -427,9 +477,21 @@ void enableExternalInterrupt(unsigned int INTX, unsigned int mode)
   sei();
 }
 
-ISR(INT0_vect) {leftCount++;};
-ISR(INT1_vect) {rightCount++;};
-ISR(INT2_vect) {collisionDetected = 1;};
+ISR(INT1_vect) {leftCount++;};
+ISR(INT3_vect) {rightCount++;};
+ISR(INT0_vect) {
+  collisionCount++;
+  if(collisionCount > 20){
+    collisionDetected = true;
+    collisionCount = 0;
+    switchVals[FRONT_BUMPER] = digitalRead(FRONT_BUMPER_PIN);
+    switchVals[FRONT_RIGHT_BUMPER] = digitalRead(FRONT_RIGHT_BUMPER_PIN);
+    switchVals[RIGHT_BUMPER] = digitalRead(RIGHT_BUMPER_PIN);
+    switchVals[REAR_BUMPER] = digitalRead(REAR_BUMPER_PIN);
+    switchVals[LEFT_BUMPER] = digitalRead(LEFT_BUMPER_PIN);
+    switchVals[FRONT_LEFT_BUMPER] = digitalRead(FRONT_LEFT_BUMPER_PIN);
+  }
+};
 
 
 

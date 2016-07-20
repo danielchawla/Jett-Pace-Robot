@@ -217,11 +217,11 @@ void ControlArm()
     armAngle = (int)(knob(6) * 190.0 / 1024.0);
     spd =  -255 + (int)(knob(6) * 512.0 / 1024.0);
 
-    RCServo0.write(clawAngle);
+    RCServo1.write(clawAngle);
 
     if (!startbutton() && !stopbutton()) {
       motor.speed(GM7, 0);
-      RCServo1.write((int)(armAngle));
+      RCServo0.write((int)(armAngle));
     }
 
     else if (stopbutton()) {
@@ -239,8 +239,8 @@ void ControlArm()
 
     if (stopbutton() && !startbutton())
     {
-      RCServo0.write(clawHome);
-      RCServo1.write(armHome);
+      RCServo1.write(clawHome);
+      RCServo0.write(armHome);
       LCD.clear(); LCD.home();
       LCD.print("Leaving Arm Control");
       delay(50);
