@@ -218,14 +218,14 @@ int rightInitial = -1;
 #define countToDropoff 250
 
 // Angles of straight arm and open claw
-#define armHome 85
+#define armHome 90
 #define clawHome 110
 #define clawClose 10
 
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
-int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, LEFT, STRAIGHT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
+//int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, LEFT, STRAIGHT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
-// int desiredTurns[] = {LEFT, STRAIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
+int desiredTurns[] = {LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, RIGHT};
 int turnCount = 0;
 
 /*
@@ -239,7 +239,7 @@ int turnCount = 0;
 int atIntersection = 0;
 int turning = 0;
 int turn180 = 0;
-int hasPassenger = 1;
+int hasPassenger = 0;
 int lostTape = 0;
 int foundTape = 0; //this should be the opposite of lostTape..
 int positionLost = 0; // Change to 1 if sensor data contradicts what is expected based on currentEdge[][]
@@ -333,9 +333,10 @@ void loop() {
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
   if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
     hasPassenger = 1;
-    kp = kp*1.5;
-    kd = kd*1.25;
-    intGain = intGain*1.5;
+    g = g*1.1;
+    kp = kp;
+    kd = kd;
+    intGain = intGain*1.1;
 
     /*passengerPosition = CheckForPassenger();
     if(passengerPosition){
