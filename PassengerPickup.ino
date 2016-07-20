@@ -6,6 +6,10 @@ int CheckForPassenger() {
     leftIRValMax = leftIRVal;
   } else if (leftIRVal < leftIRValMax - 10 && leftIRValMax > sideIRMin) {
     // Stop motors, reset maxima and pick up passenger
+    motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
+    motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
+    int start = millis();
+    while(millis() - start < 10){}
     motor.stop_all();
     leftIRValMax = -1;
     rightIRValMax = -1;
@@ -16,6 +20,10 @@ int CheckForPassenger() {
     rightIRValMax = rightIRVal;
   } else if (rightIRVal < rightIRValMax - 10 && rightIRValMax > sideIRMin) {
     // Stop motors, reset maxima and pick up passenger
+    motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
+    motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
+    int start = millis();
+    while(millis() - start < 10){}
     leftIRValMax = -1;
     rightIRValMax = -1;
     motor.stop_all();
@@ -27,28 +35,31 @@ int CheckForPassenger() {
 int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   int range = 80;
   int tripThresh = 800;
-  int armDelay = 15;
+  int armDelay = 30;
   int maxIR = -1;
   int newIR = -1;
   int finalI = range - 1;
-  side = side*-1;
 
-  RCServo0.write(clawHome);
+  RCServo0.write(clawOpen);
   RCServo1.write(armHome);
 
   LCD.clear(); LCD.print("Picking Up");
 
-  // Position Arm
+  // Rotate arm until max is spotted
+  startTime = millis();
   for (int i = 0; i <= range; i++) {
     RCServo1.write(armHome + i * side);
-    delay(armDelay);
+
+    while(millis() - startTime < armDelay){}
+    startTime = millis();
+
     newIR = analogRead(ArmIRpin);
     if (newIR > maxIR) {
       maxIR = newIR;
-    } else if (newIR < maxIR - 20 && maxIR > 300) {
+    } else if (newIR < maxIR - 10 && maxIR > 300) {
       LCD.clear();
       LCD.print("Found Max"); LCD.setCursor(0,1);LCD.print(maxIR);
-      delay(300);
+      delay(1000);
       finalI = i;
       break;
     }
@@ -57,22 +68,25 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   }
 
   LCD.clear(); LCD.print("Closing Claw");
-  // Position Claw
-  motor.speed(GM7, 150);
-  delay(2000);
+  // Extend claw
+  motor.speed(GM7, -150);
+  delay(1000);
   motor.speed(GM7, 0);
 
-  // Close Claw
+  // Close claw
   RCServo0.write(clawClose);
   delay(1000);
 
-  // Retract Claw
-  motor.speed(GM7, -150);
+  // Retract claw
+  motor.speed(GM7, 150);
   delay(600);
-  // Home Arm
+  
+  // Rotate claw back to center
+  startTime = millis();
   for (int i = 0; i <= finalI; i++) {
     RCServo1.write(armHome + (finalI - i)*side);
-    delay(armDelay);
+    while(millis() - startTime < armDelay){}
+    startTime = millis();
   }
 
   if (1400 - range * armDelay > 0) {
@@ -81,32 +95,57 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   motor.speed(GM7, 0);
 
 
-  if(side == LEFT){
+  /*if(side == LEFT){
     if(analogRead(leftIR) > passengerGoneThresh){
       PickupPassenger(LEFT);
     }
   } else if(analogRead(rightIR) > passengerGoneThresh){
     PickupPassenger(RIGHT);
-  }
+  }*/
 
 
 
   // Home Claw
-  //RCServo0.write(clawHome);
+  //RCServo0.write(clawOpen);
   //delay(1000);
   return 1;
 }
 
 void DropoffPassenger(int side){
-  return;
+
   int range = 80;
   int armDelay = 15;
-    // Position Arm
+  
+  // Rotate Arm
   for (int i = 0; i <= range; i++) {
     RCServo1.write(armHome + i * side);
     delay(armDelay);
   }
 
+  // Extend claw
+  motor.speed(GM7, -150);
+  delay(1000);
+  motor.speed(GM7, 0);
+
   // Open Claw
-  RCServo0.write(clawHome);
+  RCServo0.write(clawOpen);
+  delay(500);
+
+  // Close claw
+  RCServo0.write(clawClose);
+  
+  // Retract claw
+  motor.speed(GM7, 150);
+
+  // Rotate arm back to center
+  RCServo1.write(armHome);
+  delay(1000);
+  motor.speed(GM7, 0);
+
+  hasPassenger = false;
+
+  // Reset Gains
+  g = g/1.1;
+  intGain = intGain/1.1;
+
 }

@@ -202,13 +202,18 @@ int statusLast = 0;
 int loopsSinceLastInt = 0;
 int leavingCount = 0;
 
+int statusCount180 = 0;
+int countLeft180 = 0;
+int countRight180 = 0;
+
 // Loop timing variables
 unsigned long t1 = 0;
 unsigned long t2 = 0;
 int loopTime;
+unsigned long startTime;
 
 // Passenger Pickup
-#define sideIRMin 400
+#define sideIRMin 500
 int passengerPosition;
 int stopTime1 = 0;
 int stopTime2 = 0; 
@@ -218,14 +223,14 @@ int rightInitial = -1;
 #define countToDropoff 250
 
 // Angles of straight arm and open claw
-#define armHome 90
-#define clawHome 110
+#define armHome 80
+#define clawOpen 130
 #define clawClose 10
 
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
-//int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, LEFT, STRAIGHT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
+int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, LEFT, STRAIGHT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
-int desiredTurns[] = {LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, RIGHT};
+//int desiredTurns[] = {LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, RIGHT};
 int turnCount = 0;
 
 /*
@@ -279,7 +284,7 @@ void setup()
 
   // Set initial edge
   currentEdge[0] = 0;
-  currentEdge[1] = 1;
+  currentEdge[1] = 10;
 
   // Initialize important variables with stored values
   g = menuItems[0].Value;
@@ -289,7 +294,7 @@ void setup()
   intGain = menuItems[4].Value;
 
   // Home Servos
-  //RCServo0.write(clawHome);
+  //RCServo0.write(clawOpen);
   RCServo1.write(armHome);
   // Probably should home GM7 too
 
@@ -332,13 +337,7 @@ void loop() {
 
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
   if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
-    hasPassenger = 1;
-    g = g*1.1;
-    kp = kp;
-    kd = kd;
-    intGain = intGain*1.1;
-
-    /*passengerPosition = CheckForPassenger();
+    passengerPosition = CheckForPassenger();
     if(passengerPosition){
       if(stopTime1 == stopTime2){
         stopTime1 == millis();
@@ -349,11 +348,11 @@ void loop() {
         hasPassenger = PickupPassenger(passengerPosition);
         if(hasPassenger){
           passengerPosition = 0;
-          kp = kp*1.25;
-          kd = kd*1.25;
+          g = g*1.1;
+          intGain = intGain*1.1;
         }
       }
-    }*/
+    }
   }
 
   if(collisionDetected){

@@ -1,5 +1,5 @@
 void TurnDecision(){
-  if(false/*hasPassenger*/){
+  if(hasPassenger){
     currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;
     desiredDirection = dirToDropoff[currentEdge[1]];
 

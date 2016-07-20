@@ -239,7 +239,7 @@ void ControlArm()
 
     if (stopbutton() && !startbutton())
     {
-      RCServo1.write(clawHome);
+      RCServo1.write(clawOpen);
       RCServo0.write(armHome);
       LCD.clear(); LCD.home();
       LCD.print("Leaving Arm Control");
