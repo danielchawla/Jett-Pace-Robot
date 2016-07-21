@@ -239,7 +239,7 @@ int turnCount = 0;
 /*
   Frequency values for different sensor checks
 */
-#define passengerCheckFreq 10
+#define passengerCheckFreq 5
 #define printToLCDFreq 2000
 
 
@@ -281,10 +281,10 @@ void setup()
   for(int i = 0; i<4; i++){
   	for(int j = i; j <20; j++){
   		if (theMap[i][j] > 0){
-        initialProfitMatrix = 100 - 10*distToDropoff[theMap[i][j]];
+        initialProfitMatrix[i][j] = 100 - 10*distToDropoff[theMap[i][j]];
       }
       else{
-        initialProfitMatrix = 0;
+        initialProfitMatrix[i][j] = 0;
       }
   	}
   }
@@ -292,8 +292,8 @@ void setup()
   initialProfitMatrix[N][7] = 10;
   initialProfitMatrix[N][15] = 20;
 
-  for(i = 0; i <4; i++){
-    for(j = 0; j < 20; j++){
+  for(int i = 0; i <4; i++){
+    for(int j = 0; j < 20; j++){
       profitMatrix[i][j] = initialProfitMatrix[i][j];
     }
   }
