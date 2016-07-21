@@ -297,6 +297,9 @@ void setup()
       }
   	}
   }
+
+  initialProfitMatrix[N][7] = GARBAGE; //never go to 2
+
   currentEdge[0] = 0;
   currentEdge[1] = 10;
 
