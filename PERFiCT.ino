@@ -33,6 +33,8 @@ void amILost(void);
 void ProcessIntersection(void);
 // Decisions
 void TurnDecision(void);
+// Collisions
+void TurnAround(void);
 // Menu Functions
 void MainMenu(void);
 void Menu(void);
@@ -397,7 +399,7 @@ void loop() {
     if(switchVals[REAR_BUMPER]){
       MainMenu();
     }else{
-      turn180();
+      TurnAround();
     }
     collisionDetected = false;
     
