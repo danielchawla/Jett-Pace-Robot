@@ -30,9 +30,12 @@ int CheckForPassenger(void);
 void DropoffPassenger(int);
 // Intersection
 void AreWeThereYet(void);
+void amILost(void);
 void ProcessIntersection(void);
 // Decisions
 void TurnDecision(void);
+// Collisions
+void TurnAround(void);
 // Menu Functions
 void MainMenu(void);
 void Menu(void);
@@ -186,6 +189,7 @@ int intersectionType[20]; // stores type of each intersection ie. 4-way, 4 bit b
 
 int currentEdge[2];
 int currentDir;
+int dirAfterInt;
 int possibleTurns[3] = {0}; // left, straight, right True/False values - necessary??
 int desiredTurn = GARBAGE;
 int turnActual = GARBAGE;
@@ -282,7 +286,7 @@ void setup()
   for(int i = 0; i<4; i++){
   	for(int j = i; j <20; j++){
   		if (theMap[i][j] > 0){
-        initialProfitMatrix[i][j] = 100 - 10*distToDropoff[theMap[i][j]];
+        initialProfitMatrix[i][j] = 10 - distToDropoff[theMap[i][j]];
       }
       else{
         initialProfitMatrix[i][j] = 0;
@@ -402,15 +406,17 @@ void loop() {
     
   }
 
-
-  //Determine which direction to turn
-  if (desiredTurn == GARBAGE) {
-    TurnDecision();
-  }
-
   if(!atIntersection){
     AreWeThereYet();
   }
+
+  if(loopsSinceLastInt == 100){
+    amILost();
+  }
+  else if (loopsSinceLastInt == 200) {
+    TurnDecision();
+  }
+
 
   //Continue on
   if (atIntersection) {

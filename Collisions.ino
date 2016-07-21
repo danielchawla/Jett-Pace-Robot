@@ -1,4 +1,4 @@
-void Turn180(){
+void TurnAround(){
 	//Back up a bit
 	motor.speed(LEFT_MOTOR, -1*vel/3);
 	motor.speed(RIGHT_MOTOR, -1*vel/3);
