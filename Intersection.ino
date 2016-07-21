@@ -233,16 +233,8 @@ void ProcessIntersection() {
     }
   }
   if (!atIntersection) { // If no longer at intersection reset apropriate variables
-<<<<<<< HEAD
-    // FOR TESTING
-    /*
-      if(countInIntersection > 20){
-      desiredTurn = -2;
-      }*/
 
-      //right after currentEdge[1]
-=======
->>>>>>> 594ba4ae7da85bdb09c78af129d8ac35812baf33
+    //right after currentEdge[1]
     motor.speed(BUZZER_PIN, 0);
 
     for (int i = 0; i <4; i++){
