@@ -35,6 +35,7 @@ void ProcessIntersection(void);
 // Decisions
 void TurnDecision(void);
 // Collisions
+void CollisionCheck(void);
 void TurnAround(void);
 // Menu Functions
 void MainMenu(void);
@@ -362,21 +363,7 @@ void loop() {
   qrdVals[3] = digitalRead(q3);
 
 
-  if(digitalRead(OR) && !collisionDetected){
-    collisionCount++;
-    if(collisionCount > 20){
-      collisionDetected = true;
-      collisionCount = 0;
-      switchVals[FRONT_BUMPER] = digitalRead(FRONT_BUMPER_PIN);
-      switchVals[FRONT_RIGHT_BUMPER] = digitalRead(FRONT_RIGHT_BUMPER_PIN);
-      switchVals[RIGHT_BUMPER] = digitalRead(RIGHT_BUMPER_PIN);
-      switchVals[REAR_BUMPER] = digitalRead(REAR_BUMPER_PIN);
-      switchVals[LEFT_BUMPER] = digitalRead(LEFT_BUMPER_PIN);
-      switchVals[FRONT_LEFT_BUMPER] = digitalRead(FRONT_LEFT_BUMPER_PIN);
-    }
-  } else if(collisionCount){
-    collisionCount--;
-  }
+  CollisionCheck();
 
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
   if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
@@ -399,14 +386,9 @@ void loop() {
   }
 
   if(collisionDetected){
-    if(switchVals[REAR_BUMPER]){
-      MainMenu();
-    }else{
-      TurnAround();
-    }
+    TurnAround();
     collisionDetected = false;
-    
-  }
+    }
 
   if(!atIntersection){
     AreWeThereYet();
@@ -518,8 +500,8 @@ void PrintToLCD() {
     LCD.clear();
     /*LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);*/
-    //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
-    LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
+    LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount); LCD.print(" "); LCD.print(collisionCount);
+    //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
     LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
 }
@@ -538,8 +520,8 @@ void enableExternalInterrupt(unsigned int INTX, unsigned int mode)
   sei();
 }
 
-ISR(INT1_vect) {leftCount++;};
-ISR(INT3_vect) {rightCount++;};
+ISR(INT1_vect) {rightCount++;};
+ISR(INT3_vect) {leftCount++;};
 
 
 
