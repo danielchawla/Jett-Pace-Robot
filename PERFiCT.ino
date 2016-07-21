@@ -15,6 +15,7 @@
 #define LEFT_MOTOR 0
 #define RIGHT_MOTOR 2
 #define GM7 3
+#define GARBAGE -100
 
 /*
   Function Prototypes by File
@@ -186,8 +187,8 @@ int intersectionType[20]; // stores type of each intersection ie. 4-way, 4 bit b
 int currentEdge[2];
 int currentDir;
 int possibleTurns[3] = {0}; // left, straight, right True/False values - necessary??
-int desiredTurn = -2;
-int turnActual = -2;
+int desiredTurn = GARBAGE;
+int turnActual = GARBAGE;
 int nodeMat[20][20] = {0}; //nodeMat[fromIndex][toIndex] = dir
 int countInIntersection = 0;
 #define maxInIntersection 1300
@@ -341,7 +342,7 @@ void loop() {
       It is expected that functions will be called every loop iteration, so must behave accordingly
       For a function to not always be called, it must alter some variable so it will not be called next loop
       Other functions may also change this variable as appropriate
-        ie. ProcessIntersection sets desiredTurn = -2 after successful completion of intersection
+        ie. ProcessIntersection sets desiredTurn = GARBAGE after successful completion of intersection
   */
 
 
@@ -395,7 +396,7 @@ void loop() {
     if(switchVals[REAR_BUMPER]){
       MainMenu();
     }else{
-      turn180();
+      TurnAround();
     }
     collisionDetected = false;
     
@@ -403,7 +404,7 @@ void loop() {
 
 
   //Determine which direction to turn
-  if (desiredTurn == -2) {
+  if (desiredTurn == GARBAGE) {
     TurnDecision();
   }
 

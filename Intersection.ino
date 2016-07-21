@@ -232,6 +232,7 @@ void ProcessIntersection() {
       pastError = turnActual * -1;
     }
   }
+
   if (!atIntersection) { // If no longer at intersection reset apropriate variables
     motor.speed(BUZZER_PIN, 0);
     for (int i = 0; i <4; i++){
@@ -242,7 +243,6 @@ void ProcessIntersection() {
       }
     }
 
-
     currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4; //this doesnt make much sense. this is not the direction we face when we finish a turn... - Ryan
     currentEdge[0] = currentEdge[1];
     currentEdge[1] = theMap[(currentDir + turnActual + 4) % 4][currentEdge[0]];
@@ -250,8 +250,8 @@ void ProcessIntersection() {
       positionLost = 1;
     }
 
-    desiredTurn = -2;
-    turnActual = -2;
+    desiredTurn = GARBAGE;
+    turnActual = GARBAGE;
 
     countInIntersection = 0;
     turning = 0;
