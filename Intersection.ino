@@ -133,6 +133,7 @@ void ProcessIntersection() {
       leavingCount++;
       LCD.clear(); LCD.print("STRAIGHT");
       if(leavingCount > 10){
+        turnActual = STRAIGHT;
         atIntersection = 0;
       }
     }
@@ -245,9 +246,6 @@ void ProcessIntersection() {
       desiredTurn = -2;
       }*/
     motor.speed(BUZZER_PIN, 0);
-    desiredTurn = -2;
-
-    turnActual = -2;
 
     currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4; // This should probably be somewhere else, here for testing
     currentEdge[0] = currentEdge[1];
@@ -255,6 +253,9 @@ void ProcessIntersection() {
     if (currentEdge[1] == -1) {
       positionLost = 1;
     }
+
+    desiredTurn = -2;
+    turnActual = -2;
 
     countInIntersection = 0;
     turning = 0;

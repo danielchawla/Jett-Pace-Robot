@@ -93,6 +93,7 @@ int divisors[] = {8, 8, 8, 1, 4}; //divides gains and speeds by this number
 int qrdVals[4];
 
 //Switches
+
 #define FRONT_BUMPER 0
 #define FRONT_RIGHT_BUMPER 1
 #define RIGHT_BUMPER 2
@@ -100,6 +101,7 @@ int qrdVals[4];
 #define LEFT_BUMPER 4
 #define FRONT_LEFT_BUMPER 5
 
+#define OR 0
 #define FRONT_BUMPER_PIN 0
 #define FRONT_RIGHT_BUMPER_PIN 1
 #define RIGHT_BUMPER_PIN 2
@@ -224,7 +226,7 @@ int rightInitial = -1;
 
 // Angles of straight arm and open claw
 #define armHome 80
-#define clawOpen 130
+#define clawOpen 160
 #define clawClose 10
 
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
@@ -255,8 +257,7 @@ void setup()
   LCD.clear();
   LCD.home();
 
-  // Attach 3 interrupts
-  enableExternalInterrupt(INT0, RISING);
+  // Attach 2 interrupts
   enableExternalInterrupt(INT1, RISING);
   enableExternalInterrupt(INT3, RISING);
 
@@ -294,14 +295,17 @@ void setup()
   intGain = menuItems[4].Value;
 
   // Home Servos
-  //RCServo0.write(clawOpen);
+  RCServo0.write(clawOpen);
   RCServo1.write(armHome);
   // Probably should home GM7 too
 
-  LCD.print("Press Start To Begin");
   while (true) {
+    currentEdge[0] = (int)((float)knob(6)/1024.0*20.0);
+    currentEdge[1] = (int)((float)knob(7)/1024.0*20.0);
+    LCD.clear();
+    LCD.print("Press Start"); LCD.setCursor(0,1);
+    LCD.print("E0: "); LCD.print(currentEdge[0]); LCD.print(" E1: "); LCD.print(currentEdge[1]);
     delay(200);
-    LCD.scrollDisplayLeft();
     if (startbutton())
     {
       while (true) {
@@ -334,6 +338,23 @@ void loop() {
   qrdVals[1] = digitalRead(q1);
   qrdVals[2] = digitalRead(q2);
   qrdVals[3] = digitalRead(q3);
+
+
+  if(digitalRead(OR) && !collisionDetected){
+    collisionCount++;
+    if(collisionCount > 20){
+      collisionDetected = true;
+      collisionCount = 0;
+      switchVals[FRONT_BUMPER] = digitalRead(FRONT_BUMPER_PIN);
+      switchVals[FRONT_RIGHT_BUMPER] = digitalRead(FRONT_RIGHT_BUMPER_PIN);
+      switchVals[RIGHT_BUMPER] = digitalRead(RIGHT_BUMPER_PIN);
+      switchVals[REAR_BUMPER] = digitalRead(REAR_BUMPER_PIN);
+      switchVals[LEFT_BUMPER] = digitalRead(LEFT_BUMPER_PIN);
+      switchVals[FRONT_LEFT_BUMPER] = digitalRead(FRONT_LEFT_BUMPER_PIN);
+    }
+  } else if(collisionDetected){
+    collisionDetected--;
+  }
 
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
   if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
@@ -385,7 +406,13 @@ void loop() {
     }
     if((leftCount - leftInitial > countToDropoff) && (rightCount - rightInitial > countToDropoff)){
       // Have reached dropoff zone
-      DropoffPassenger(currentEdge[0]*2-35);
+      motor.stop_all();
+      delay(100);
+      /*stopTime2 = millis();
+      if(stopTime2 - stopTime1 > 100){
+        stopTime1 = stopTime2;
+      }*/
+      DropoffPassenger((currentEdge[0]*2-35)*-1);
       leftInitial = -1;
       rightInitial = -1;
     }
@@ -457,8 +484,9 @@ void PrintToLCD() {
   numOfIttrs = 0;
   if (1/*!atIntersection*/) {
     LCD.clear();
-    LCD.print("LT: "); LCD.print(loopTime);
-    LCD.print(" i: "); LCD.print(turnCount);
+    /*LCD.print("LT: "); LCD.print(loopTime);
+    LCD.print(" i: "); LCD.print(turnCount);*/
+    LCD.print(analogRead(4)); LCD.print(" "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
     LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
 }
@@ -479,19 +507,6 @@ void enableExternalInterrupt(unsigned int INTX, unsigned int mode)
 
 ISR(INT1_vect) {leftCount++;};
 ISR(INT3_vect) {rightCount++;};
-ISR(INT0_vect) {
-  collisionCount++;
-  if(collisionCount > 20){
-    collisionDetected = true;
-    collisionCount = 0;
-    switchVals[FRONT_BUMPER] = digitalRead(FRONT_BUMPER_PIN);
-    switchVals[FRONT_RIGHT_BUMPER] = digitalRead(FRONT_RIGHT_BUMPER_PIN);
-    switchVals[RIGHT_BUMPER] = digitalRead(RIGHT_BUMPER_PIN);
-    switchVals[REAR_BUMPER] = digitalRead(REAR_BUMPER_PIN);
-    switchVals[LEFT_BUMPER] = digitalRead(LEFT_BUMPER_PIN);
-    switchVals[FRONT_LEFT_BUMPER] = digitalRead(FRONT_LEFT_BUMPER_PIN);
-  }
-};
 
 
 
