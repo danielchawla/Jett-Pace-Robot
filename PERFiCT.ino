@@ -367,8 +367,8 @@ void loop() {
       switchVals[LEFT_BUMPER] = digitalRead(LEFT_BUMPER_PIN);
       switchVals[FRONT_LEFT_BUMPER] = digitalRead(FRONT_LEFT_BUMPER_PIN);
     }
-  } else if(collisionDetected){
-    collisionDetected--;
+  } else if(collisionCount){
+    collisionCount--;
   }
 
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
@@ -392,8 +392,13 @@ void loop() {
   }
 
   if(collisionDetected){
+    if(switchVals[REAR_BUMPER]){
+      MainMenu();
+    }else{
+      turn180();
+    }
     collisionDetected = false;
-    MainMenu();
+    
   }
 
 

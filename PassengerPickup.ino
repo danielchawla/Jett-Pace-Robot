@@ -35,7 +35,7 @@ int CheckForPassenger() {
 int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   int range = 80;
   int tripThresh = 800;
-  int armDelay = 30;
+  int armDelay = 5;
   int maxIR = -1;
   int newIR = -1;
   int finalI = range - 1;
