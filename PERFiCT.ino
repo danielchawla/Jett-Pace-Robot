@@ -145,8 +145,8 @@ int correction;
 //Interrupt Counts:
 volatile unsigned int leftCount = 0;
 volatile unsigned int rightCount = 0;
-volatile unsigned int collisionDetected = 0;
-volatile unsigned int collisionCount = 0;
+unsigned int collisionDetected = 0;
+unsigned int collisionCount = 0;
 
 //NAV VARIABLES -- decisions
 int topIR0, ir0 = 0;
@@ -164,6 +164,7 @@ int dir;
 int nextTempNode;
 int desiredDirection;
 int highestProfit;
+int profits[4] = {0};
 int lastIntersectionType;
 
 int initialProfitMatrix[4][20];
@@ -229,6 +230,7 @@ int stopTime2 = 0;
 int leftInitial = -1;
 int rightInitial = -1;
 #define countToDropoff 250
+#define dropWidth  80
 
 // Angles of straight arm and open claw
 #define armHome 80
@@ -289,7 +291,7 @@ void setup()
         initialProfitMatrix[i][j] = 10 - distToDropoff[theMap[i][j]];
       }
       else{
-        initialProfitMatrix[i][j] = 0;
+        initialProfitMatrix[i][j] = GARBAGE;
       }
   	}
   }
@@ -417,7 +419,6 @@ void loop() {
     TurnDecision();
   }
 
-
   //Continue on
   if (atIntersection) {
     ProcessIntersection();
@@ -425,23 +426,27 @@ void loop() {
     TapeFollow();
   }
 
-  if(hasPassenger && (currentEdge[0] == 17 || currentEdge[0] == 18)){
+  if((currentEdge[0] == 17 && currentEdge[1] == 18) || (currentEdge[0] == 18 & currentEdge[1] == 17)){
     //Going towards dropoff - count with encoders
-    if(leftInitial == -1){
+    if(leftInitial == GARBAGE){
       leftInitial = leftCount;
       rightInitial = rightCount;
     }
-    if((leftCount - leftInitial > countToDropoff) && (rightCount - rightInitial > countToDropoff)){
+    if((leftCount - leftInitial > countToDropoff) || (rightCount - rightInitial > countToDropoff)  && hasPassenger){
       // Have reached dropoff zone
-      motor.stop_all();
-      delay(100);
-      /*stopTime2 = millis();
-      if(stopTime2 - stopTime1 > 100){
-        stopTime1 = stopTime2;
-      }*/
-      DropoffPassenger((currentEdge[0]*2-35)*-1);
-      leftInitial = -1;
-      rightInitial = -1;
+      if((leftCount - leftInitial < countToDropoff + dropWidth) || (rightCount - rightInitial < countToDropoff + dropWidth)){
+          // Might not need this if depending on passener positions on 17-18 edge
+        motor.stop_all();
+        stopTime2 = millis();
+        if(stopTime2 - stopTime1 > 100){
+          stopTime1 = stopTime2;
+        }
+        DropoffPassenger((currentEdge[0]*2-35)*-1);
+        leftInitial = GARBAGE;
+        rightInitial = GARBAGE;
+      }else{
+        //turnAround(); // Don't think we'll ever get here
+      }
     }
 
 
@@ -513,7 +518,8 @@ void PrintToLCD() {
     LCD.clear();
     /*LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);*/
-    LCD.print(analogRead(4)); LCD.print(" "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
+    //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
+    LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
     LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
 }

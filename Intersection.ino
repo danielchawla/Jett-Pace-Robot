@@ -132,34 +132,36 @@ void ProcessIntersection() {
     if (!qrdVals[0] && !qrdVals[3]) {
       leavingCount++;
       LCD.clear(); LCD.print("STRAIGHT");
-      if(leavingCount > 10){
+      if(leavingCount > 10){ //may need to CHANGE for time trials 200 -> 10.  May try to go straight when not possible though
         turnActual = STRAIGHT;
         atIntersection = 0;
       }
     }
 
     // Check if all QRDs are lost
-    /*if(qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW){
-      countStatus++;
+    if(qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW){
+      statusCount++;
 
-
-      // need to turn
-      if(leftTurnPossible>pathConfidence){
-        turnActual = LEFT;
-        turning = 1;
-        qrdToCheck = q0;
-        LCD.clear();
-        LCD.print("Turning Left");
-      } else if(rightTurnPossible>pathConfidence){
-        turnActual = RIGHT;
-        turning = 1;
-        qrdToCheck = q3;
-        LCD.clear();
-        LCD.print("Turning Right");
-      } else{ // reached dead end
-        // 180 turn
+      if(statusCount > 10){
+        // need to turn
+        if(leftTurnPossible>pathConfidence){
+          turnActual = LEFT;
+          turning = 1;
+          qrdToCheck = q0;
+          LCD.clear();
+          LCD.print("Turning Left");
+        } else if(rightTurnPossible>pathConfidence){
+          turnActual = RIGHT;
+          turning = 1;
+          qrdToCheck = q3;
+          LCD.clear();
+          LCD.print("Turning Right");
+        } else{ // CHANGE - will get stuck here - need to handle it
+          LCD.print("No straight or turn");
+          while(true){}
+        }
       }
-      }*/
+    }
     // Determine if we can turn the desired direction
     if (desiredTurn == LEFT){
       if(leftTurnPossible > pathConfidence) {
@@ -169,9 +171,6 @@ void ProcessIntersection() {
         LCD.clear();
         LCD.print("Turning Left");
       }
-      else{
-        discrepancyInLocation = true;
-      }
     }
     if (desiredTurn == RIGHT){
       if(rightTurnPossible > pathConfidence) {
@@ -180,9 +179,6 @@ void ProcessIntersection() {
         qrdToCheck = q3;
         LCD.clear();
         LCD.print("Turning Right");
-      }
-      else{
-        discrepancyInLocation = true;
       }
     }
   }
@@ -234,23 +230,12 @@ void ProcessIntersection() {
   }
 
   if (!atIntersection) { // If no longer at intersection reset apropriate variables
-
-    //right after currentEdge[1]
     motor.speed(BUZZER_PIN, 0);
-
-    for (int i = 0; i <4; i++){
-      for (int j = 0; j<20; j++){
-        if(profitMatrix[i][j] < initialProfitMatrix[i][j]){
-          profitMatrix[i][j]++;
-        }
-      }
+    if(desiredTurn != turnActual){
+      discrepancyInLocation = true;
     }
-    
-    profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 0;
-    profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 0;
 
-    currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4; //direction that we entered currentEdge[1] with.
-
+    // Update the current edge based on turnActual
     currentEdge[0] = currentEdge[1];
     currentEdge[1] = theMap[(currentDir + turnActual + 4) % 4][currentEdge[0]];
     if (currentEdge[1] == -1) {

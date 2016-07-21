@@ -277,11 +277,7 @@ void PickupPassengerMain(){
 }
 
 void altMotor(void){
-  int i = 1;
-  while(true){
-    motor.speed(1,200*i);
-    delay(2000);
-    i = i*-1;
-  }
+  motor.speed(LEFT_MOTOR, 255);
+  motor.speed(RIGHT_MOTOR, 255);
 }
 

@@ -34,8 +34,7 @@ int CheckForPassenger() {
 
 int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   int range = 80;
-  int tripThresh = 800;
-  int armDelay = 5;
+  int armDelay = 11;
   int maxIR = -1;
   int newIR = -1;
   int finalI = range - 1;
@@ -57,16 +56,20 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
     newIR = analogRead(ArmIRpin);
     if (newIR > maxIR) {
       maxIR = newIR;
-    } else if (newIR < maxIR - 25 && maxIR > 300) {
+    } else if (newIR < maxIR - 20 && maxIR > 250) {
       LCD.clear();
       LCD.print("Found Max"); LCD.setCursor(0,1);LCD.print(maxIR);
+      motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED*3/4);
       delay(1000);
+      motor.speed(BUZZER_PIN, 0);
+      RCServo1.write(armHome + (i-2)*side);
       finalI = i;
       break;
     }
     LCD.clear(); LCD.print("IR:  "); LCD.print(newIR);
     LCD.setCursor(0, 1); LCD.print("Max: "); LCD.print(maxIR);
   }
+
 
   LCD.clear(); LCD.print("Closing Claw");
   // Extend claw

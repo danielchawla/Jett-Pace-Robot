@@ -1,6 +1,19 @@
 void TurnDecision(){
+  currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;
+
+  // Update profit matrix to be 0 on current edge and increase all other values
+  for (int i = 0; i <4; i++){
+    for (int j = 0; j<20; j++){
+      if(profitMatrix[i][j] < initialProfitMatrix[i][j]){
+        profitMatrix[i][j]++;
+      }
+    }
+  }    
+  profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 0;
+  profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 0;
+
+  // Make decision
   if(hasPassenger){
-    currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;
     desiredDirection = dirToDropoff[currentEdge[1]];
 
     if((desiredDirection - currentDir+4)%4 == 2){
@@ -16,21 +29,22 @@ void TurnDecision(){
     if(desiredTurn == BACK){
       LCD.clear();LCD.print("ERR: 180 Turn??");
       motor.stop_all();
-      while(true){} //get rid of this before competiton. good for now.
+      while(true){} //CHANGE get rid of this before competiton. good for now.
     }
   }
   else if(!discrepancyInLocation){
-	  highestProfit = 0;
+	  highestProfit = GARBAGE;
 	  for(int dir = 0; dir < 4; dir++){
-	    nextTempNode = theMap[dir][currentEdge[1]];
-	    if(nextTempNode != -1){
-	      tempInt = profitMatrix[currentEdge[1]][nextTempNode]; //change of temp int!
-	      if(tempInt > highestProfit){
-	        highestProfit = tempInt;
-	        desiredDirection = dir;
-	      }
-	    }
-	  }
+      profits[dir] = profitMatrix[dir][currentEdge[1]]; //change of temp int!
+      if(profits[dir] > highestProfit && (dir - currentDir+4)%4 != 2){
+        highestProfit = profits[dir];
+        desiredDirection = dir;
+      }
+    }
+    if(highestProfit == GARBAGE){ // only turn option was 180°
+      MainMenu();
+    }
+	  
     currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4; //direction with which we will enter the next intersection.
     desiredTurn = desiredDirection - currentDir;
     switch (desiredTurn){
@@ -50,6 +64,6 @@ void TurnDecision(){
 
       
   // For testing, turn left, right, straight, left ...
-  desiredTurn = desiredTurns[turnCount];
-  turnCount++;
+  //desiredTurn = desiredTurns[turnCount];
+  //turnCount++;
 }

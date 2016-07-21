@@ -1,10 +1,12 @@
 void TurnAround(){
+
+	motor.stop_all();
 	//Back up a bit
 	motor.speed(LEFT_MOTOR, -1*vel/3);
 	motor.speed(RIGHT_MOTOR, -1*vel/3);
 	countLeft180 = leftCount;
 	countRight180 = rightCount;
-	while((leftCount - countLeft180 < 60) && (rightCount - countRight180 < 60)){}
+	while((leftCount - countLeft180 < 30) && (rightCount - countRight180 < 30)){}
 	motor.speed(LEFT_MOTOR, 0);
 	motor.speed(RIGHT_MOTOR, 0);
 
