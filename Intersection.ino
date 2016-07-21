@@ -231,15 +231,9 @@ void ProcessIntersection() {
       atIntersection = 0;
       pastError = turnActual * -1;
     }
-    /*if (statusCount < -10) {
-      motor.stop_all();
-      LCD.clear(); LCD.print("Stuck turning");
-      while (true) {
-        delay(1000);
-      }
-    }*/
   }
   if (!atIntersection) { // If no longer at intersection reset apropriate variables
+<<<<<<< HEAD
     // FOR TESTING
     /*
       if(countInIntersection > 20){
@@ -247,6 +241,8 @@ void ProcessIntersection() {
       }*/
 
       //right after currentEdge[1]
+=======
+>>>>>>> 594ba4ae7da85bdb09c78af129d8ac35812baf33
     motor.speed(BUZZER_PIN, 0);
 
     for (int i = 0; i <4; i++){
