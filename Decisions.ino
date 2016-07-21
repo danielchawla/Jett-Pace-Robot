@@ -1,16 +1,5 @@
 void TurnDecision(){
-  currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;
-
-  // Update profit matrix to be 0 on current edge and increase all other values
-  for (int i = 0; i <4; i++){
-    for (int j = 0; j<20; j++){
-      if(profitMatrix[i][j] < initialProfitMatrix[i][j]){
-        profitMatrix[i][j]++;
-      }
-    }
-  }    
-  profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 0;
-  profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 0;
+  currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;//direction with which we will enter the next intersection.
 
   // Make decision
   if(hasPassenger){
@@ -33,19 +22,26 @@ void TurnDecision(){
     }
   }
   else if(!discrepancyInLocation){
-	  highestProfit = GARBAGE;
-	  for(int dir = 0; dir < 4; dir++){
+  	//same as MATLAB robotNav.m
+	  highestProfit = 0;
+
+		profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 0;
+		profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 0;
+
+		for (int i = 0; i <4; i++){
+	    for (int j = 0; j<20; j++){
+	      if(profitMatrix[i][j] + initialProfitMatrix[i][j]/30 + 1 <= initialProfitMatrix[i][j]){
+	        profitMatrix[i][j]+= initialProfitMatrix[i][j]/30 + 1; //the +1 is to avoid adding 0
+	      }
+	    }
       profits[dir] = profitMatrix[dir][currentEdge[1]]; //change of temp int!
-      if(profits[dir] > highestProfit && (dir - currentDir+4)%4 != 2){
+      if(profits[dir] > highestProfit){
         highestProfit = profits[dir];
         desiredDirection = dir;
       }
     }
-    if(highestProfit == GARBAGE){ // only turn option was 180°
-      MainMenu();
-    }
-	  
-    currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4; //direction with which we will enter the next intersection.
+
+
     desiredTurn = desiredDirection - currentDir;
     switch (desiredTurn){
       case 3: desiredTurn = LEFT; break;

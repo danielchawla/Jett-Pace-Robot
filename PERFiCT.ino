@@ -186,6 +186,7 @@ int dirToDropoff[20]        = {S, S, S, S, S, E, S, E, S, W, S, S, W, E, S, S, E
 int secondDirToDropoff[20]  = {S, S, S, S, S, E, N, W, N, W, E, W, S, S, E, W, N, N, N, N};
 int bearingToDropoff[20] = {120, 160, 180, 200, 240, 120, 150, 180, 210, 240, 110, 120, 160, 200, 240, 250, 100, 100, 260, 260}; // gives bearing to dropoff from each node
 int distToDropoff[20] = {4, 4, 5, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 3, 2, 1, 1, 2};
+int stuckLikelyhood[20] = {8, 8, 8, 8, 8, 8, 9, 4, 9, 8, 5, 1, 4, 4, 1, 5, 4, 2, 2, 4};
 int intersectionType[20]; // stores type of each intersection ie. 4-way, 4 bit boolean {NSEW} T/F values
 
 int currentEdge[2];
@@ -284,20 +285,20 @@ void setup()
     }
   }
 
+  //Just like MATLAB robotNav.m
   //create initialProfitMatrix
   for(int i = 0; i<4; i++){
   	for(int j = i; j <20; j++){
   		if (theMap[i][j] > 0){
-        initialProfitMatrix[i][j] = 10 - distToDropoff[theMap[i][j]];
+        initialProfitMatrix[i][j] = 100 - 10*distToDropoff[theMap[i][j]] - 8*stuckLikelyhood[theMap[i][j]];
       }
       else{
         initialProfitMatrix[i][j] = GARBAGE;
       }
   	}
   }
-  initialProfitMatrix[N][10] = 20;
-  initialProfitMatrix[N][7] = 10;
-  initialProfitMatrix[N][15] = 20;
+  currentEdge[0] = 0;
+  currentEdge[1] = 10;
 
   for(int i = 0; i <4; i++){
     for(int j = 0; j < 20; j++){
@@ -305,9 +306,6 @@ void setup()
     }
   }
 
-  // Set initial edge
-  currentEdge[0] = 0;
-  currentEdge[1] = 10;
 
   // Initialize important variables with stored values
   g = menuItems[0].Value;
