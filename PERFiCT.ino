@@ -162,7 +162,8 @@ int desiredDirection;
 int highestProfit;
 int lastIntersectionType;
 
-int profitMatrix[20][20];
+int initialProfitMatrix[4][20];
+int profitMatrix[4][20];
 
 //edge matrix stuff
 int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
@@ -276,11 +277,25 @@ void setup()
     }
   }
 
-  //create profitMatrix
-  for(int i = 0; i<20; i++){
+  //create initialProfitMatrix
+  for(int i = 0; i<4; i++){
   	for(int j = i; j <20; j++){
-  		profitMatrix[i][j] = 10 - distToDropoff[j];
+  		if (theMap[i][j] > 0){
+        initialProfitMatrix = 100 - 10*distToDropoff[theMap[i][j]];
+      }
+      else{
+        initialProfitMatrix = 0;
+      }
   	}
+  }
+  initialProfitMatrix[N][10] = 20;
+  initialProfitMatrix[N][7] = 10;
+  initialProfitMatrix[N][15] = 20;
+
+  for(i = 0; i <4; i++){
+    for(j = 0; j < 20; j++){
+      profitMatrix[i][j] = initialProfitMatrix[i][j];
+    }
   }
 
   // Set initial edge
