@@ -27,4 +27,5 @@ void amILost(void){
   else{
   	discrepancyInLocation = false;
   }
+  discrepancyInLocation = false;
 }

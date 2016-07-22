@@ -15,11 +15,6 @@ void TurnDecision(){
       case -3: desiredTurn = RIGHT; break;
       case -2: desiredTurn = BACK; break; 
     }
-    if(desiredTurn == BACK){
-      LCD.clear();LCD.print("ERR: 180 Turn??");
-      motor.stop_all();
-      while(true){} //CHANGE get rid of this before competiton. good for now.
-    }
   }
   else if(!discrepancyInLocation){
   	//same as MATLAB robotNav.m
@@ -37,10 +32,10 @@ void TurnDecision(){
           }
 	      }
 	    }
-      profits[dir] = profitMatrix[dir][currentEdge[1]]; //change of temp int!
-      if(profits[dir] > highestProfit){
-        highestProfit = profits[dir];
-        desiredDirection = dir;
+      profits[i] = profitMatrix[i][currentEdge[1]]; //change of temp int!
+      if(profits[i] > highestProfit){
+        highestProfit = profits[i];
+        desiredDirection = i;
       }
     }
 
@@ -63,6 +58,6 @@ void TurnDecision(){
 
       
   // For testing, turn left, right, straight, left ...
-  //desiredTurn = desiredTurns[turnCount];
-  //turnCount++;
+  desiredTurn = desiredTurns[turnCount];
+  turnCount++;
 }

@@ -137,16 +137,16 @@ void ProcessIntersection() {
       LCD.clear(); LCD.print("STRAIGHT");
       if(leavingCount > 10){ //may need to CHANGE for time trials 200 -> 10.  May try to go straight when not possible though
         turnActual = STRAIGHT;
-        TapeFollow();
-        //atIntersection = 0;
-      }
-      if(leavingCount > 200){
+        //TapeFollow();
         atIntersection = 0;
       }
+      /*if(leavingCount > 200){
+        atIntersection = 0;
+      }*/
     }
 
     // Check if all QRDs are lost
-    if(qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW){
+    /*if(qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW){
       statusCount++;
 
       if(statusCount > 10){
@@ -170,7 +170,7 @@ void ProcessIntersection() {
           while(true){}
         }
       }
-    }
+    }*/
     // Determine if we can turn the desired direction
     if (desiredTurn == LEFT){
       if(leftTurnPossible > pathConfidence) {
@@ -196,7 +196,7 @@ void ProcessIntersection() {
     if (loopNum == 1) {
       if (digitalRead(qrdToCheck) == LOW) {
         statusCount++;
-        if (statusCount == 7) {
+        if (statusCount == 15) {
           loopNum = 2;
           statusCount = 0;
         }
@@ -209,7 +209,7 @@ void ProcessIntersection() {
     if (loopNum == 2) {
       if (digitalRead(qrdToCheck) == HIGH) {
         statusCount++;
-        if (statusCount == 7) {
+        if (statusCount == 5) {
           loopNum = 3;
           statusCount = 0;
         }
@@ -222,7 +222,7 @@ void ProcessIntersection() {
     if (loopNum == 3) {
       if (digitalRead(qrdToCheck) == LOW) {
         statusCount++;
-        if (statusCount == 7) {
+        if (statusCount == 5) {
           loopNum = 0;
           statusCount = 0;
         }
