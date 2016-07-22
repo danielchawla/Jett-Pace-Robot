@@ -4,7 +4,7 @@ int CheckForPassenger() {
   // Check left side
   if (leftIRVal > leftIRValMax) {
     leftIRValMax = leftIRVal;
-  } else if (leftIRVal < leftIRValMax - 25 && leftIRValMax > sideIRMin) {
+  } else if (leftIRVal < leftIRValMax - 15 && leftIRValMax > sideIRMin) {
     // Stop motors, reset maxima and pick up passenger
     motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
     motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
@@ -18,7 +18,7 @@ int CheckForPassenger() {
   // Check right side
   if (rightIRVal > rightIRValMax) {
     rightIRValMax = rightIRVal;
-  } else if (rightIRVal < rightIRValMax - 25 && rightIRValMax > sideIRMin) {
+  } else if (rightIRVal < rightIRValMax - 15 && rightIRValMax > sideIRMin) {
     // Stop motors, reset maxima and pick up passenger
     motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
     motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);

@@ -228,7 +228,7 @@ int loopTime;
 unsigned long startTime;
 
 // Passenger Pickup
-#define sideIRMin 400
+#define sideIRMin 100
 int passengerPosition;
 int stopTime1 = 0;
 int stopTime2 = 0; 
@@ -391,7 +391,7 @@ void loop() {
   }
 
   if(collisionDetected){
-    if(switchVals[FRONT_BUMPER]){
+    if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
       TurnAround();
     }
     for(int i = 0; i<6;i++){

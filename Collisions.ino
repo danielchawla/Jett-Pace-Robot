@@ -1,5 +1,5 @@
-#define stage1 10
-#define stage2 95 // maybe 95 and stage1 15 is better
+#define stage1 20
+#define stage2 120 // maybe 95 and stage1 15 is better
 #define stage3 90
 void TurnAround(){
 	//Stage1: Reverse just left
