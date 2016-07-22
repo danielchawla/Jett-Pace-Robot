@@ -120,7 +120,6 @@ void DropoffPassenger(int side){
   delay(1000);
   int range = 80;
   int armDelay = 15;
-  int startTime;
   
   // Extend claw
   motor.speed(GM7, -150);

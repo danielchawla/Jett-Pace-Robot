@@ -99,7 +99,6 @@ int qrdVals[4];
 
 //Switches
 
-
 // These are indices for array
 #define FRONT_BUMPER 0 //change to _INDEX
 #define FRONT_RIGHT_BUMPER 1
@@ -159,17 +158,15 @@ int topIR2, ir2 = 2;
 int directionOfDropZone; // 0 to 359 degrees (bearings).
 int topIRSensitivity = 200;
 int offset;
-int currentNode;
+//int currentNode;
 int robotDirection;
 int discrepancyInLocation = false;
 int accuracyInIR = 60;
 int tempInt;
 int dir;
-int nextTempNode;
 int desiredDirection;
 int highestProfit;
 int profits[4] = {0};
-int lastIntersectionType;
 
 int initialProfitMatrix[4][20];
 int profitMatrix[4][20];
@@ -208,11 +205,9 @@ int countTurning = 0;
 int leftTurnPossible = 0;
 int rightTurnPossible = 0;
 int intGain;
-int lostCount = 0;
 int qrdToCheck;
 int loopNum = 1;
 int statusCount = 0;
-int statusLast = 0;
 #define pathConfidence 10
 int loopsSinceLastInt = 0;
 int leavingCount = 0;
@@ -259,11 +254,7 @@ int turnCount = 0;
 // State Variables
 int atIntersection = 0;
 int turning = 0;
-int turn180 = 0;
 int hasPassenger = 0;
-int lostTape = 0;
-int foundTape = 0; //this should be the opposite of lostTape..
-int positionLost = 0; // Change to 1 if sensor data contradicts what is expected based on currentEdge[][]
 
 void setup()
 {
@@ -357,9 +348,9 @@ void loop() {
         ie. ProcessIntersection sets desiredTurn = GARBAGE after successful completion of intersection
   */
 
-
   numOfIttrs++;
   loopsSinceLastInt++;
+
   /*TAPE FOLLOWING*/
   //low reading == white. High reading == black tape.
   qrdVals[0] = digitalRead(q0);
@@ -367,7 +358,7 @@ void loop() {
   qrdVals[2] = digitalRead(q2);
   qrdVals[3] = digitalRead(q3);
 
-
+  // Check switch vals to determine if there was a collision
   CollisionCheck();
 
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
@@ -390,6 +381,7 @@ void loop() {
     }
   }
 
+  // Our current basic collision handling
   if(collisionDetected){
     if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
       TurnAround();
@@ -400,10 +392,12 @@ void loop() {
     collisionDetected = false;
   }
 
+  // Check if we're at an intersection if we're not already
   if(!atIntersection){
     AreWeThereYet();
   }
 
+  // Check if there is a discrepancy in location based on IR/encoders - This currently always returns false
   if(loopsSinceLastInt == 100){
     amILost();
   }
@@ -411,13 +405,15 @@ void loop() {
     TurnDecision();
   }
 
-  //Continue on
+  //Continue on by processing intersection if we're at one or else tape follow
   if (atIntersection) {
     ProcessIntersection();
   } else { //keep tape following
     TapeFollow();
   }
 
+  // Count with encoders on edge 17-18 with or without passenger, dropoff if we have one
+  // Could maybe move this into a function to be neater
   if((currentEdge[0] == 17 && currentEdge[1] == 18) || (currentEdge[0] == 18 & currentEdge[1] == 17)){
     //Going towards dropoff - count with encoders
     if(leftInitial == GARBAGE && hasPassenger){
