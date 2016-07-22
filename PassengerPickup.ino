@@ -4,7 +4,7 @@ int CheckForPassenger() {
   // Check left side
   if (leftIRVal > leftIRValMax) {
     leftIRValMax = leftIRVal;
-  } else if (leftIRVal < leftIRValMax - 5 && leftIRValMax > sideIRMin) {
+  } else if (leftIRVal < leftIRValMax - 25 && leftIRValMax > sideIRMin) {
     // Stop motors, reset maxima and pick up passenger
     motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
     motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
@@ -18,7 +18,7 @@ int CheckForPassenger() {
   // Check right side
   if (rightIRVal > rightIRValMax) {
     rightIRValMax = rightIRVal;
-  } else if (rightIRVal < rightIRValMax - 5 && rightIRValMax > sideIRMin) {
+  } else if (rightIRVal < rightIRValMax - 25 && rightIRValMax > sideIRMin) {
     // Stop motors, reset maxima and pick up passenger
     motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
     motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
@@ -75,7 +75,7 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   // Extend claw
   motor.speed(GM7, -150);
   startTime = millis();
-  while(millis() - startTime < 1000){}
+  while(millis() - startTime < 1200){}
   motor.speed(GM7, 0);
 
   // Close claw
@@ -95,7 +95,7 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
     startTime = millis();
   }*/
   startTime = millis();
-  while(millis() - startTime < 1000){}
+  while(millis() - startTime < 1200){}
   motor.speed(GM7, 0);
 
 
@@ -116,43 +116,48 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
 }
 
 void DropoffPassenger(int side){
-
+  LCD.clear(); LCD.print("Dropping off");
+  delay(1000);
   int range = 80;
   int armDelay = 15;
   int startTime;
   
   // Extend claw
   motor.speed(GM7, -150);
-  startTime = millis();
-  while(millis() - startTime < 1000){}
+  delay(1000);
+  //startTime = millis();
+  //while(millis() - startTime < 1000){}
   motor.speed(GM7, 0);
 
   // Rotate Arm
   RCServo1.write(armHome + range * side);
-  startTime = millis();
-  while(millis() - startTime < 300){}
+  delay(300);
+  // startTime = millis();
+  // while(millis() - startTime < 300){}
 
   // Open Claw
   RCServo0.write(clawOpen);
-  startTime = millis();
-  while(millis() - startTime < 500){}
+  delay(600);
+  // startTime = millis();
+  // while(millis() - startTime < 600){}
 
   // Close claw
   RCServo0.write(clawClose);
   
   // Retract claw
   motor.speed(GM7, 150);
-  startTime = millis();
-  while(millis() - startTime < 300){}
+  delay(300);
+  // startTime = millis();
+  // while(millis() - startTime < 300){}
 
   // Rotate arm back to center
   RCServo1.write(armHome);
-  startTime = millis();
-  while(millis() - startTime < 1500){}
+  delay(1500);
+  // startTime = millis();
+  // while(millis() - startTime < 1500){}
   motor.speed(GM7, 0);
 
   hasPassenger = false;
-
   // Reset Gains
   g = g/1.1;
   intGain = intGain/1.1;

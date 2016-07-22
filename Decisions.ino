@@ -26,7 +26,7 @@ void TurnDecision(){
 		for (int i = 0; i <4; i++){
 	    for (int j = 0; j<20; j++){
 	      if(profitMatrix[i][j] < initialProfitMatrix[i][j]){
-	        profitMatrix[i][j]+= initialProfitMatrix[i][j]/30 + 1; //the +1 is to avoid adding 0
+	        profitMatrix[i][j]+= initialProfitMatrix[i][j]/40 + 1; //the +1 is to avoid adding 0
           if(profitMatrix[i][j] > initialProfitMatrix[i][j]){
             profitMatrix[i][j] = initialProfitMatrix[i][j];
           }
@@ -58,6 +58,6 @@ void TurnDecision(){
 
       
   // For testing, turn left, right, straight, left ...
-  desiredTurn = desiredTurns[turnCount];
-  turnCount++;
+  // desiredTurn = desiredTurns[turnCount];
+  // turnCount++;
 }

@@ -1,5 +1,5 @@
 void AreWeThereYet(){
-  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) && loopsSinceLastInt > 2000) {
+  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) && loopsSinceLastInt > 1000) {
     statusCount++;
     if (qrdVals[0]) {
       leftTurnPossible++;
@@ -115,7 +115,7 @@ void ProcessIntersection() {
       m++;
 
       motor.speed(LEFT_MOTOR, vel / 4 - correction);
-      motor.speed(RIGHT_MOTOR, vel / 4 + correction);
+      motor.speed(RIGHT_MOTOR, vel / 4 + correction); // CHANGE may need to have to set back to /4
     }
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {
@@ -135,7 +135,7 @@ void ProcessIntersection() {
     if (!qrdVals[0] && !qrdVals[3]) {
       leavingCount++;
       LCD.clear(); LCD.print("STRAIGHT");
-      if(leavingCount > 10){ //may need to CHANGE for time trials 200 -> 10.  May try to go straight when not possible though
+      if(leavingCount > 40){ //may need to CHANGE for time trials 200 -> 10.  May try to go straight when not possible though
         turnActual = STRAIGHT;
         //TapeFollow();
         atIntersection = 0;

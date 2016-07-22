@@ -33,7 +33,7 @@ currentEdge1 = 10;
 
 profitMatrix = initialProfitMatrix;
 
-for node = 1:20
+for node = 1:50
     highestProfit = 0;
     
     profitMatrix(nodeMat(currentEdge0+1,currentEdge1+1),currentEdge0+1) = 0;
@@ -55,6 +55,19 @@ for node = 1:20
         end
         
     end
+    %output stuff
+    currentEdge0;
+    currentEdge1;
+    path(node) = currentEdge1
+    for dir = 1:4
+        profits(dir) = profitMatrix(dir,currentEdge1+1);
+    end
+    desiredDirection
+    profits
+    inp = input('');
+   
+    %reset
+    
     if(false)%rand()*100 < 10)
         temp = currentEdge0;
         currentEdge0 = currentEdge1;
@@ -63,18 +76,6 @@ for node = 1:20
         currentEdge0 = currentEdge1;
         currentEdge1 = theMap(desiredDirection,currentEdge1+1);
     end
-    %output stuff
-    currentEdge0;
-    currentEdge1;
-    path(node) = currentEdge1;
-    for dir = 1:4
-        profits(dir) = profitMatrix(dir,currentEdge1+1);
-    end
-    %desiredDirection
-    %profits
-   
-    %reset
-
     
    
 end

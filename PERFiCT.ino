@@ -190,7 +190,7 @@ int dirToDropoff[20]        = {S, S, S, S, S, E, S, E, S, W, S, S, W, E, S, S, E
 int secondDirToDropoff[20]  = {S, S, S, S, S, E, N, W, N, W, E, W, S, S, E, W, N, N, N, N};
 int bearingToDropoff[20] = {120, 160, 180, 200, 240, 120, 150, 180, 210, 240, 110, 120, 160, 200, 240, 250, 100, 100, 260, 260}; // gives bearing to dropoff from each node
 int distToDropoff[20] = {4, 4, 5, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 3, 2, 1, 1, 2};
-int stuckLikelyhood[20] = {8, 8, 8, 8, 8, 8, 9, 4, 9, 8, 5, 1, 4, 4, 1, 5, 4, 2, 2, 4};
+int stuckLikelyhood[20] = {8, 8, 8, 8, 8, 8, 7, 4, 7, 8, 5, 1, 4, 4, 1, 5, 4, 2, 2, 4};
 int intersectionType[20]; // stores type of each intersection ie. 4-way, 4 bit boolean {NSEW} T/F values
 
 int currentEdge[2];
@@ -227,13 +227,13 @@ int loopTime;
 unsigned long startTime;
 
 // Passenger Pickup
-#define sideIRMin 500
+#define sideIRMin 400
 int passengerPosition;
 int stopTime1 = 0;
 int stopTime2 = 0; 
 #define passengerGoneThresh 50
-int leftInitial = -1;
-int rightInitial = -1;
+int leftInitial = GARBAGE;
+int rightInitial = GARBAGE;
 #define countToDropoff 250
 #define dropWidth  80
 
@@ -419,20 +419,20 @@ void loop() {
 
   if((currentEdge[0] == 17 && currentEdge[1] == 18) || (currentEdge[0] == 18 & currentEdge[1] == 17)){
     //Going towards dropoff - count with encoders
-    if(leftInitial == GARBAGE){
+    if(leftInitial == GARBAGE && hasPassenger){
       leftInitial = leftCount;
       rightInitial = rightCount;
     }
-    if((leftCount - leftInitial > countToDropoff) || (rightCount - rightInitial > countToDropoff)  && hasPassenger){
+    if(((leftCount - leftInitial > countToDropoff) || (rightCount - rightInitial > countToDropoff))  &&  hasPassenger){
       // Have reached dropoff zone
-      if((leftCount - leftInitial < countToDropoff + dropWidth) || (rightCount - rightInitial < countToDropoff + dropWidth)){
+      if(true/*(leftCount - leftInitial < countToDropoff + dropWidth) || (rightCount - rightInitial < countToDropoff + dropWidth)*/){
           // Might not need this if depending on passener positions on 17-18 edge
         motor.stop_all();
         stopTime2 = millis();
         if(stopTime2 - stopTime1 > 100){
           stopTime1 = stopTime2;
         }
-        DropoffPassenger((currentEdge[0]*2-35)*-1);
+        DropoffPassenger((currentEdge[0]*2-35)*-1); // 17 -> 1 or 18 -> -1
         leftInitial = GARBAGE;
         rightInitial = GARBAGE;
       }else{
@@ -509,8 +509,8 @@ void PrintToLCD() {
     LCD.clear();
     /*LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);*/
-    //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount); LCD.print(" "); LCD.print(collisionCount);
-    LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
+    LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount); LCD.print(" "); LCD.print(collisionCount);
+    //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
     LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
 }

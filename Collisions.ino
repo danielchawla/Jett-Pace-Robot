@@ -1,6 +1,6 @@
-#define stage1 15
-#define stage2 95
-#define stage3 80
+#define stage1 10
+#define stage2 95 // maybe 95 and stage1 15 is better
+#define stage3 90
 void TurnAround(){
 	//Stage1: Reverse just left
 	int stage = 1;
@@ -11,17 +11,15 @@ void TurnAround(){
 		if(stage == 1 && (leftCount - countLeft180) > stage1){
 			stage++;
 			motor.stop_all();
-			delay(1000);
 			//Entering Stage2: Reverse both
 			LCD.clear();LCD.print("Stage 2 "); LCD.print(leftCount - countLeft180);
 		  countLeft180 = leftCount;
 			motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED*2/3);
 			motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED/6);
 		}
-		if(stage == 2 && leftCount - countLeft180 > stage2){
+		if((stage == 2 && leftCount - countLeft180 > stage2) || digitalRead(REAR_BUMPER_PIN)){ // should maybe change digital read to be more robust
 			stage++;
 			motor.stop_all();
-			delay(1000);
 			// Entering Stage 3: Pivot
 			LCD.clear();LCD.print("Stage 3 "); LCD.print(leftCount - countLeft180);
 			countLeft180 = leftCount;
@@ -31,12 +29,11 @@ void TurnAround(){
 		if(stage == 3 && leftCount - countLeft180 > stage3){
 			stage++;
 			motor.stop_all();
-			delay(1000);
 			// Entering stage 4: Reverse left slow, drive right
 			LCD.clear();LCD.print("Stage 4 "); LCD.print(leftCount - countLeft180);
 			countLeft180 = leftCount;
 			// motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED*3/8);
-			motor.speed(RIGHT_MOTOR, MAX_MOTOR_SPEED*2/3);
+			motor.speed(RIGHT_MOTOR, MAX_MOTOR_SPEED*3/4);
 		}
 
 		//Check if tape is found
