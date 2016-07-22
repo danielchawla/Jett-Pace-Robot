@@ -99,20 +99,23 @@ int qrdVals[4];
 
 //Switches
 
-#define FRONT_BUMPER 0
+
+// These are indices for array
+#define FRONT_BUMPER 0 //change to _INDEX
 #define FRONT_RIGHT_BUMPER 1
 #define RIGHT_BUMPER 2
 #define REAR_BUMPER 3
 #define LEFT_BUMPER 4
 #define FRONT_LEFT_BUMPER 5
 
+// Constants for pin on TINAH
 #define OR 0
-#define FRONT_BUMPER_PIN 0
-#define FRONT_RIGHT_BUMPER_PIN 1
-#define RIGHT_BUMPER_PIN 2
-#define REAR_BUMPER_PIN 3
-#define LEFT_BUMPER_PIN 4
-#define FRONT_LEFT_BUMPER_PIN 5
+#define FRONT_BUMPER_PIN 9
+#define FRONT_RIGHT_BUMPER_PIN 8
+#define RIGHT_BUMPER_PIN 13
+#define REAR_BUMPER_PIN 12
+#define LEFT_BUMPER_PIN 11
+#define FRONT_LEFT_BUMPER_PIN 10
 int switchVals[6] = {0};
 
 // Analog
@@ -240,7 +243,7 @@ int rightInitial = -1;
 #define clawClose 10
 
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
-int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, LEFT, STRAIGHT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
+int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, LEFT, LEFT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 //int desiredTurns[] = {LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, RIGHT};
 int turnCount = 0;
@@ -387,9 +390,14 @@ void loop() {
   }
 
   if(collisionDetected){
-    TurnAround();
-    collisionDetected = false;
+    if(switchVals[FRONT_BUMPER]){
+      TurnAround();
     }
+    for(int i = 0; i<6;i++){
+      switchVals[i] = 0;
+    }
+    collisionDetected = false;
+  }
 
   if(!atIntersection){
     AreWeThereYet();
@@ -501,8 +509,8 @@ void PrintToLCD() {
     LCD.clear();
     /*LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);*/
-    LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount); LCD.print(" "); LCD.print(collisionCount);
-    //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
+    //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount); LCD.print(" "); LCD.print(collisionCount);
+    LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
     LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
 }

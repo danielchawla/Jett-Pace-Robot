@@ -1,5 +1,5 @@
 #define stage1 15
-#define stage2 130
+#define stage2 95
 #define stage3 80
 void TurnAround(){
 	//Stage1: Reverse just left
@@ -145,15 +145,22 @@ void TurnAround(){
 void CollisionCheck(){
 	if(digitalRead(OR) && !collisionDetected){
     collisionCount++;
+    switchVals[FRONT_BUMPER] += digitalRead(FRONT_BUMPER_PIN);
+    switchVals[FRONT_RIGHT_BUMPER] += digitalRead(FRONT_RIGHT_BUMPER_PIN);
+    switchVals[RIGHT_BUMPER] += digitalRead(RIGHT_BUMPER_PIN);
+    switchVals[REAR_BUMPER] += digitalRead(REAR_BUMPER_PIN);
+    switchVals[LEFT_BUMPER] += digitalRead(LEFT_BUMPER_PIN);
+    switchVals[FRONT_LEFT_BUMPER] += digitalRead(FRONT_LEFT_BUMPER_PIN);
     if(collisionCount > 20){
+    	switchVals[FRONT_BUMPER] /= 15;
+      switchVals[FRONT_RIGHT_BUMPER] /= 15;
+      switchVals[RIGHT_BUMPER] /= 15;
+      switchVals[REAR_BUMPER] /= 15;
+      switchVals[LEFT_BUMPER] /= 15;
+      switchVals[FRONT_LEFT_BUMPER] /= 15;
       collisionDetected = true;
       collisionCount = 0;
-      switchVals[FRONT_BUMPER] = digitalRead(FRONT_BUMPER_PIN);
-      switchVals[FRONT_RIGHT_BUMPER] = digitalRead(FRONT_RIGHT_BUMPER_PIN);
-      switchVals[RIGHT_BUMPER] = digitalRead(RIGHT_BUMPER_PIN);
-      switchVals[REAR_BUMPER] = digitalRead(REAR_BUMPER_PIN);
-      switchVals[LEFT_BUMPER] = digitalRead(LEFT_BUMPER_PIN);
-      switchVals[FRONT_LEFT_BUMPER] = digitalRead(FRONT_LEFT_BUMPER_PIN);
+
     }
   } else if(collisionCount){
     collisionCount--;
