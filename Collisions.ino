@@ -1,5 +1,5 @@
 #define stage1 15
-#define stage2 70
+#define stage2 130
 #define stage3 80
 void TurnAround(){
 	//Stage1: Reverse just left
@@ -16,7 +16,7 @@ void TurnAround(){
 			LCD.clear();LCD.print("Stage 2 "); LCD.print(leftCount - countLeft180);
 		  countLeft180 = leftCount;
 			motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED*2/3);
-			motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED*5/16);
+			motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED/6);
 		}
 		if(stage == 2 && leftCount - countLeft180 > stage2){
 			stage++;
@@ -25,7 +25,7 @@ void TurnAround(){
 			// Entering Stage 3: Pivot
 			LCD.clear();LCD.print("Stage 3 "); LCD.print(leftCount - countLeft180);
 			countLeft180 = leftCount;
-			motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED/3);
+			//motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED/3);
 			motor.speed(RIGHT_MOTOR, MAX_MOTOR_SPEED*2/3);
 		}
 		if(stage == 3 && leftCount - countLeft180 > stage3){
@@ -35,7 +35,7 @@ void TurnAround(){
 			// Entering stage 4: Reverse left slow, drive right
 			LCD.clear();LCD.print("Stage 4 "); LCD.print(leftCount - countLeft180);
 			countLeft180 = leftCount;
-			motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED*3/8);
+			// motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED*3/8);
 			motor.speed(RIGHT_MOTOR, MAX_MOTOR_SPEED*2/3);
 		}
 
@@ -46,6 +46,12 @@ void TurnAround(){
 			statusCount180--;
 		}
 		if(statusCount180 > 15){
+			//Finished turning around - change currentEdge
+			tempInt = currentEdge[1];
+			currentEdge[1] = currentEdge[0];
+			currentEdge[0] = tempInt;
+
+
 			statusCount180 = 0;
 			stage = 1; // Reset stage
 			break;

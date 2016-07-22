@@ -88,32 +88,35 @@ void ProcessIntersection() {
     }
 
     // Collect error values so that Tape Following continues nicely after intersection - do we really need this?
-    if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
-      if (pastError < 0) {
-        error = -5;
+    // Only if not under leaving circumstances - not tape following yet
+    if(leavingCount < 10){
+      if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
+        if (pastError < 0) {
+          error = -5;
+        }
+        if (pastError > 0) {
+          error = 5;
+        }
+      } else if ( qrdVals[1] == LOW) {
+        error = -1;
+      } else if (qrdVals[2] == LOW) {
+        error = 1;
+      } else {
+        error = 0;
       }
-      if (pastError > 0) {
-        error = 5;
+
+      if (!error == pastError) {
+        recError = prevError;
+        q = m;
+        m = 1;
       }
-    } else if ( qrdVals[1] == LOW) {
-      error = -1;
-    } else if (qrdVals[2] == LOW) {
-      error = 1;
-    } else {
-      error = 0;
+
+      pastError = error;
+      m++;
+
+      motor.speed(LEFT_MOTOR, vel / 4 - correction);
+      motor.speed(RIGHT_MOTOR, vel / 4 + correction);
     }
-
-    if (!error == pastError) {
-      recError = prevError;
-      q = m;
-      m = 1;
-    }
-
-    pastError = error;
-    m++;
-    motor.speed(LEFT_MOTOR, vel / 4 - correction);
-    motor.speed(RIGHT_MOTOR, vel / 4 + correction);
-
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {
       leftTurnPossible++;
@@ -134,6 +137,10 @@ void ProcessIntersection() {
       LCD.clear(); LCD.print("STRAIGHT");
       if(leavingCount > 10){ //may need to CHANGE for time trials 200 -> 10.  May try to go straight when not possible though
         turnActual = STRAIGHT;
+        TapeFollow();
+        //atIntersection = 0;
+      }
+      if(leavingCount > 200){
         atIntersection = 0;
       }
     }
@@ -148,12 +155,14 @@ void ProcessIntersection() {
           turnActual = LEFT;
           turning = 1;
           qrdToCheck = q0;
+          loopNum = 2;
           LCD.clear();
           LCD.print("Turning Left");
         } else if(rightTurnPossible>pathConfidence){
           turnActual = RIGHT;
           turning = 1;
           qrdToCheck = q3;
+          loopNum = 2;
           LCD.clear();
           LCD.print("Turning Right");
         } else{ // CHANGE - will get stuck here - need to handle it
