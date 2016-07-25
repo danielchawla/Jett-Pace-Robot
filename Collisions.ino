@@ -1,8 +1,14 @@
 // Define number of encoder pulses for left wheel are necessary in each stage
 #define stage1 20
 #define stage2 120 // maybe 95 and stage1 15 is better
-#define stage3 90
-void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &encoderCount){
+//#define stage3 90
+
+int offTape = false;
+int outOfCollision = false;
+int lastEncCount = 0;
+int loopsSinceLastChange = 0;
+
+void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverseEncoderCount, volatile unsigned int &driveEncoderCount){
 	/*
 		Turning around consists of 4 stages:
 			Stage 1 - Reverse just left wheel for a defined # of encoder pulses
@@ -17,31 +23,41 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &encoder
 		The biggest things to change in here are counts for each stage and Left and Right motor speeds in each stage
 		Also want to eventually check for other collisions, could probably reset process to a different stage in this case
 	*/
+
+
 	//Stage1: Reverse just left
-	int stage = 1;
-	LCD.clear();LCD.print("Stage 1");
-	count180 = encoderCount;
-	motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*2/3);
+	int stage = 0;
+
 	while(true){
 		// While loop is set up with if statements for different stages similar to turning code at intersections
-		if(stage == 1 && (encoderCount - count180) > stage1){ // This is the condition to leave stage 1 - at this point we write Stage 2 speeds and increment stage
+		if(stage == 0){
+			stage++;
+			LCD.clear();LCD.print("Stage 1");
+			count180 = reverseEncoderCount;
+			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*2/3);
+		}
+
+		if(stage == 1 && reverseEncoderCount - count180 > stage1){ // This is the condition to leave stage 1 - at this point we write Stage 2 speeds and increment stage
 			stage++;
 			motor.stop_all();
 			//Entering Stage 2: Reverse both
-			LCD.clear();LCD.print("Stage 2 "); LCD.print(encoderCount - count180);
-		  count180 = encoderCount;
+			LCD.clear();LCD.print("Stage 2 "); LCD.print(reverseEncoderCount - count180);
+			count180 = reverseEncoderCount;
 			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*2/3);
 			motor.speed(driveMotor, -1*MAX_MOTOR_SPEED/6);
 		}
-		if((stage == 2 && encoderCount - count180 > stage2) || digitalRead(REAR_BUMPER_PIN)){ // should maybe change digital read to be more robust
+
+		if(stage == 2 && reverseEncoderCount - count180 > stage2){ // should maybe change digital read to be more robust
 			stage++;
 			motor.stop_all();
 			// Entering Stage 3: Pivot
-			LCD.clear();LCD.print("Stage 3 "); LCD.print(encoderCount - count180);
-			count180 = encoderCount;
+			LCD.clear();LCD.print("Stage 3 "); LCD.print(driveEncoderCount - count180);
+			count180 = driveEncoderCount;
 			//motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED/3);
 			motor.speed(driveMotor, MAX_MOTOR_SPEED*2/3);
 		}
+
+		/*
 		if(stage == 3 && encoderCount - count180 > stage3){
 			stage++;
 			motor.stop_all();
@@ -50,34 +66,93 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &encoder
 			count180 = encoderCount;
 			// motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*3/8);
 			motor.speed(driveMotor, MAX_MOTOR_SPEED*3/4);
+		}*/
+
+
+		//Check if offTape
+		if(!offTape){
+			if(!(digitalRead(q1) || digitalRead(q2))) {
+				statusCount180++;
+
+				if(statusCount180 > 10){
+					//we just lost the tape.
+					statusCount180 = 0;
+					offTape = true;
+				}
+			}
+			else if(statusCount180){
+				statusCount180--;
+			}
 		}
 
 		//Check if tape is found
-		if((digitalRead(q1) || digitalRead(q2)) && stage > 2){// Need to change the stage > condition - not adaptable enough, although maybe is very useful information on how far we've turned
-			statusCount180++;
-		} else if(statusCount180 && stage > 2){
-			statusCount180--;
-		}
-		if(statusCount180 > 10){
-			//Finished turning around - change currentEdge
-			tempInt = currentEdge[1];
-			currentEdge[1] = currentEdge[0];
-			currentEdge[0] = tempInt;
+		if(offTape){
+			if(digitalRead(q1) || digitalRead(q2)){// Need to change the stage > condition - not adaptable enough, although maybe is very useful information on how far we've turned
+				statusCount180++;
 
-
-			statusCount180 = 0;
-			stage = 1; // Reset stage
-			break;
+				if(statusCount180 > 10){
+					//Finished turning around - change currentEdge
+					tempInt = currentEdge[1];
+					currentEdge[1] = currentEdge[0];
+					currentEdge[0] = tempInt;
+					statusCount180 = 0;
+					stage = 1; // Reset stage
+					offTape = false;
+					break;
+				}
+			}
+			else if(statusCount180){
+				statusCount180--;
+			}
 		}
+
+		if(loopsSinceLastChange > 1000){
+			//do something with regards to changing stage back to one that would be appropriate.
+			if(stage < 3){
+				//set to stage 3:
+				stage = 2;
+				count180 = -1*stage2; //gonna go into that if statement up there once and will leave in stage 3
+				loopsSinceLastChange = 0;
+			}
+			else{
+				//set to stage 2:
+				stage = 1;
+				count180 = -1*stage1; //gonna go into that if statement up there once and will leave in stage 2
+				loopsSinceLastChange = 0;
+			}
+		}
+		else{
+			if(stage == 3){
+				//use driveEncoderCount
+				if(lastEncCount == driveEncoderCount){
+					loopsSinceLastChange++;
+				}
+				else{
+					loopsSinceLastChange = 0;
+					lastEncCount = driveEncoderCount;
+				}
+			}
+			else{
+				//use leftEncoderCount
+				if(lastEncCount == reverseEncoderCount){
+					loopsSinceLastChange++;
+				}
+				else{
+					loopsSinceLastChange = 0;
+					lastEncCount = reverseEncoderCount;
+				}
+			}
+		}
+
 	}
 }
 
 void TurnCW(){
-	TurnAround(LEFT_MOTOR, RIGHT_MOTOR, leftCount);
+	TurnAround(LEFT_MOTOR, RIGHT_MOTOR, leftCount, rightCount);
 }
 
 void TurnCCW(){
-	TurnAround(RIGHT_MOTOR, LEFT_MOTOR, rightCount);
+	TurnAround(RIGHT_MOTOR, LEFT_MOTOR, rightCount, leftCount);
 }
 
 void CollisionCheck(){ 
