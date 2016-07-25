@@ -36,7 +36,9 @@ void ProcessIntersection(void);
 void TurnDecision(void);
 // Collisions
 void CollisionCheck(void);
-void TurnAround(void);
+void TurnCCW(void);
+void TurnCW(void);
+void TurnAround(int, int, volatile unsigned int&);
 // Menu Functions
 void MainMenu(void);
 void Menu(void);
@@ -82,7 +84,7 @@ MenuItem ProportionalGain = MenuItem("P-gain");
 MenuItem DerivativeGain   = MenuItem("D-gain");
 MenuItem IntersectionGain = MenuItem("Int-Gain");
 MenuItem menuItems[]      = {Gain, ProportionalGain, DerivativeGain, Speed, IntersectionGain};
-int divisors[] = {8, 8, 8, 1, 4}; //divides gains and speeds by this number
+int divisors[] = {8, 8, 8, 1, 2}; //divides gains and speeds by this number
 
 
 /*
@@ -212,9 +214,9 @@ int statusCount = 0;
 int loopsSinceLastInt = 0;
 int leavingCount = 0;
 
+//180 turn stuff
 int statusCount180 = 0;
-int countLeft180 = 0;
-int countRight180 = 0;
+int count180 = 0;
 
 // Loop timing variables
 unsigned long t1 = 0;
@@ -255,6 +257,7 @@ int turnCount = 0;
 int atIntersection = 0;
 int turning = 0;
 int hasPassenger = 0;
+int passengerSpotted = 0;
 
 void setup()
 {
@@ -294,7 +297,7 @@ void setup()
   	}
   }
 
-  initialProfitMatrix[N][7] = GARBAGE; //never go to 2
+  initialProfitMatrix[N][7] = GARBAGE; //never go to 2.  Should change this
 
   currentEdge[0] = 0;
   currentEdge[1] = 10;
@@ -362,9 +365,9 @@ void loop() {
   CollisionCheck();
 
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
-  if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
+  if (numOfIttrs%passengerCheckFreq == 0/* && !hasPassenger*/) {
     passengerPosition = CheckForPassenger();
-    if(passengerPosition){
+    if(passengerPosition && hasPassenger){ // Changed this line to add hasPassenger from previous if
       if(stopTime1 == stopTime2){
         stopTime1 == millis();
       }
@@ -378,13 +381,25 @@ void loop() {
           intGain = intGain*1.1;
         }
       }
-    }
+    }else if(passengerPosition){
+      passengerSpotted = 1;
+      profitMatrix[currentEdge[1]][nodeMat[currentEdge[1]][currentEdge[0]]] == 100; // Set profitability of current edge in reverse direction very high
+      passengerPosition = 0;
+    }      
   }
 
   // Our current basic collision handling
   if(collisionDetected){
     if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
-      TurnAround();
+      // Check which way to turn based on currentEdge[1]
+      switch(currentEdge[1]){
+        case 0: TurnCCW(); break;
+        case 1: TurnCW(); break;
+        case 2: TurnCW(); break;
+        case 3: TurnCCW(); break;
+        case 4: TurnCW(); break;
+        default: TurnCCW();
+      }
     }
     for(int i = 0; i<6;i++){
       switchVals[i] = 0;
@@ -430,6 +445,14 @@ void loop() {
           stopTime1 = stopTime2;
         }
         DropoffPassenger((currentEdge[0]*2-35)*-1); // 17 -> 1 or 18 -> -1
+        if(passengerSpotted){
+          passengerSpotted = 0;
+          if(currentEdge[0] == 17){
+            TurnCW();
+          }else if (currentEdge[0] == 18){
+            TurnCCW();
+          }
+        }
         leftInitial = GARBAGE;
         rightInitial = GARBAGE;
       }else{
@@ -459,9 +482,9 @@ void loop() {
 void TapeFollow() {
   if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
     if(qrdVals[0] == HIGH){
-      error = 8;
+      error = 12;
     }else if(qrdVals[3] == HIGH){
-      error = -8;
+      error = -12;
     }else{
       if (pastError < 0) {
         error = -5;

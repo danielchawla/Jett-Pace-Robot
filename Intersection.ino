@@ -73,7 +73,7 @@ void ProcessIntersection() {
     // Collect error values so that Tape Following continues nicely after intersection - do we really need this?
     // Only if not under leaving circumstances - not tape following yet
     if(leavingCount < 40){
-      if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
+      /*if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
         if (pastError < 0) {
           error = -5;
         }
@@ -95,10 +95,10 @@ void ProcessIntersection() {
       }
 
       pastError = error;
-      m++;
+      m++;*/
 
-      motor.speed(LEFT_MOTOR, vel / 4 - correction);
-      motor.speed(RIGHT_MOTOR, vel / 4 + correction); // CHANGE may need to have to set back to /4
+      motor.speed(LEFT_MOTOR, vel / 8 - correction/2);
+      motor.speed(RIGHT_MOTOR, vel / 8 + correction/2); // CHANGE may need to have to set back to /4
     }
 
 
@@ -122,7 +122,7 @@ void ProcessIntersection() {
     if (!qrdVals[0] && !qrdVals[3]) {
       leavingCount++;
       LCD.clear(); LCD.print("STRAIGHT");
-      if(leavingCount > 40){ // Strong condition to leave intersection - 
+      if(leavingCount > 30){ // Strong condition to leave intersection - 
         /* 
           This is to handle case where one outside is lost before other one sees tape coming into a T at a weird angle 
             - Nodes 17 and 18 from the North
@@ -217,14 +217,14 @@ void ProcessIntersection() {
       } else {
         statusCount = 0; // This is really severe - maybe change to statusCount--
       } //one of outside is high so keep going
-      motor.speed(LEFT_MOTOR, vel / 4);
-      motor.speed(RIGHT_MOTOR, vel / 4);
+      motor.speed(LEFT_MOTOR, vel / 6);
+      motor.speed(RIGHT_MOTOR, vel / 6);
     }
     // Loop 2
     if (loopNum == 2) {
       if (digitalRead(qrdToCheck) == HIGH) {
         statusCount++;
-        if (statusCount == 5) { // tape seen for 5 cycles, kinda low, may need to strengthen
+        if (statusCount == 10) { // tape seen for 5 cycles, kinda low, may need to strengthen
           loopNum = 3;
           statusCount = 0;
         }
