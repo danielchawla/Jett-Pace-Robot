@@ -393,7 +393,7 @@ void loop() {
 
   // Our current basic collision handling
   if(collisionDetected){
-    if(switchVals(FRONT_BUMPER) && (currentEdge[0] == 6 || currentEdge[0] == 8) && analogRead(ArmIRpin) > FRONT_IR_MIN){
+    if(switchVals(FRONT_BUMPER) && (currentEdge[0] == 6 || currentEdge[0] == 8) && analogRead(ArmIRpin) > FRONT_IR_MIN && !hasPassenger){
       hasPassenger = pickupPassenger(0);
     }
     if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
