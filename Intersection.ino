@@ -265,6 +265,7 @@ void ProcessIntersection() {
     if(desiredTurn != turnActual){
       discrepancyInLocation = true;
     }
+    for (int i = -1; i++)
 
     // Update the current edge based on turnActual
     currentEdge[0] = currentEdge[1];

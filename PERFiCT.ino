@@ -175,12 +175,13 @@ int profitMatrix[4][20];
 
 //edge matrix stuff
 int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
-  //0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
-  { -1, -1, -1, -1, -1, -1, 1, 2, 3, -1, 0, 6, 7, 7, 8, 4, 10, 11, 14, 15}, //N
-  { -1, -1, -1, -1, -1, 6, -1, 13, 9, -1, 11, 12, -1, 14, 15, -1, 17, 18, 19, -1}, //E
-  {10, 6, 7, 8, 15, -1, 11, -1, 14, -1, 16, 17, 13, 12, 18, 19, -1, -1, -1, -1}, //S
-  { -1, -1, -1, -1, -1, -1, 5, 12, -1, 8, -1, 10, 11, -1, 13, 14, -1, 16, 17, 18} //W
-}; //dont change this
+                          // 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
+                          { -1, -1, -1, -1, -1, -1,  1,  2,  3, -1,  0,  6,  7,  7,  8,  4, 10, 11, 14, 15}, //N
+                          { -1, -1, -1, -1, -1,  6, -1, 13,  9, -1, 11, 12, -1, 14, 15, -1, 17, 18, 19, -1}, //E
+                          { 10,  6,  7,  8, 15, -1, 11, -1, 14, -1, 16, 17, 13, 12, 18, 19, -1, -1, -1, -1}, //S
+                          { -1, -1, -1, -1, -1, -1,  5, 12, -1,  8, -1, 10, 11, -1, 13, 14, -1, 16, 17, 18} //W
+};//dont change this
+int intersectionType[20] ={  2,  2,  2,  2,  2,  4, 11, 13, 14,  1, 14, 15, 11, 14, 15, 11, 12, 13, 13,  9}; // stores type of each intersection ie. 4-way, 4 bit boolean {NSEW} T/F values
 int rotEncoder[4][20] = {
 	//?? Idk if we need this but it'd be in the same format as theMap.
 };
@@ -191,7 +192,7 @@ int bearingToDropoff[20] = {120, 160, 180, 200, 240, 120, 150, 180, 210, 240, 11
 int distToDropoff[20] = {4, 4, 5, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 3, 2, 1, 1, 2};
 int stuckLikelyhood[20] = {8, 8, 8, 8, 8, 8, 7, 4, 7, 8, 5, 1, 4, 4, 1, 5, 4, 2, 2, 4};
 int numOfDolls[20] = {2, 3, 2, 3, 2, 3, 8, 6, 8, 3, 6, 7, 5, 5, 7, 6, 3, 7, 7, 3};
-int intersectionType[20]; // stores type of each intersection ie. 4-way, 4 bit boolean {NSEW} T/F values
+
 
 int currentEdge[2];
 int currentDir;

@@ -13,7 +13,7 @@ void TurnDecision(){
   for (int i = 0; i <4; i++){ // 2 in MATLAB
     for (int j = 0; j<20; j++){ // Increment the profitabilities of all other edges by 1/40?? of their initial value
       if(profitMatrix[i][j] < initialProfitMatrix[i][j]){
-        profitMatrix[i][j]+= initialProfitMatrix[i][j]/40 + 1; //the +1 is to avoid adding 0.  Ryan I though /40 messed everything up???
+        profitMatrix[i][j]+= initialProfitMatrix[i][j]/30 + 1; //the +1 is to avoid adding 0.  Ryan I though /40 messed everything up???
         if(profitMatrix[i][j] > initialProfitMatrix[i][j]){
           profitMatrix[i][j] = initialProfitMatrix[i][j];
         }
@@ -80,6 +80,6 @@ void TurnDecision(){
 
       
   // For testing, turn left, right, straight, left ...
-  desiredTurn = desiredTurns[turnCount];
-  turnCount++;
+  //desiredTurn = desiredTurns[turnCount];
+  //turnCount++;
 }
