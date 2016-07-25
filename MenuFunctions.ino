@@ -1,5 +1,7 @@
 void MainMenu()
 {
+  leftCount = 0;
+  rightCount = 0;
   motor.stop_all();
   LCD.clear(); LCD.home();
   LCD.print("Entering Main Menu");
