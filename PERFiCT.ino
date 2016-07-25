@@ -36,7 +36,9 @@ void ProcessIntersection(void);
 void TurnDecision(void);
 // Collisions
 void CollisionCheck(void);
-void TurnAround(void);
+void TurnCCW(void);
+void TurnCW(void);
+void TurnAround(int, int, volatile unsigned int&);
 // Menu Functions
 void MainMenu(void);
 void Menu(void);
@@ -82,7 +84,7 @@ MenuItem ProportionalGain = MenuItem("P-gain");
 MenuItem DerivativeGain   = MenuItem("D-gain");
 MenuItem IntersectionGain = MenuItem("Int-Gain");
 MenuItem menuItems[]      = {Gain, ProportionalGain, DerivativeGain, Speed, IntersectionGain};
-int divisors[] = {8, 8, 8, 1, 4}; //divides gains and speeds by this number
+int divisors[] = {8, 8, 8, 1, 2}; //divides gains and speeds by this number
 
 
 /*
@@ -98,7 +100,6 @@ int divisors[] = {8, 8, 8, 1, 4}; //divides gains and speeds by this number
 int qrdVals[4];
 
 //Switches
-
 
 // These are indices for array
 #define FRONT_BUMPER 0 //change to _INDEX
@@ -159,17 +160,15 @@ int topIR2, ir2 = 2;
 int directionOfDropZone; // 0 to 359 degrees (bearings).
 int topIRSensitivity = 200;
 int offset;
-int currentNode;
+//int currentNode;
 int robotDirection;
 int discrepancyInLocation = false;
 int accuracyInIR = 60;
 int tempInt;
 int dir;
-int nextTempNode;
 int desiredDirection;
 int highestProfit;
 int profits[4] = {0};
-int lastIntersectionType;
 
 int initialProfitMatrix[4][20];
 int profitMatrix[4][20];
@@ -189,9 +188,9 @@ int rotEncoder[4][20] = {
 int dirToDropoff[20]        = {S, S, S, S, S, E, S, E, S, W, S, S, W, E, S, S, E, E, W, W}; // Direction of dropoff zone from each intersection
 int secondDirToDropoff[20]  = {S, S, S, S, S, E, N, W, N, W, E, W, S, S, E, W, N, N, N, N};
 int bearingToDropoff[20] = {120, 160, 180, 200, 240, 120, 150, 180, 210, 240, 110, 120, 160, 200, 240, 250, 100, 100, 260, 260}; // gives bearing to dropoff from each node
-int distToDropoff[20] =       {4, 4, 5, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 3, 2, 1, 1, 2};
-int stuckLikelyhood[20] =     {8, 8, 8, 8, 8, 8, 9, 4, 9, 8, 5, 1, 4, 4, 1, 5, 4, 2, 2, 4};
-int numOfDolls[20] =          {2, 3, 2, 3, 2, 3, 8, 6, 8, 3, 6, 7, 5, 5, 7, 6, 3, 7, 7, 3};
+int distToDropoff[20] = {4, 4, 5, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 3, 2, 1, 1, 2};
+int stuckLikelyhood[20] = {8, 8, 8, 8, 8, 8, 7, 4, 7, 8, 5, 1, 4, 4, 1, 5, 4, 2, 2, 4};
+int numOfDolls[20] = {2, 3, 2, 3, 2, 3, 8, 6, 8, 3, 6, 7, 5, 5, 7, 6, 3, 7, 7, 3};
 int intersectionType[20]; // stores type of each intersection ie. 4-way, 4 bit boolean {NSEW} T/F values
 
 int currentEdge[2];
@@ -208,18 +207,16 @@ int countTurning = 0;
 int leftTurnPossible = 0;
 int rightTurnPossible = 0;
 int intGain;
-int lostCount = 0;
 int qrdToCheck;
 int loopNum = 1;
 int statusCount = 0;
-int statusLast = 0;
 #define pathConfidence 10
 int loopsSinceLastInt = 0;
 int leavingCount = 0;
 
+//180 turn stuff
 int statusCount180 = 0;
-int countLeft180 = 0;
-int countRight180 = 0;
+int count180 = 0;
 
 // Loop timing variables
 unsigned long t1 = 0;
@@ -228,13 +225,13 @@ int loopTime;
 unsigned long startTime;
 
 // Passenger Pickup
-#define sideIRMin 500
+#define sideIRMin 100
 int passengerPosition;
 int stopTime1 = 0;
 int stopTime2 = 0; 
 #define passengerGoneThresh 50
-int leftInitial = -1;
-int rightInitial = -1;
+int leftInitial = GARBAGE;
+int rightInitial = GARBAGE;
 #define countToDropoff 250
 #define dropWidth  80
 
@@ -259,11 +256,8 @@ int turnCount = 0;
 // State Variables
 int atIntersection = 0;
 int turning = 0;
-int turn180 = 0;
 int hasPassenger = 0;
-int lostTape = 0;
-int foundTape = 0; //this should be the opposite of lostTape..
-int positionLost = 0; // Change to 1 if sensor data contradicts what is expected based on currentEdge[][]
+int passengerSpotted = 0;
 
 void setup()
 {
@@ -303,7 +297,7 @@ void setup()
   	}
   }
 
-  initialProfitMatrix[N][7] = GARBAGE; //never go to 2
+  initialProfitMatrix[N][7] = GARBAGE; //never go to 2.  Should change this
 
   currentEdge[0] = 0;
   currentEdge[1] = 10;
@@ -357,9 +351,9 @@ void loop() {
         ie. ProcessIntersection sets desiredTurn = GARBAGE after successful completion of intersection
   */
 
-
   numOfIttrs++;
   loopsSinceLastInt++;
+
   /*TAPE FOLLOWING*/
   //low reading == white. High reading == black tape.
   qrdVals[0] = digitalRead(q0);
@@ -367,13 +361,13 @@ void loop() {
   qrdVals[2] = digitalRead(q2);
   qrdVals[3] = digitalRead(q3);
 
-
+  // Check switch vals to determine if there was a collision
   CollisionCheck();
 
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
-  if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
+  if (numOfIttrs%passengerCheckFreq == 0/* && !hasPassenger*/) {
     passengerPosition = CheckForPassenger();
-    if(passengerPosition){
+    if(passengerPosition && hasPassenger){ // Changed this line to add hasPassenger from previous if
       if(stopTime1 == stopTime2){
         stopTime1 == millis();
       }
@@ -387,12 +381,25 @@ void loop() {
           intGain = intGain*1.1;
         }
       }
-    }
+    }else if(passengerPosition){
+      passengerSpotted = 1;
+      profitMatrix[currentEdge[1]][nodeMat[currentEdge[1]][currentEdge[0]]] == 100; // Set profitability of current edge in reverse direction very high
+      passengerPosition = 0;
+    }      
   }
 
+  // Our current basic collision handling
   if(collisionDetected){
-    if(switchVals[FRONT_BUMPER]){
-      TurnAround();
+    if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
+      // Check which way to turn based on currentEdge[1]
+      switch(currentEdge[1]){
+        case 0: TurnCCW(); break;
+        case 1: TurnCW(); break;
+        case 2: TurnCW(); break;
+        case 3: TurnCCW(); break;
+        case 4: TurnCW(); break;
+        default: TurnCCW();
+      }
     }
     for(int i = 0; i<6;i++){
       switchVals[i] = 0;
@@ -400,10 +407,12 @@ void loop() {
     collisionDetected = false;
   }
 
+  // Check if we're at an intersection if we're not already
   if(!atIntersection){
     AreWeThereYet();
   }
 
+  // Check if there is a discrepancy in location based on IR/encoders - This currently always returns false
   if(loopsSinceLastInt == 100){
     amILost();
   }
@@ -411,29 +420,39 @@ void loop() {
     TurnDecision();
   }
 
-  //Continue on
+  //Continue on by processing intersection if we're at one or else tape follow
   if (atIntersection) {
     ProcessIntersection();
   } else { //keep tape following
     TapeFollow();
   }
 
+  // Count with encoders on edge 17-18 with or without passenger, dropoff if we have one
+  // Could maybe move this into a function to be neater
   if((currentEdge[0] == 17 && currentEdge[1] == 18) || (currentEdge[0] == 18 & currentEdge[1] == 17)){
     //Going towards dropoff - count with encoders
-    if(leftInitial == GARBAGE){
+    if(leftInitial == GARBAGE && hasPassenger){
       leftInitial = leftCount;
       rightInitial = rightCount;
     }
-    if((leftCount - leftInitial > countToDropoff) || (rightCount - rightInitial > countToDropoff)  && hasPassenger){
+    if(((leftCount - leftInitial > countToDropoff) || (rightCount - rightInitial > countToDropoff))  &&  hasPassenger){
       // Have reached dropoff zone
-      if((leftCount - leftInitial < countToDropoff + dropWidth) || (rightCount - rightInitial < countToDropoff + dropWidth)){
+      if(true/*(leftCount - leftInitial < countToDropoff + dropWidth) || (rightCount - rightInitial < countToDropoff + dropWidth)*/){
           // Might not need this if depending on passener positions on 17-18 edge
         motor.stop_all();
         stopTime2 = millis();
         if(stopTime2 - stopTime1 > 100){
           stopTime1 = stopTime2;
         }
-        DropoffPassenger((currentEdge[0]*2-35)*-1);
+        DropoffPassenger((currentEdge[0]*2-35)*-1); // 17 -> 1 or 18 -> -1
+        if(passengerSpotted){
+          passengerSpotted = 0;
+          if(currentEdge[0] == 17){
+            TurnCW();
+          }else if (currentEdge[0] == 18){
+            TurnCCW();
+          }
+        }
         leftInitial = GARBAGE;
         rightInitial = GARBAGE;
       }else{
@@ -463,9 +482,9 @@ void loop() {
 void TapeFollow() {
   if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
     if(qrdVals[0] == HIGH){
-      error = 8;
+      error = 12;
     }else if(qrdVals[3] == HIGH){
-      error = -8;
+      error = -12;
     }else{
       if (pastError < 0) {
         error = -5;
@@ -510,8 +529,8 @@ void PrintToLCD() {
     LCD.clear();
     /*LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);*/
-    //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount); LCD.print(" "); LCD.print(collisionCount);
-    LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
+    LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount); LCD.print(" "); LCD.print(collisionCount);
+    //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
     LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
 }
