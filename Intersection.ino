@@ -265,7 +265,33 @@ void ProcessIntersection() {
     if(desiredTurn != turnActual){
       discrepancyInLocation = true;
     }
-    for (int i = -1; i++)
+    for (int i = -1; i<2; i++){
+      if(leftTurnPossible){
+        if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] == -1){
+          discrepancyInLocation = true;
+        }
+      }
+      if(rightTurnPossible){
+        if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] == -1){
+          discrepancyInLocation = true;
+        }
+      }
+      if(turnActual == STRAIGHT){
+        if(!leftTurnPossible){
+          if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] != -1){
+            discrepancyInLocation = true;
+          }
+        }
+        if(!rightTurnPossible){
+          if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] != -1){
+            discrepancyInLocation = true;
+          }
+        }
+      }
+    }
+    if(discrepancyInLocation){
+      motor.speed(BUZZER_PIN, 255);
+    }
 
     // Update the current edge based on turnActual
     currentEdge[0] = currentEdge[1];

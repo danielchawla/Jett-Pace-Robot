@@ -227,6 +227,7 @@ unsigned long startTime;
 
 // Passenger Pickup
 #define sideIRMin 100
+#define FRONT_IR_MIN 200 // DETERMINE THIS
 int passengerPosition;
 int stopTime1 = 0;
 int stopTime2 = 0; 
@@ -385,12 +386,16 @@ void loop() {
     }else if(passengerPosition){
       passengerSpotted = 1;
       profitMatrix[currentEdge[1]][nodeMat[currentEdge[1]][currentEdge[0]]] == 100; // Set profitability of current edge in reverse direction very high
+      profitMatrix[currentEdge[0]][nodeMat[currentEdge[0]][currentEdge[1]]] == 100;
       passengerPosition = 0;
     }      
   }
 
   // Our current basic collision handling
   if(collisionDetected){
+    if(switchVals(FRONT_BUMPER) && (currentEdge[0] == 6 || currentEdge[0] == 8) && analogRead(ArmIRpin) > FRONT_IR_MIN){
+      hasPassenger = pickupPassenger(0);
+    }
     if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
       // Check which way to turn based on currentEdge[1]
       switch(currentEdge[1]){

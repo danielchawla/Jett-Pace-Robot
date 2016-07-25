@@ -1,6 +1,6 @@
 // Define number of encoder pulses for left wheel are necessary in each stage
 #define stage1 20
-#define stage2 120 // maybe 95 and stage1 15 is better
+#define stage2 105 // maybe 95 and stage1 15 is better
 //#define stage3 90
 
 int offTape = false;
@@ -106,7 +106,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			}
 		}
 
-		if(loopsSinceLastChange > 1000){
+		if(loopsSinceLastChange > 10000){
 			//do something with regards to changing stage back to one that would be appropriate.
 			if(stage < 3){
 				//set to stage 3:
