@@ -30,8 +30,10 @@ int CheckForPassenger(void);
 void DropoffPassenger(int);
 // Intersection
 void AreWeThereYet(void);
-void amILost(void);
+void irDirection(void);
 void ProcessIntersection(void);
+//GetFound
+void determineLocation(void);
 // Decisions
 void TurnDecision(void);
 // Collisions
@@ -172,6 +174,13 @@ int profits[4] = {0};
 
 int initialProfitMatrix[4][20];
 int profitMatrix[4][20];
+
+//GetFoundVars
+int lastKnownIntersection = GARBAGE;
+int lastKnownDir = GARBAGE;
+int leftCountBeforeCol;
+int rightCountBeforeCol;
+
 
 //edge matrix stuff
 int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
@@ -418,11 +427,7 @@ void loop() {
     AreWeThereYet();
   }
 
-  // Check if there is a discrepancy in location based on IR/encoders - This currently always returns false
-  if(loopsSinceLastInt == 400){
-    amILost();
-  }
-  else if (loopsSinceLastInt == 600) {
+  if (loopsSinceLastInt == 600) {
     TurnDecision();
   }
 
