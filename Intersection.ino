@@ -1,5 +1,5 @@
 void AreWeThereYet(){
-  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) && loopsSinceLastInt > 5000) {
+  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) && loopsSinceLastInt > 1000) {
     statusCount++;
     if (qrdVals[0]) {
       leftTurnPossible++;
@@ -17,7 +17,7 @@ void AreWeThereYet(){
   } else if (statusCount > 10) {
     statusCount-=10;
   }
-  if (statusCount == 80) {
+  if (statusCount == 50) {
     motor.speed(LEFT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.speed(RIGHT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.stop_all();
@@ -28,13 +28,9 @@ void AreWeThereYet(){
     LCD.clear();
     LCD.print("Going Straight");
 
-   // turn180 = (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
   }
 }
 
-
-void ProcessIntersection() {
-  motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED*3/4);
   /*
     TAKE ACTION AT INTERSECTION
     When you come to and intersection there are 5 posibilities:
@@ -55,38 +51,17 @@ void ProcessIntersection() {
         • If both directions are possible, choose which direction to continue at random
           • This is probably only relevant in testing, where directions to turn are random
   */
-  countInIntersection++;
 
- /* if(turnActual == BACK){ // Need to deal with cases where QRDs cross tape or never leave tape.
-    // Currently only works with dead ends
-    if(!lostTape){
-      motor.speed(LEFT_MOTOR,-1*MAX_MOTOR_SPEED/2);
-      motor.speed(RIGHT_MOTOR,1*MAX_MOTOR_SPEED/2);
-    }else{
-      motor.speed(LEFT_MOTOR,-1*MAX_MOTOR_SPEED);
-      motor.speed(RIGHT_MOTOR,1*MAX_MOTOR_SPEED);
-    }
-    if(qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW){
-      lostTape = 1;
-    }else if(qrdVals[1] == LOW || qrdVals[2] == LOW){
-      lostTape = 0;
-      atIntersection = 0;
-    }
-  }*/
+void ProcessIntersection() {
+  motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED*3/4);
+
+  countInIntersection++;
 
   if (!turning && !(turnActual==BACK)) {
     // Check if 180 is desired.  This is always possible
     if(desiredTurn == BACK){
       turnActual == BACK; //once this executes the rest of this if statement will execute as well. this is not good. -Ryan
     }
-
-    /*if (countInIntersection > maxInIntersection) {
-      atIntersection = 0;
-      LCD.clear();
-      LCD.print("Leaving");
-      motor.stop_all();
-      delay(1000);
-    }*/
 
     // Collect error values so that Tape Following continues nicely after intersection - do we really need this?
     // Only if not under leaving circumstances - not tape following yet
@@ -115,8 +90,8 @@ void ProcessIntersection() {
       pastError = error;
       m++;
 
-      motor.speed(LEFT_MOTOR, vel / 2 - correction/2);
-      motor.speed(RIGHT_MOTOR, vel / 2 + correction/2); // CHANGE may need to have to set back to /4
+      motor.speed(LEFT_MOTOR, vel / 4 - correction);
+      motor.speed(RIGHT_MOTOR, vel / 4 + correction); // CHANGE may need to have to set back to /4
     }
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {
@@ -216,8 +191,8 @@ void ProcessIntersection() {
       } else {
         statusCount = 0;
       }
-      motor.speed(LEFT_MOTOR, vel / 3 + turnActual * intGain); //minus should be plus and vise versa when turning right.
-      motor.speed(RIGHT_MOTOR, vel / 3 - turnActual * intGain);
+      motor.speed(LEFT_MOTOR, vel / 5 + turnActual * intGain); //minus should be plus and vise versa when turning right.
+      motor.speed(RIGHT_MOTOR, vel / 5 - turnActual * intGain);
     }
     if (loopNum == 3) {
       if (digitalRead(qrdToCheck) == LOW) {
@@ -238,7 +213,7 @@ void ProcessIntersection() {
     }
   }
 
-if (!atIntersection) { // If no longer at intersection reset apropriate variables
+  if (!atIntersection) { // If no longer at intersection reset apropriate variables
     motor.speed(BUZZER_PIN, 0); // Stop buzzer
 
     /*
@@ -298,4 +273,3 @@ if (!atIntersection) { // If no longer at intersection reset apropriate variable
     loopsSinceLastInt = 0;
 
   }
-}

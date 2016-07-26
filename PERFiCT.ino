@@ -378,7 +378,7 @@ void loop() {
   CollisionCheck();
 
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
-  if (numOfIttrs%passengerCheckFreq == 0/* && !hasPassenger*/) {
+  if (numOfIttrs%passengerCheckFreq == 0 && false) { // TODO: check this
     passengerPosition = CheckForPassenger();
     if(passengerPosition && hasPassenger){ // Changed this line to add hasPassenger from previous if
       if(stopTime1 == stopTime2){
@@ -394,11 +394,11 @@ void loop() {
           intGain = intGain*1.1;
         }
       }
-    }else if(passengerPosition){
-      passengerSpotted = 1;
-      profitMatrix[currentEdge[1]][nodeMat[currentEdge[1]][currentEdge[0]]] == 100; // Set profitability of current edge in reverse direction very high
-      profitMatrix[currentEdge[0]][nodeMat[currentEdge[0]][currentEdge[1]]] == 100;
-      passengerPosition = 0;
+    // }else if(passengerPosition){
+    //   passengerSpotted = true;
+    //   profitMatrix[currentEdge[1]][nodeMat[currentEdge[1]][currentEdge[0]]] == 100; // Set profitability of current edge in reverse direction very high
+    //   profitMatrix[currentEdge[0]][nodeMat[currentEdge[0]][currentEdge[1]]] == 100;
+    //   passengerPosition = 0;
     }      
   }
 
@@ -429,7 +429,6 @@ void loop() {
     AreWeThereYet();
   }
 
-<<<<<<< HEAD
   // Check if there is a discrepancy in location based on IR/encoders - This currently always returns false
   if(loopsSinceLastInt == 100){
     amILost();
@@ -439,10 +438,6 @@ void loop() {
   } 
   else if(loopsSinceLastInt == 500){
     TurnDecision2();
-=======
-  if (loopsSinceLastInt == 600) {
-    TurnDecision();
->>>>>>> 55290e93b2e786659d977fed770e22a008560152
   }
 
   //Continue on by processing intersection if we're at one or else tape follow
@@ -454,7 +449,7 @@ void loop() {
 
   // Count with encoders on edge 17-18 with or without passenger, dropoff if we have one
   // Could maybe move this into a function to be neater
-  if((currentEdge[0] == 17 && currentEdge[1] == 18) || (currentEdge[0] == 18 & currentEdge[1] == 17)){
+  if((currentEdge[0] == 17 && currentEdge[1] == 18) || (currentEdge[0] == 18 && currentEdge[1] == 17)){
     //Going towards dropoff - count with encoders
     if(leftInitial == GARBAGE && hasPassenger){
       leftInitial = leftCount;
@@ -509,12 +504,12 @@ void TapeFollow() {
     if(qrdVals[0] == HIGH && pastError > 0){
       tapeFollowStatusCount++;
       if(tapeFollowStatusCount > 10){
-        error = 8;
+        error = 12;
       }
     }else if(qrdVals[3] == HIGH && pastError < 0){
       tapeFollowStatusCount--;
       if(tapeFollowStatusCount < -10){
-        error = -8;
+        error = -12;
       }
     }else{
       tapeFollowStatusCount = 0;
