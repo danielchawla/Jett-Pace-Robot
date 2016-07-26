@@ -1,3 +1,5 @@
+int pickupAttempt = 0;
+
 int CheckForPassenger() { 
   leftIRVal = analogRead(leftIR);
   rightIRVal = analogRead(rightIR);
@@ -32,7 +34,7 @@ int CheckForPassenger() {
   return 0;
 }
 
-int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
+int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right, side=0 if in front
   int range = 80;
   int armDelay = 11;
   int maxIR = -1;
@@ -86,33 +88,43 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   motor.speed(GM7, 150);
   startTime = millis();
   while(millis() - startTime < 400){}
+
+
   // Rotate claw back to center
   RCServo1.write(armHome);
-  /*startTime = millis();
-  for (int i = 0; i <= finalI; i++) {
-    RCServo1.write(armHome + (finalI - i)*side);
-    while(millis() - startTime < armDelay){}
-    startTime = millis();
-  }*/
   startTime = millis();
   while(millis() - startTime < 1200){}
   motor.speed(GM7, 0);
 
+  if (!PassengerGone(side) && pickupAttempt < 2){
+    LCD.clear();
+    LCD.print("Unsuccessful pickup... :(");
+    pickupAttempt++;
+    PickupPassenger(side);
+  }
+  else if(pickupAttempt >= 2){
+    return 0;
+  }
 
-  /*if(side == LEFT){
-    if(analogRead(leftIR) > passengerGoneThresh){
+  pickupAttempt = 0;
+  return 1;
+}
+
+/*
+* Checks if passengers were picked up successfully
+*/
+bool PassengerGone(int side){
+
+  if(side == LEFT){
+    if(analogRead(leftIR) > PASSENGERGONE){
       PickupPassenger(LEFT);
     }
-  } else if(analogRead(rightIR) > passengerGoneThresh){
-    PickupPassenger(RIGHT);
-  }*/
-
-
-
-  // Home Claw
-  //RCServo0.write(clawOpen);
-  //delay(1000);
-  return 1;
+  } 
+  else if(side == RIGHT){
+    if(analogRead(rightIR) > PASSENGERGONE){
+      PickupPassenger(RIGHT);
+    }
+  }
 }
 
 void DropoffPassenger(int side){
