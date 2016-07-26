@@ -51,7 +51,7 @@ void jettPace(void);
 
 void (*menuFunctions[])() = {Menu, ViewDigital, ViewAnalog, ControlArm, PickupPassengerMain, altMotor, jettPace};
 int countMainMenu = 7;
-const char *mainMenuNames[] = {"Change Vars", "View Digital In", "View Analog In", "Control Arm", "Pickup Passenger", "Alt Motor", "Jett Pace"};
+const char *mainMenuNames[] = {"Change Vars", "View Digital In", "View Analog In", "Control Arm", "§ Passenger", "Alt Motor", "Jett Pace"};
 
 /* Store a variable in TINAH mem*/
 class MenuItem
@@ -231,7 +231,7 @@ unsigned long startTime;
 int passengerPosition;
 int stopTime1 = 0;
 int stopTime2 = 0; 
-#define passengerGoneThresh 50
+#define PASSENGERGONE 90
 int leftInitial = GARBAGE;
 int rightInitial = GARBAGE;
 #define countToDropoff 250
@@ -393,8 +393,8 @@ void loop() {
 
   // Our current basic collision handling
   if(collisionDetected){
-    if(switchVals(FRONT_BUMPER) && (currentEdge[0] == 6 || currentEdge[0] == 8) && analogRead(ArmIRpin) > FRONT_IR_MIN && !hasPassenger){
-      hasPassenger = pickupPassenger(0);
+    if(switchVals[FRONT_BUMPER] && (currentEdge[0] == 6 || currentEdge[0] == 8) && analogRead(ArmIRpin) > FRONT_IR_MIN && !hasPassenger){
+      hasPassenger = PickupPassenger(0);
     }
     if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
       // Check which way to turn based on currentEdge[1]
