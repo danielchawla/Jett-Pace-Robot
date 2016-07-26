@@ -33,7 +33,8 @@ void AreWeThereYet(void);
 void amILost(void);
 void ProcessIntersection(void);
 // Decisions
-void TurnDecision(void);
+void TurnDecision1(void);
+void TurnDecision2(void);
 // Collisions
 void CollisionCheck(void);
 void TurnCCW(void);
@@ -146,6 +147,7 @@ int vel;
 int p;
 int d;
 int correction;
+int tapeFollowStatusCount = 0;
 
 //Interrupt Counts:
 volatile unsigned int leftCount = 0;
@@ -419,11 +421,14 @@ void loop() {
   }
 
   // Check if there is a discrepancy in location based on IR/encoders - This currently always returns false
-  if(loopsSinceLastInt == 400){
+  if(loopsSinceLastInt == 100){
     amILost();
   }
-  else if (loopsSinceLastInt == 600) {
-    TurnDecision();
+  else if (loopsSinceLastInt == 200) {
+    TurnDecision1();
+  } 
+  else if(loopsSinceLastInt == 500){
+    TurnDecision2();
   }
 
   //Continue on by processing intersection if we're at one or else tape follow
@@ -487,11 +492,18 @@ void loop() {
 
 void TapeFollow() {
   if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
-    if(qrdVals[0] == HIGH){
-      error = 12;
-    }else if(qrdVals[3] == HIGH){
-      error = -12;
+    if(qrdVals[0] == HIGH && pastError > 0){
+      tapeFollowStatusCount++;
+      if(tapeFollowStatusCount > 10){
+        error = 8;
+      }
+    }else if(qrdVals[3] == HIGH && pastError < 0){
+      tapeFollowStatusCount--;
+      if(tapeFollowStatusCount < -10){
+        error = -8;
+      }
     }else{
+      tapeFollowStatusCount = 0;
       if (pastError < 0) {
         error = -5;
       } else if (pastError > 0) {
@@ -500,7 +512,7 @@ void TapeFollow() {
         // Do we need to do anything? Just go straight?
       }
     }
-  } else if ( qrdVals[2] == HIGH) {
+  } else if ( qrdVals[2] == HIGH && !qrdVals[1] ) {
     error = -1;
   } else if (qrdVals[1] == HIGH) {
     error = 1;
@@ -533,9 +545,9 @@ void PrintToLCD() {
   numOfIttrs = 0;
   if (1/*!atIntersection*/) {
     LCD.clear();
-    /*LCD.print("LT: "); LCD.print(loopTime);
-    LCD.print(" i: "); LCD.print(turnCount);*/
-    LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount); LCD.print(" "); LCD.print(collisionCount);
+    LCD.print("LT: "); LCD.print(loopTime);
+    //LCD.print(" i: "); LCD.print(turnCount);
+    //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount); LCD.print(" "); LCD.print(collisionCount);
     //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
     LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
