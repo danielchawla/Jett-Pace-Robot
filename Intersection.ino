@@ -274,7 +274,7 @@ if (!atIntersection) { // If no longer at intersection reset apropriate variable
       }
     }
     if(discrepancyInLocation){
-      motor.speed(BUZZER_PIN, 255);
+      motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED);
     }
 
     // Update the current edge based on turnActual
