@@ -82,7 +82,7 @@ MenuItem ProportionalGain = MenuItem("P-gain");
 MenuItem DerivativeGain   = MenuItem("D-gain");
 MenuItem IntersectionGain = MenuItem("Int-Gain");
 MenuItem menuItems[]      = {Gain, ProportionalGain, DerivativeGain, Speed, IntersectionGain};
-int divisors[] = {8, 8, 8, 1, 4}; //divides gains and speeds by this number
+int divisors[] = {8, 8, 8, 1, 2}; //divides gains and speeds by this number
 
 
 /*
@@ -244,9 +244,9 @@ int rightInitial = GARBAGE;
 #define clawClose 10
 
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
-int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, LEFT, LEFT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
+//int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, LEFT, LEFT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
-//int desiredTurns[] = {LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, RIGHT};
+int desiredTurns[] = {LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, RIGHT, STRAIGHT};
 int turnCount = 0;
 
 /*
@@ -371,7 +371,7 @@ void loop() {
   CollisionCheck();
 
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
-  if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
+  if (numOfIttrs%passengerCheckFreq == 0 && false){//!hasPassenger) {
     passengerPosition = CheckForPassenger();
     if(passengerPosition){
       if(stopTime1 == stopTime2){
@@ -463,9 +463,9 @@ void loop() {
 void TapeFollow() {
   if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
     if(qrdVals[0] == HIGH){
-      error = 8;
+      error = 12;
     }else if(qrdVals[3] == HIGH){
-      error = -8;
+      error = -12;
     }else{
       if (pastError < 0) {
         error = -5;

@@ -17,7 +17,7 @@ void AreWeThereYet(){
   } else if (statusCount > 10) {
     statusCount-=10;
   }
-  if (statusCount == 30) {
+  if (statusCount == 50) {
     motor.speed(LEFT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.speed(RIGHT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.stop_all();
@@ -216,8 +216,8 @@ void ProcessIntersection() {
       } else {
         statusCount = 0;
       }
-      motor.speed(LEFT_MOTOR, vel / 3 + turnActual * intGain); //minus should be plus and vise versa when turning right.
-      motor.speed(RIGHT_MOTOR, vel / 3 - turnActual * intGain);
+      motor.speed(LEFT_MOTOR, vel / 5 + turnActual * intGain); //minus should be plus and vise versa when turning right.
+      motor.speed(RIGHT_MOTOR, vel / 5 - turnActual * intGain);
     }
     if (loopNum == 3) {
       if (digitalRead(qrdToCheck) == LOW) {
