@@ -33,7 +33,9 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 		if(stage == 0){
 			stage++;
 			motor.stop_all();
-			LCD.clear();LCD.print("Stage 1");
+			LCD.clear();LCD.print("About to Turn");
+			delay(1000);
+			LCD.clear(); LCD.print("Stage 1");
 			count180 = reverseEncoderCount;
 			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*2/3);
 		}

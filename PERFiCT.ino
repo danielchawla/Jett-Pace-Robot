@@ -95,8 +95,8 @@ int divisors[] = {8, 8, 8, 1, 2}; //divides gains and speeds by this number
 // Tape follwing QRDs
 /*q0:far left, q1:left centre, q2right centre, q3: far right*/
 #define q0 4
-#define q1 5
-#define q2 6
+#define q1 6
+#define q2 5
 #define q3 7
 int qrdVals[4];
 
@@ -245,16 +245,16 @@ int rightInitial = GARBAGE;
 #define clawClose 10
 
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
-int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, LEFT, LEFT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
+//int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, LEFT, LEFT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
-//int desiredTurns[] = {LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, RIGHT};
+int desiredTurns[] = {LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, RIGHT};
 int turnCount = 0;
 
 /*
   Frequency values for different sensor checks
 */
 #define passengerCheckFreq 5
-#define printToLCDFreq 2000
+#define printToLCDFreq 20000
 
 
 // State Variables
@@ -543,7 +543,7 @@ void PrintToLCD() {
   loopTime = ((t2 - t1) * 1000) / printToLCDFreq;
   t1 = t2;
   numOfIttrs = 0;
-  if (1/*!atIntersection*/) {
+  if (!atIntersection) {
     LCD.clear();
     LCD.print("LT: "); LCD.print(loopTime);
     //LCD.print(" i: "); LCD.print(turnCount);

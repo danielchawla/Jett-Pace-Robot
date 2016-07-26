@@ -1,5 +1,5 @@
 void AreWeThereYet(){
-  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) && loopsSinceLastInt > 1000) {
+  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) && loopsSinceLastInt > 5000) {
     statusCount++;
     if (qrdVals[0]) {
       leftTurnPossible++;
@@ -17,7 +17,7 @@ void AreWeThereYet(){
   } else if (statusCount > 10) {
     statusCount-=10;
   }
-  if (statusCount == 20) {
+  if (statusCount == 80) {
     motor.speed(LEFT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.speed(RIGHT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.stop_all();
@@ -28,7 +28,7 @@ void AreWeThereYet(){
     LCD.clear();
     LCD.print("Going Straight");
 
-    //turn180 = (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
+   // turn180 = (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
   }
 }
 
@@ -57,7 +57,7 @@ void ProcessIntersection() {
   */
   countInIntersection++;
 
-  /*if(turnActual == BACK){ // Need to deal with cases where QRDs cross tape or never leave tape.
+ /* if(turnActual == BACK){ // Need to deal with cases where QRDs cross tape or never leave tape.
     // Currently only works with dead ends
     if(!lostTape){
       motor.speed(LEFT_MOTOR,-1*MAX_MOTOR_SPEED/2);
@@ -80,16 +80,18 @@ void ProcessIntersection() {
       turnActual == BACK; //once this executes the rest of this if statement will execute as well. this is not good. -Ryan
     }
 
-    if (countInIntersection > maxInIntersection) {
+    /*if (countInIntersection > maxInIntersection) {
       atIntersection = 0;
       LCD.clear();
       LCD.print("Leaving");
-    }
+      motor.stop_all();
+      delay(1000);
+    }*/
 
     // Collect error values so that Tape Following continues nicely after intersection - do we really need this?
     // Only if not under leaving circumstances - not tape following yet
-    if(leavingCount < 30){
-      /*if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
+    if(leavingCount < 10){
+      if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
         if (pastError < 0) {
           error = -5;
         }
@@ -111,10 +113,10 @@ void ProcessIntersection() {
       }
 
       pastError = error;
-      m++;*/
+      m++;
 
-      motor.speed(LEFT_MOTOR, vel / 4 - correction);
-      motor.speed(RIGHT_MOTOR, vel / 4 + correction); // CHANGE may need to have to set back to /4
+      motor.speed(LEFT_MOTOR, vel / 2 - correction/2);
+      motor.speed(RIGHT_MOTOR, vel / 2 + correction/2); // CHANGE may need to have to set back to /4
     }
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {
@@ -134,20 +136,20 @@ void ProcessIntersection() {
     if (!qrdVals[0] && !qrdVals[3]) {
       leavingCount++;
       LCD.clear(); LCD.print("STRAIGHT");
+      if(leavingCount > 40){ //may need to CHANGE for time trials 200 -> 10.  May try to go straight when not possible though
+        turnActual = STRAIGHT;
+        //TapeFollow();
+        atIntersection = 0;
+      }
+      /*if(leavingCount > 200){
+        atIntersection = 0;
+      }*/
     }
-    if(leavingCount > 30){ //may need to CHANGE for time trials 200 -> 10.  May try to go straight when not possible though
-      turnActual = STRAIGHT;
-      atIntersection = 0;
-      //TapeFollow();
-    }
-    /*if(leavingCount > 200){
-      atIntersection = 0;
-    }*/
 
     // Check if all QRDs are lost
     /*if(qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW){
       statusCount++;
-      if(statusCount > 100){
+      if(statusCount > 10){
         // need to turn
         if(leftTurnPossible>pathConfidence){
           turnActual = LEFT;
@@ -201,7 +203,6 @@ void ProcessIntersection() {
       } else {
         statusCount = 0;
       } //one of outside is high so keep going
-
       motor.speed(LEFT_MOTOR, vel / 4);
       motor.speed(RIGHT_MOTOR, vel / 4);
     }
@@ -237,7 +238,7 @@ void ProcessIntersection() {
     }
   }
 
-  if (!atIntersection) { // If no longer at intersection reset apropriate variables
+if (!atIntersection) { // If no longer at intersection reset apropriate variables
     motor.speed(BUZZER_PIN, 0); // Stop buzzer
 
     /*
@@ -295,7 +296,6 @@ void ProcessIntersection() {
     leavingCount = 0;
     loopNum = 1;
     loopsSinceLastInt = 0;
-
 
   }
 }
