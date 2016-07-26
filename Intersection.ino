@@ -18,7 +18,7 @@ void AreWeThereYet(){
   } else if (statusCount > 10) { // Decrease status count, not below 0 though
     statusCount-=10;
   }
-  if (statusCount == 30) { // If status count reaches 30, enter the intersection processing code
+  if (statusCount == 40) { // If status count reaches 30, enter the intersection processing code
     motor.speed(LEFT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.speed(RIGHT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.stop_all();

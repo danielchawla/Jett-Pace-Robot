@@ -32,6 +32,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 		// While loop is set up with if statements for different stages similar to turning code at intersections
 		if(stage == 0){
 			stage++;
+			motor.stop_all();
 			LCD.clear();LCD.print("Stage 1");
 			count180 = reverseEncoderCount;
 			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*2/3);
@@ -40,6 +41,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 		if(stage == 1 && reverseEncoderCount - count180 > stage1){ // This is the condition to leave stage 1 - at this point we write Stage 2 speeds and increment stage
 			stage++;
 			motor.stop_all();
+			delay(1000);
 			//Entering Stage 2: Reverse both
 			LCD.clear();LCD.print("Stage 2 "); LCD.print(reverseEncoderCount - count180);
 			count180 = reverseEncoderCount;
@@ -50,6 +52,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 		if(stage == 2 && reverseEncoderCount - count180 > stage2){ // should maybe change digital read to be more robust
 			stage++;
 			motor.stop_all();
+			delay(1000);
 			// Entering Stage 3: Pivot
 			LCD.clear();LCD.print("Stage 3 "); LCD.print(driveEncoderCount - count180);
 			count180 = driveEncoderCount;
@@ -106,7 +109,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			}
 		}
 
-		if(loopsSinceLastChange > 10000){
+		if(loopsSinceLastChange > 40000){
 			//do something with regards to changing stage back to one that would be appropriate.
 			if(stage < 3){
 				//set to stage 3:
