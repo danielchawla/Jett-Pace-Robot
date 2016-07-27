@@ -32,6 +32,8 @@ void DropoffPassenger(int);
 void AreWeThereYet(void);
 void amILost(void);
 void ProcessIntersection(void);
+void checkToSeeIfWeKnowWhereWeAre(void);
+bool sortaEqual(int, int);
 // Decisions
 void TurnDecision(void);
 // Collisions
@@ -224,6 +226,16 @@ int loopsSinceLastInt = 0;
 int leavingCount = 0;
 int tapeFollowCountInInt = 0;
 int noStraightCount = 0;
+
+// checkToSeeIfWeKnowWhereWeAre variables
+int rightEncoderAtLastInt = 0;
+int leftEncoderAtLastInt = 0;
+int rightDiff;
+int leftDiff;
+int diff;
+#define curveInsideCount 300
+#define curveOutsideCount 350
+#define straightCount 450
 
 int count180 = 0;
 int statusCount180 = 0;
