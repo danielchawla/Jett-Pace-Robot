@@ -444,9 +444,7 @@ void loop() {
   }
 
   // Check if there is a discrepancy in location based on IR/encoders - This currently always returns false
-  if(loopsSinceLastInt == 100){
-    amILost();
-  }
+  
   else if (loopsSinceLastInt == 200) {
     TurnDecision1();
   } 
