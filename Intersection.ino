@@ -17,7 +17,7 @@ void AreWeThereYet(){
   } else if (statusCount > 10) {
     statusCount-=10;
   }
-  if (statusCount == 50) { //TODO: check this, it was previously 30
+  if (statusCount == 35) { //TODO: check this, it was previously 30
     motor.speed(LEFT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.speed(RIGHT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.stop_all();

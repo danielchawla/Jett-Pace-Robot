@@ -507,6 +507,7 @@ void loop(){
   }
 }
 
+/** This was on dev. the code above is copied from master. */
 void TapeFollow() {
   if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
     if(qrdVals[0] == HIGH && pastError > 0){
