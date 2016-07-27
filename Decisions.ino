@@ -1,4 +1,4 @@
-void TurnDecision1(){
+void updateProfMatrix(){
   currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;//direction with which we will enter the next intersection.
 
   // ADDED FOLLOWING CODE BEFOR MAIN IF(HASPASSENGER)
@@ -21,7 +21,7 @@ void TurnDecision1(){
     }
   }
 }
-void TurnDecision2(){
+void turnDecision(){
   // Make actual decision
   if(hasPassenger){ // 3 in MATLAB
     desiredDirection = dirToDropoff[currentEdge[1]]; // Ideal direction to dropoff
@@ -78,7 +78,6 @@ void TurnDecision2(){
 	  	//we're facked boys. This'll be interesting... stay tuned!
 	  }
 	}
-
       
   // For testing, turn left, right, straight, left ...
   desiredTurn = desiredTurns[turnCount];

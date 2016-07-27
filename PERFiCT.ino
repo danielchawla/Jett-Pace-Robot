@@ -35,8 +35,8 @@ void ProcessIntersection(void);
 //GetFound
 void determineLocation(void);
 // Decisions
-void TurnDecision1(void);
-void TurnDecision2(void);
+void updateProfMatrix(void);
+void turnDecision(void);
 // Collisions
 void CollisionCheck(void);
 void TurnCCW(void);
@@ -434,10 +434,10 @@ void loop() {
     amILost();
   }
   else if (loopsSinceLastInt == 200) {
-    TurnDecision1();
+    updateProfMatrix();
   } 
   else if(loopsSinceLastInt == 500){
-    TurnDecision2();
+    turnDecision();
   }
 
   //Continue on by processing intersection if we're at one or else tape follow
@@ -457,7 +457,7 @@ void loop() {
     }
     if(((leftCount - leftInitial > countToDropoff) || (rightCount - rightInitial > countToDropoff))  &&  hasPassenger){
       // Have reached dropoff zone
-      if(true/*(leftCount - leftInitial < countToDropoff + dropWidth) || (rightCount - rightInitial < countToDropoff + dropWidth)*/){
+      if(true/*(leftCount - leftInitial < countToDropoff + dropWidth) || (rightCount - rightInitial < countToDropoff + dropWidth)*/){ //TODO: Check this
           // Might not need this if depending on passener positions on 17-18 edge
         motor.stop_all();
         stopTime2 = millis();
@@ -479,8 +479,6 @@ void loop() {
         //turnAround(); // Don't think we'll ever get here
       }
     }
-
-
   }
 
   //Print useful information

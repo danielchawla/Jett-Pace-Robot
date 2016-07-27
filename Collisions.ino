@@ -8,22 +8,22 @@ int outOfCollision = false;
 int lastEncCount = 0;
 int loopsSinceLastChange = 0;
 
+
+/*
+	Turning around consists of 4 stages:
+		Stage 1 - Reverse just left wheel for a defined # of encoder pulses
+		Stage 2 - Reverse left fast and right slightly for a # of left encoder pulses
+		Stage 3 - Drive just right motor for a predefined # of left pulses
+								I just realized this makes no sense to count left pulses, we should probably change it 
+		Stage 4 - Drive just right motor until tape is found
+
+	Currently stage 3 and 4 are very similar - maybe reverse left a bit in either stage
+	Currently are looking for the tape in only stage 3 or 4 - Will this help us to avoid turning around only 90° onto different edge????
+
+	The biggest things to change in here are counts for each stage and Left and Right motor speeds in each stage
+	Also want to eventually check for other collisions, could probably reset process to a different stage in this case
+*/
 void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverseEncoderCount, volatile unsigned int &driveEncoderCount){
-	/*
-		Turning around consists of 4 stages:
-			Stage 1 - Reverse just left wheel for a defined # of encoder pulses
-			Stage 2 - Reverse left fast and right slightly for a # of left encoder pulses
-			Stage 3 - Drive just right motor for a predefined # of left pulses
-									I just realized this makes no sense to count left pulses, we should probably change it 
-			Stage 4 - Drive just right motor until tape is found
-
-		Currently stage 3 and 4 are very similar - maybe reverse left a bit in either stage
-		Currently are looking for the tape in only stage 3 or 4 - Will this help us to avoid turning around only 90° onto different edge????
-
-		The biggest things to change in here are counts for each stage and Left and Right motor speeds in each stage
-		Also want to eventually check for other collisions, could probably reset process to a different stage in this case
-	*/
-
 
 	//Stage1: Reverse just left
 	int stage = 0;
