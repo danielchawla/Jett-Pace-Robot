@@ -38,7 +38,7 @@ bool sortaEqual(int, int);
 void determineLocation(void);
 // Decisions
 void updateProfMatrix(void);
-void turnDecision(void);
+void TurnDecision(void);
 // Collisions
 void CollisionCheck(void);
 void TurnCCW(void);
@@ -236,9 +236,11 @@ int intGain;
 int qrdToCheck;
 int loopNum = 1;
 int statusCount = 0;
-#define pathConfidence 10
+#define pathConfidence 20
 int loopsSinceLastInt = 0;
 int leavingCount = 0;
+int lostTape = 0;
+int turn180 = 0; // TODO get rid of this
 
 //180 turn stuff
 int statusCount180 = 0;
@@ -445,12 +447,9 @@ void loop(){
   // Check if there is a discrepancy in location based on IR/encoders - This currently always returns false
 
   else if (loopsSinceLastInt == 200) {
-    // updateProfMatrix();
-    turnDecision();
-  // } 
-  // else if(loopsSinceLastInt == 500){ // TODO: test this
-  //   turnDecision();
-  // }
+    updateProfMatrix();
+    TurnDecision();
+  }
 
   //Continue on by processing intersection if we're at one or else tape follow
   if (atIntersection) {
@@ -508,7 +507,6 @@ void loop(){
   }
 }
 
-/** This was on dev. the code above is copied from master. */
 void TapeFollow() {
   if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
     if(qrdVals[0] == HIGH && pastError > 0){

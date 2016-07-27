@@ -19,44 +19,44 @@ void updateProfMatrix(){
     }
   }
 }
-void turnDecision(){
+void TurnDecision(){
   // Make actual decision
-  if(hasPassenger && !discrepancyInLocation){ // 3 in MATLAB
-    desiredDirection = dirToDropoff[currentEdge[1]]; // Ideal direction to dropoff
+ //  if(hasPassenger && !discrepancyInLocation){ // 3 in MATLAB
+ //    desiredDirection = dirToDropoff[currentEdge[1]]; // Ideal direction to dropoff
 
-    if((desiredDirection - currentDir+4)%4 == 2){ // If ideal direction requres 180 turn use secondary direction - could maybe scrap this if 180s are reliable
-      desiredDirection = secondDirToDropoff[currentEdge[1]]; 
-    }
+ //    if((desiredDirection - currentDir+4)%4 == 2){ // If ideal direction requres 180 turn use secondary direction - could maybe scrap this if 180s are reliable
+ //      desiredDirection = secondDirToDropoff[currentEdge[1]]; 
+ //    }
 
-    desiredTurn = desiredDirection - currentDir; // Map desiredDirection and currentDirection to a turn direction (LEFT, RIGHT, STRAIGHT)
-    switch (desiredTurn){
-      case 3: desiredTurn = LEFT; break;
-      case -3: desiredTurn = RIGHT; break;
-      case -2: desiredTurn = BACK; break; 
-    }
-  }
-  else if(!discrepancyInLocation){  // 4 in MATLAB
-    // If no passenger and we're not lost, seek most profitable route
-	  highestProfit = 0;
+ //    desiredTurn = desiredDirection - currentDir; // Map desiredDirection and currentDirection to a turn direction (LEFT, RIGHT, STRAIGHT)
+ //    switch (desiredTurn){
+ //      case 3: desiredTurn = LEFT; break;
+ //      case -3: desiredTurn = RIGHT; break;
+ //      case -2: desiredTurn = BACK; break; 
+ //    }
+ //  }
+ //  else if(!discrepancyInLocation){  // 4 in MATLAB
+ //    // If no passenger and we're not lost, seek most profitable route
+	//   highestProfit = 0;
 
-		for (int i = 0; i <4; i++){
-      profits[i] = profitMatrix[i][currentEdge[1]]; //change of temp int!
-      if(profits[i] > highestProfit && theMap[i][currentEdge[1]] != currentEdge[0]){ // Added && to not go backwards when passengerSpottedd
-        highestProfit = profits[i];
-        desiredDirection = i; // Find the direction with the highest profit
-      }
-    }
+	// 	for (int i = 0; i <4; i++){
+ //      profits[i] = profitMatrix[i][currentEdge[1]]; //change of temp int!
+ //      if(profits[i] > highestProfit && theMap[i][currentEdge[1]] != currentEdge[0]){ // Added && to not go backwards when passengerSpottedd
+ //        highestProfit = profits[i];
+ //        desiredDirection = i; // Find the direction with the highest profit
+ //      }
+ //    }
 
-    desiredTurn = desiredDirection - currentDir; // Map two directions to a turn direction
-    switch (desiredTurn){
-      case 3: desiredTurn = LEFT; break;
-      case -3: desiredTurn = RIGHT; break;
-      case -2: desiredTurn = BACK; break; 
-    }
-  }
- 	else{ // If we are lost, we have to do something about it
- 		desiredTurn = STRAIGHT; //this is okay to stay. We are doing something about it right after intersections.
-	}
+ //    desiredTurn = desiredDirection - currentDir; // Map two directions to a turn direction
+ //    switch (desiredTurn){
+ //      case 3: desiredTurn = LEFT; break;
+ //      case -3: desiredTurn = RIGHT; break;
+ //      case -2: desiredTurn = BACK; break; 
+ //    }
+ //  }
+ // 	else{ // If we are lost, we have to do something about it
+ // 		desiredTurn = STRAIGHT; //this is okay to stay. We are doing something about it right after intersections.
+	// }
       
   desiredTurn = desiredTurns[turnCount];
   turnCount++;

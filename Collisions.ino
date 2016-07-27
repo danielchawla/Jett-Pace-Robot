@@ -144,11 +144,11 @@ void TurnCCW(){
 	TurnAround(RIGHT_MOTOR, LEFT_MOTOR, rightCount, leftCount);
 }
 
-void CollisionCheck(){ 
 /*
  	Collision checking code - must see collision 20 times, and an individual switch must have been pressed for 20 of those to be deemed the cause of the collision
 	Here we may not even need to use the or, and just look at switches individually
 */
+void CollisionCheck(){
 	if(digitalRead(OR) && !collisionDetected){
     collisionCount++;
     switchVals[FRONT_BUMPER] += digitalRead(FRONT_BUMPER_PIN);

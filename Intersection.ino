@@ -14,10 +14,10 @@ void AreWeThereYet(){
       rightTurnPossible--;
     }
 
-  } else if (statusCount > 10) {
-    statusCount-=10;
+  } else if (statusCount) {
+    statusCount--;
   }
-  if (statusCount == 50) { //TODO: check this, it was previously 30
+  if (statusCount == 30) { //TODO: check this, it was previously 30
     motor.speed(LEFT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.speed(RIGHT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.stop_all();
@@ -29,8 +29,8 @@ void AreWeThereYet(){
     LCD.print("Going Straight");
 
     //used for check to see if we know where we are function.
-    rightDiff = rightCount - rightEncoderAtLastInt;
-    leftDiff = leftCount - leftEncoderAtLastInt;
+    // rightDiff = rightCount - rightEncoderAtLastInt;
+    // leftDiff = leftCount - leftEncoderAtLastInt; //TODO: Uncomment these 2 lines
   }
 }
 
@@ -320,3 +320,4 @@ bool sortaEqual(int a, int b){
   }
   return false;
 }
+
