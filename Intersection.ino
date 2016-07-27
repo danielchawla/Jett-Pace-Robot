@@ -97,8 +97,8 @@ void ProcessIntersection() {
       pastError = error;
       m++;
 
-      motor.speed(LEFT_MOTOR, vel / 4 - correction*2);
-      motor.speed(RIGHT_MOTOR, vel / 4 + correction*2); // CHANGE may need to have to set back to /4
+      motor.speed(LEFT_MOTOR, vel / 4 - correction);
+      motor.speed(RIGHT_MOTOR, vel / 4 + correction); // CHANGE may need to have to set back to /4
     }
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {
@@ -118,7 +118,7 @@ void ProcessIntersection() {
     if (!qrdVals[0] && !qrdVals[3]) {
       leavingCount++;
       LCD.clear(); LCD.print("STRAIGHT");
-      if(leavingCount > 40){ //may need to CHANGE for time trials 200 -> 10.  May try to go straight when not possible though
+      if(leavingCount > 50){ //may need to CHANGE for time trials 200 -> 10.  May try to go straight when not possible though
         turnActual = STRAIGHT;
         //TapeFollow();
         atIntersection = 0;

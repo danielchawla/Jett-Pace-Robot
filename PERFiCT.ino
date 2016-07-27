@@ -36,7 +36,11 @@ void ProcessIntersection(void);
 void TurnDecision(void);
 // Collisions
 void CollisionCheck(void);
-void TurnAround(void);
+void TurnAround(int, int, volatile unsigned int&, volatile unsigned int&);
+void TurnCW(void);
+void TurnCCW(void);
+void ReverseLeft(void);
+void ReverseRight(void);
 // Menu Functions
 void MainMenu(void);
 void Menu(void);
@@ -219,6 +223,7 @@ int statusLast = 0;
 int loopsSinceLastInt = 0;
 int leavingCount = 0;
 
+int count180 = 0;
 int statusCount180 = 0;
 int countLeft180 = 0;
 int countRight180 = 0;
@@ -394,8 +399,15 @@ void loop() {
   }
 
   if(collisionDetected){
-    if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
-      TurnAround();
+    if(!qrdVals[0] && !qrdVals[1] && !qrdVals[2] && !qrdVals[3]){
+      if(switchVals[FRONT_LEFT_BUMPER]){
+        ReverseLeft();
+      }
+      if(switchVals[FRONT_RIGHT_BUMPER]){
+        ReverseRight();
+      }
+    }else if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
+      TurnCCW(); // TODO import switch/case from DEV
     }
     for(int i = 0; i<6;i++){
       switchVals[i] = 0;
@@ -468,12 +480,12 @@ void TapeFollow() {
     if(qrdVals[0] == HIGH && loopsSinceLastInt > 2000){
       statusCountTapeFollow++;
       if(statusCountTapeFollow > 60){
-        error = 16;
+        error = 12;
       }
     }else if(qrdVals[3] == HIGH && loopsSinceLastInt > 2000){
       statusCountTapeFollow--;
       if(statusCountTapeFollow < -60){
-        error = -16;
+        error = -12;
       }
     }else{ // All low
       statusCountTapeFollow = 0;
