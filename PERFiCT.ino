@@ -115,11 +115,11 @@ int qrdVals[4];
 // Constants for pin on TINAH
 #define OR 0
 #define FRONT_BUMPER_PIN 9
-#define FRONT_RIGHT_BUMPER_PIN 8
+#define FRONT_RIGHT_BUMPER_PIN 10
 #define RIGHT_BUMPER_PIN 13
 #define REAR_BUMPER_PIN 12
 #define LEFT_BUMPER_PIN 11
-#define FRONT_LEFT_BUMPER_PIN 10
+#define FRONT_LEFT_BUMPER_PIN 8
 int switchVals[6] = {0};
 
 // Analog
@@ -402,12 +402,20 @@ void loop() {
     if(!qrdVals[0] && !qrdVals[1] && !qrdVals[2] && !qrdVals[3]){
       if(switchVals[FRONT_LEFT_BUMPER]){
         ReverseLeft();
-      }
-      if(switchVals[FRONT_RIGHT_BUMPER]){
+      }else if(switchVals[FRONT_RIGHT_BUMPER]){
         ReverseRight();
       }
+      //TODO: Implement check for passenger at front from dev
     }else if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
-      TurnCCW(); // TODO import switch/case from DEV
+      // Check which way to turn based on currentEdge[1]
+      switch(currentEdge[1]){
+      case 0: TurnCW(); break;
+      case 1: TurnCCW(); break;
+      case 2: TurnCCW(); break;
+      case 3: TurnCW(); break;
+      case 4: TurnCCW(); break;
+      default: TurnCCW();
+      }
     }
     for(int i = 0; i<6;i++){
       switchVals[i] = 0;

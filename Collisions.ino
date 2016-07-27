@@ -18,7 +18,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			stage++;
 			motor.stop_all();
 			LCD.clear();LCD.print("About to Turn");
-			delay(600);
+			// delay(100);
 			LCD.clear(); LCD.print("Stage 1");
 			count180 = reverseEncoderCount;
 			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*2/3);
@@ -27,7 +27,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 		if(stage == 1 && reverseEncoderCount - count180 > stage1){ // This is the condition to leave stage 1 - at this point we write Stage 2 speeds and increment stage
 			stage++;
 			motor.stop_all();
-			delay(600);
+			// delay(100);
 			//Entering Stage 2: Reverse both
 			LCD.clear();LCD.print("Stage 2 "); LCD.print(reverseEncoderCount - count180);
 			count180 = reverseEncoderCount;
@@ -38,7 +38,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 		if(stage == 2 && reverseEncoderCount - count180 > stage2){ // should maybe change digital read to be more robust
 			stage++;
 			motor.stop_all();
-			delay(600);
+			// delay(100);
 			// Entering Stage 3: Pivot
 			LCD.clear();LCD.print("Stage 3 "); LCD.print(driveEncoderCount - count180);
 			count180 = driveEncoderCount;
@@ -86,7 +86,6 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 		if(loopsSinceLastChange > 20000){ //Previously was 40000
 			LCD.clear(); LCD.print("STUCK");
 			motor.stop_all();
-			delay(1000);
 			//do something with regards to changing stage back to one that would be appropriate.
 			if(stage < 3){
 				//set to stage 3:
@@ -162,19 +161,21 @@ void CollisionCheck(){
 }
 
 void ReverseSlow(int fastMotor, int slowMotor, volatile unsigned int &encoderCount){
+	int reverseCount = 0;
 	int initialEncoderCount = encoderCount;
 	while(encoderCount - initialEncoderCount < 100){
+		reverseCount++;
 		motor.speed(fastMotor, -MAX_MOTOR_SPEED*2/3);
 		motor.speed(slowMotor, -MAX_MOTOR_SPEED*7/12);
-		if(digitalRead(q1) || digitalRead(q2)){
+		if(digitalRead(q1) || digitalRead(q2) /*|| reverseCount > 100000*/){ //TODO: Uncomment this
 			break;
 		}
 	}
 }
 
-void ReverseLeft(){
+void ReverseRight(){
 	ReverseSlow(LEFT_MOTOR, RIGHT_MOTOR, leftCount);
 }
-void ReverseRight(){
+void ReverseLeft(){
 	ReverseSlow(RIGHT_MOTOR, LEFT_MOTOR, rightCount);
 }

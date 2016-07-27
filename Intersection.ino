@@ -222,6 +222,7 @@ void ProcessIntersection() {
   }
 
   if (!atIntersection) { // If no longer at intersection reset apropriate variables
+    // TODO copy paste lost detection code from DEV
     motor.speed(BUZZER_PIN, 0);
     if(desiredTurn != turnActual){
       discrepancyInLocation = true;
