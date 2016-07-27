@@ -1,7 +1,6 @@
-// Define number of encoder pulses for left wheel are necessary in each stage
+// Define number of encoder pulses for outside (reversing) wheel are necessary in each stage
 #define stage1 20
 #define stage2 105 // maybe 95 and stage1 15 is better
-//#define stage3 90
 
 int offTape = false;
 int outOfCollision = false;
@@ -16,10 +15,8 @@ int loopsSinceLastChange = 0;
 		Stage 3 - Drive just right motor for a predefined # of left pulses
 								I just realized this makes no sense to count left pulses, we should probably change it 
 		Stage 4 - Drive just right motor until tape is found
-
 	Currently stage 3 and 4 are very similar - maybe reverse left a bit in either stage
 	Currently are looking for the tape in only stage 3 or 4 - Will this help us to avoid turning around only 90° onto different edge????
-
 	The biggest things to change in here are counts for each stage and Left and Right motor speeds in each stage
 	Also want to eventually check for other collisions, could probably reset process to a different stage in this case
 */
@@ -62,23 +59,10 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			motor.speed(driveMotor, MAX_MOTOR_SPEED*2/3);
 		}
 
-		/*
-		if(stage == 3 && encoderCount - count180 > stage3){
-			stage++;
-			motor.stop_all();
-			// Entering stage 4: Reverse left slow, drive right
-			LCD.clear();LCD.print("Stage 4 "); LCD.print(encoderCount - count180);
-			count180 = encoderCount;
-			// motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*3/8);
-			motor.speed(driveMotor, MAX_MOTOR_SPEED*3/4);
-		}*/
-
-
 		//Check if offTape
 		if(!offTape){
 			if(!(digitalRead(q1) || digitalRead(q2))) {
 				statusCount180++;
-
 				if(statusCount180 > 10){
 					//we just lost the tape.
 					statusCount180 = 0;
