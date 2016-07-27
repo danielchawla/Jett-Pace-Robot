@@ -537,7 +537,7 @@ void TapeFollow() {
 
   p = kp * error;
   d = (int)((float)kd * (float)(error - recError) / (float)(q + m));
-  correction = p + d;
+  correction = (float)((p + d)*g)/10.0;
 
   pastError = error;
   m++;
