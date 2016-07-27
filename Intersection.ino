@@ -72,7 +72,7 @@ void ProcessIntersection() {
 
     // Collect error values so that Tape Following continues nicely after intersection - do we really need this?
     // Only if not under leaving circumstances - not tape following yet
-    if(leavingCount < 10){
+    /*if(leavingCount < 10){
       if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
         if (pastError < 0) {
           error = -5;
@@ -99,7 +99,11 @@ void ProcessIntersection() {
 
       motor.speed(LEFT_MOTOR, vel / 4 - correction*2);
       motor.speed(RIGHT_MOTOR, vel / 4 + correction*2); // CHANGE may need to have to set back to /4
-    }
+    }*/
+
+    motor.speed(LEFT_MOTOR, vel / 4 - correction*2);
+    motor.speed(RIGHT_MOTOR, vel / 4 + correction*2); // CHANGE may need to have to set back to /4
+
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {
       leftTurnPossible++;
@@ -115,7 +119,7 @@ void ProcessIntersection() {
       rightTurnPossible--;
     }
 
-    if (!qrdVals[0] && !qrdVals[3]) {
+    if (!qrdVals[0] && !qrdVals[3] && (rightTurnPossible >= pathConfidence || leftTurnPossible >= pathConfidence)) {
       leavingCount++;
       LCD.clear(); LCD.print("STRAIGHT");
       if(leavingCount > 40){ //may need to CHANGE for time trials 200 -> 10.  May try to go straight when not possible though
@@ -156,7 +160,7 @@ void ProcessIntersection() {
     }*/
     // Determine if we can turn the desired direction
     if (desiredTurn == LEFT){
-      if(leftTurnPossible > pathConfidence) {
+      if(leftTurnPossible >= pathConfidence) {
         turnActual = LEFT;
         turning = 1;
         qrdToCheck = q0;
@@ -165,7 +169,7 @@ void ProcessIntersection() {
       }
     }
     if (desiredTurn == RIGHT){
-      if(rightTurnPossible > pathConfidence) {
+      if(rightTurnPossible >= pathConfidence) {
         turnActual = RIGHT;
         turning = 1;
         qrdToCheck = q3;
