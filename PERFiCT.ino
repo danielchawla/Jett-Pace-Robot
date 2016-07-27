@@ -277,7 +277,7 @@ int turnCount = 0;
   Frequency values for different sensor checks
 */
 #define passengerCheckFreq 5
-#define printToLCDFreq 20000
+#define printToLCDFreq 5000
 
 
 // State Variables
@@ -391,7 +391,7 @@ void loop(){
   CollisionCheck();
 
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
-  if (numOfIttrs%passengerCheckFreq == 0 && false) { // TODO: check this
+  if (numOfIttrs%passengerCheckFreq == 0 && false) { // TODO: take out the false to detect passengers
     passengerPosition = CheckForPassenger();
     if(passengerPosition && hasPassenger){ // Changed this line to add hasPassenger from previous if
       if(stopTime1 == stopTime2){
@@ -445,11 +445,12 @@ void loop(){
   // Check if there is a discrepancy in location based on IR/encoders - This currently always returns false
 
   else if (loopsSinceLastInt == 200) {
-    updateProfMatrix();
-  } 
-  else if(loopsSinceLastInt == 500){
+    // updateProfMatrix();
     turnDecision();
-  }
+  // } 
+  // else if(loopsSinceLastInt == 500){ // TODO: test this
+  //   turnDecision();
+  // }
 
   //Continue on by processing intersection if we're at one or else tape follow
   if (atIntersection) {
