@@ -24,10 +24,13 @@ void AreWeThereYet(){
     atIntersection = 1;
     statusCount = 0;
   }
-  if (atIntersection == 1) {
+  if (atIntersection == 1) { //executes once right before the intersection.
     LCD.clear();
     LCD.print("Going Straight");
 
+    //used for check to see if we know where we are function.
+    rightDiff = rightCount - rightEncoderAtLastInt;
+    leftDiff = leftCount - leftEncoderAtLastInt;
   }
 }
 
@@ -148,7 +151,7 @@ void ProcessIntersection() {
     }*/
     // Determine if we can turn the desired direction
     if (desiredTurn == LEFT){
-      if(leftTurnPossible > pathConfidence) {
+      if(leftTurnPossible >= pathConfidence) {
         turnActual = LEFT;
         turning = 1;
         qrdToCheck = q0;
@@ -157,7 +160,7 @@ void ProcessIntersection() {
       }
     }
     if (desiredTurn == RIGHT){
-      if(rightTurnPossible > pathConfidence) {
+      if(rightTurnPossible >= pathConfidence) {
         turnActual = RIGHT;
         turning = 1;
         qrdToCheck = q3;
@@ -224,39 +227,36 @@ void ProcessIntersection() {
     if(desiredTurn != turnActual){
       discrepancyInLocation = true;
     }
-    for (int i = -1; i<2; i++){
-      if(leftTurnPossible){
-        if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] == -1){
+    if(leftTurnPossible >= pathConfidence){
+      if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] == -1){
+        discrepancyInLocation = true;
+      }
+    }
+    if(rightTurnPossible >= pathConfidence){
+      if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] == -1){
+        discrepancyInLocation = true;
+      }
+    }
+    if(turnActual == STRAIGHT){
+      if(leftTurnPossible <pathConfidence){
+        if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] != -1){
           discrepancyInLocation = true;
         }
       }
-      if(rightTurnPossible){
-        if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] == -1){
+      if(rightTurnPossible < pathConfidence){
+        if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] != -1){
           discrepancyInLocation = true;
         }
       }
-      if(turnActual == STRAIGHT){
-        if(!leftTurnPossible){
-          if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] != -1){
-            discrepancyInLocation = true;
-          }
-        }
-        if(!rightTurnPossible){
-          if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] != -1){
-            discrepancyInLocation = true;
-          }
-        }
-      }
     }
-    if(discrepancyInLocation){
-      motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED);
-    }
-
+    
     // Update the current edge based on turnActual
     currentEdge[0] = currentEdge[1];
     currentEdge[1] = theMap[(currentDir + turnActual + 4) % 4][currentEdge[0]];
-    if (currentEdge[1] == -1) { // I think this is redundant with line 265 but might be a better check
-      discrepancyInLocation = 1;
+    
+    if(discrepancyInLocation){
+      motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED/5);
+      checkToSeeIfWeKnowWhereWeAre();
     }
 
     // Reset these values to garbage so that a new decision can be made and turnActual will be reset at the next intersection
@@ -273,3 +273,53 @@ void ProcessIntersection() {
     loopsSinceLastInt = 0;
 
   }
+}
+
+void checkToSeeIfWeKnowWhereWeAre(void){
+  if(sortaEqual(rightDiff, curveInsideCount) && sortaEqual(leftDiff, curveOutsideCount)){
+    //we know where we are
+    discrepancyInLocation = false;
+    if(leftTurnPossible >= pathConfidence){
+      currentEdge[0] = 12;
+      currentEdge[1] = 7;
+    }
+    else{
+      discrepancyInLocation = true;
+    }
+  }
+  else if(sortaEqual(leftDiff, curveInsideCount) && sortaEqual(rightDiff, curveOutsideCount)){ 
+    discrepancyInLocation = false;
+    if(rightTurnPossible >= pathConfidence){
+      currentEdge[0] = 13;
+      currentEdge[1] = 7;
+    }
+    else{
+      discrepancyInLocation = true;
+    }
+  }
+  else if(sortaEqual(rightDiff, straightCount) && sortaEqual(leftDiff, straightCount)){
+    discrepancyInLocation = false;
+    if(rightTurnPossible >= pathConfidence && leftTurnPossible < pathConfidence){
+      currentEdge[0] = 17;
+      currentEdge[1] = 16;
+    }
+    else if(leftTurnPossible >= pathConfidence && rightTurnPossible < pathConfidence){
+      currentEdge[0] = 18;
+      currentEdge[1] = 19;
+    }
+    else{
+      discrepancyInLocation = true;
+    }
+  }
+}
+
+bool sortaEqual(int a, int b){
+  int diff = a-b;
+  if (diff < 0){
+    diff = -1*diff;
+  }
+  if(diff < 30){
+    return true;
+  }
+  return false;
+}

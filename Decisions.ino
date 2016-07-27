@@ -23,7 +23,7 @@ void TurnDecision1(){
 }
 void TurnDecision2(){
   // Make actual decision
-  if(hasPassenger){ // 3 in MATLAB
+  if(hasPassenger && !discrepancyInLocation){ // 3 in MATLAB
     desiredDirection = dirToDropoff[currentEdge[1]]; // Ideal direction to dropoff
 
     if((desiredDirection - currentDir+4)%4 == 2){ // If ideal direction requres 180 turn use secondary direction - could maybe scrap this if 180s are reliable
@@ -71,12 +71,7 @@ void TurnDecision2(){
     }
   }
  	else{ // If we are lost, we have to do something about it
- 		if (directionOfDropZone > 0){ //if we're lost and we know the direction of drop zone
-	  	//we can do something about this. it increases our confidence.
-	  }
-	  else{
-	  	//we're facked boys. This'll be interesting... stay tuned!
-	  }
+ 		desiredTurn = STRAIGHT; //this is okay to stay. We are doing something about it right after intersections.
 	}
 
       
