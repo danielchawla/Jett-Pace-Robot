@@ -100,9 +100,23 @@ void ProcessIntersection() {
       motor.speed(LEFT_MOTOR, vel / 4 - correction*2);
       motor.speed(RIGHT_MOTOR, vel / 4 + correction*2); // CHANGE may need to have to set back to /4
     }*/
-
-    motor.speed(LEFT_MOTOR, vel / 4 - correction*2);
-    motor.speed(RIGHT_MOTOR, vel / 4 + correction*2); // CHANGE may need to have to set back to /4
+    if(discrepancyInLocation || !(rightTurnPossible >= pathConfidence || leftTurnPossible >= pathConfidence)) {
+      motor.speed(LEFT_MOTOR, vel / 4 - correction*2);
+      motor.speed(RIGHT_MOTOR, vel / 4 + correction*2); // CHANGE may need to have to set back to /4
+    else if (desiredTurn == STRAIGHT){
+      if(rightTurnPossible >= pathConfidence && !(leftTurnPossible >= pathConfidence)){
+        motor.speed(LEFT_MOTOR, vel / 4 - intersectionVeer);
+        motor.speed(RIGHT_MOTOR, vel / 4 + intersectionVeer);
+      }
+      else if(!(rightTurnPossible >= pathConfidence) && leftTurnPossible >= pathConfidence){
+        motor.speed(LEFT_MOTOR, vel / 4 + intersectionVeer);
+        motor.speed(RIGHT_MOTOR, vel / 4 - intersectionVeer);
+      }
+      else{
+        motor.speed(LEFT_MOTOR, vel / 4);
+        motor.speed(RIGHT_MOTOR, vel / 4);
+      }
+    }
 
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {

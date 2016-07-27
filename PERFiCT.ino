@@ -218,6 +218,7 @@ int statusLast = 0;
 #define pathConfidence 20
 int loopsSinceLastInt = 0;
 int leavingCount = 0;
+#define intersectionVeer 60
 
 int statusCount180 = 0;
 int countLeft180 = 0;
