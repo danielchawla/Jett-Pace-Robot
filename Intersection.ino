@@ -54,15 +54,12 @@ void AreWeThereYet(){
 
 void ProcessIntersection() {
   motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED*3/4);
-
   countInIntersection++;
 
   if (!turning && !(turnActual==BACK)) {
-    // Check if 180 is desired.  This is always possible
     if(desiredTurn == BACK){
       turnActual == BACK; //once this executes the rest of this if statement will execute as well. this is not good. -Ryan
     }
-
     // Collect error values so that Tape Following continues nicely after intersection - do we really need this?
     // Only if not under leaving circumstances - not tape following yet
     if(leavingCount < 10){
@@ -168,7 +165,7 @@ void ProcessIntersection() {
   }
 
   if (turning) {
-    if (loopNum == 1) {
+    if (loopNum == 1){
       if (digitalRead(qrdToCheck) == LOW) {
         statusCount++;
         if (statusCount == 15) {
@@ -181,7 +178,7 @@ void ProcessIntersection() {
       motor.speed(LEFT_MOTOR, vel / 4);
       motor.speed(RIGHT_MOTOR, vel / 4);
     }
-    if (loopNum == 2) {
+    if (loopNum == 2){
       if (digitalRead(qrdToCheck) == HIGH) {
         statusCount++;
         if (statusCount == 5) {
@@ -194,7 +191,7 @@ void ProcessIntersection() {
       motor.speed(LEFT_MOTOR, vel / 5 + turnActual * intGain); //minus should be plus and vise versa when turning right.
       motor.speed(RIGHT_MOTOR, vel / 5 - turnActual * intGain);
     }
-    if (loopNum == 3) {
+    if (loopNum == 3){
       if (digitalRead(qrdToCheck) == LOW) {
         statusCount++;
         if (statusCount == 5) {
@@ -273,3 +270,4 @@ void ProcessIntersection() {
     loopsSinceLastInt = 0;
 
   }
+}

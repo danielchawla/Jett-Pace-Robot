@@ -272,8 +272,7 @@ int turning = 0;
 int hasPassenger = 0;
 int passengerSpotted = 0;
 
-void setup()
-{
+void setup(){
 #include <phys253setup.txt>
   LCD.clear();
   LCD.home();
@@ -355,15 +354,15 @@ void setup()
 
 }
 
-void loop() {
-  /*
-    A NOTE ON FUNCTIONS IN THE MAIN LOOP:
-      It is expected that functions will be called every loop iteration, so must behave accordingly
-      For a function to not always be called, it must alter some variable so it will not be called next loop
-      Other functions may also change this variable as appropriate
-        ie. ProcessIntersection sets desiredTurn = GARBAGE after successful completion of intersection
-  */
 
+/*
+  A NOTE ON FUNCTIONS IN THE MAIN LOOP:
+    It is expected that functions will be called every loop iteration, so must behave accordingly
+    For a function to not always be called, it must alter some variable so it will not be called next loop
+    Other functions may also change this variable as appropriate
+      ie. ProcessIntersection sets desiredTurn = GARBAGE after successful completion of intersection
+*/
+void loop(){
   numOfIttrs++;
   loopsSinceLastInt++;
 
@@ -398,8 +397,8 @@ void loop() {
     //   passengerSpotted = true;
     //   profitMatrix[currentEdge[1]][nodeMat[currentEdge[1]][currentEdge[0]]] == 100; // Set profitability of current edge in reverse direction very high
     //   profitMatrix[currentEdge[0]][nodeMat[currentEdge[0]][currentEdge[1]]] == 100;
-    //   passengerPosition = 0;
-    }      
+    //   passengerPosition = 0;     
+    }
   }
 
   // Our current basic collision handling
@@ -431,7 +430,7 @@ void loop() {
 
   // Check if there is a discrepancy in location based on IR/encoders - This currently always returns false
   if(loopsSinceLastInt == 100){
-    amILost();
+    // amILost();
   }
   else if (loopsSinceLastInt == 200) {
     updateProfMatrix();
@@ -487,8 +486,7 @@ void loop() {
   }
 
   // Enter Menu if startbutton
-  if (startbutton())
-  {
+  if (startbutton()){
     delay(100);
     if (startbutton())
     {
