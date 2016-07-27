@@ -58,11 +58,7 @@ void ProcessIntersection() {
   */
   countInIntersection++;
 
-  if (!turning && !(turnActual==BACK)) {
-    // Check if 180 is desired.  This is always possible
-    if(desiredTurn == BACK){
-      turnActual == BACK; //once this executes the rest of this if statement will execute as well. this is not good. -Ryan
-    }
+  if (!turning) {
 
     /*if (countInIntersection > maxInIntersection) {
       atIntersection = 0;
@@ -115,45 +111,56 @@ void ProcessIntersection() {
       rightTurnPossible--;
     }
 
-    if (!qrdVals[0] && !qrdVals[3]) {
+    if (!qrdVals[0] && !qrdVals[3] && !tapeFollowCountInInt) {
       leavingCount++;
       LCD.clear(); LCD.print("STRAIGHT");
       if(leavingCount > 50){ //may need to CHANGE for time trials 200 -> 10.  May try to go straight when not possible though
+        tapeFollowCountInInt = 1;
         turnActual = STRAIGHT;
-        //TapeFollow();
-        atIntersection = 0;
+        //atIntersection = 0;
       }
       /*if(leavingCount > 200){
         atIntersection = 0;
       }*/
     }
 
-    // Check if all QRDs are lost
-    /*if(qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW){
-      statusCount++;
+    if(tapeFollowCountInInt){
+      tapeFollowCountInInt++;
+      TapeFollow();
+      if(tapeFollowCountInInt > 3000){
+        atIntersection = false;
+      }
+    }
 
-      if(statusCount > 10){
+    // Check if all QRDs are lost
+    if((qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW) && tapeFollowCountInInt){ // IS last condition necessary?? >0??
+      noStraightCount++;
+      if(noStraightCount > 800){
         // need to turn
-        if(leftTurnPossible>pathConfidence){
+        if(leftTurnPossible>=pathConfidence){
           turnActual = LEFT;
           turning = 1;
           qrdToCheck = q0;
           loopNum = 2;
           LCD.clear();
           LCD.print("Turning Left");
-        } else if(rightTurnPossible>pathConfidence){
+        } else if(rightTurnPossible>=pathConfidence){
           turnActual = RIGHT;
           turning = 1;
           qrdToCheck = q3;
           loopNum = 2;
           LCD.clear();
           LCD.print("Turning Right");
-        } else{ // CHANGE - will get stuck here - need to handle it
+        } else{ // THIS SHOULD NEVER HAPPEN
           LCD.print("No straight or turn");
-          while(true){}
+          motor.stop_all();
+          while(true){} // TODO 
         }
       }
-    }*/
+    }else if((qrdVals[1] == HIGH || qrdVals[2] == HIGH) && noStraightCount>0){
+      noStraightCount-=3;
+    }
+
     // Determine if we can turn the desired direction
     if (desiredTurn == LEFT){
       if(leftTurnPossible > pathConfidence) {
@@ -248,6 +255,8 @@ void ProcessIntersection() {
     tapeFollowVel = vel;
     loopNum = 1;
     lostTape = 0;
+    noStraightCount = 0;
+    tapeFollowCountInInt = 0;
   }
 }
 

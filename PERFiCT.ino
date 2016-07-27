@@ -222,6 +222,8 @@ int statusLast = 0;
 #define pathConfidence 20
 int loopsSinceLastInt = 0;
 int leavingCount = 0;
+int tapeFollowCountInInt = 0;
+int noStraightCount = 0;
 
 int count180 = 0;
 int statusCount180 = 0;
