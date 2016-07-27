@@ -120,14 +120,14 @@ void ViewDigital()
     int index = knob(6) * 3 / 1024;
     if (index == 0)
     {
-      LCD.print("D0:"); LCD.print(digitalRead(0)); LCD.print(" D1:"); LCD.print(digitalRead(1)); LCD.print(" D2:"); LCD.print(digitalRead(2));
+      LCD.print("D4:"); LCD.print(digitalRead(4)); LCD.print(" D6:"); LCD.print(digitalRead(6)); LCD.print(" D5:"); LCD.print(digitalRead(5));
       LCD.setCursor(0, 1);
-      LCD.print("D3:"); LCD.print(digitalRead(3)); LCD.print(" D4:"); LCD.print(digitalRead(4)); LCD.print(" D5:"); LCD.print(digitalRead(5));
+      LCD.print("D7:"); LCD.print(digitalRead(7)); LCD.print(" D0:"); LCD.print(digitalRead(0)); LCD.print(" D1:"); LCD.print(digitalRead(1));
 
 
     } else if (index == 1)
     {
-      LCD.print("D6:"); LCD.print(digitalRead(6)); LCD.print(" D7:"); LCD.print(digitalRead(7)); LCD.print(" D8:"); LCD.print(digitalRead(8));
+      LCD.print("D2:"); LCD.print(digitalRead(2)); LCD.print(" D3:"); LCD.print(digitalRead(3)); LCD.print(" D8:"); LCD.print(digitalRead(8));
       LCD.setCursor(0, 1);
       LCD.print("D9:"); LCD.print(digitalRead(9)); LCD.print(" D0:"); LCD.print(digitalRead(10)); LCD.print(" D1:"); LCD.print(digitalRead(11));
     } else if (index == 2)
@@ -270,7 +270,7 @@ void PickupPassengerMain(){
   delay(500);
     
   while(true){
-    if(startbutton()){
+    if(startbutton()){ 
       break;
     }
     delay(50);

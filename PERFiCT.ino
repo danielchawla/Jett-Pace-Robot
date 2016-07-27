@@ -96,9 +96,9 @@ int divisors[] = {8, 8, 8, 1, 2}; //divides gains and speeds by this number
 // Digital:
 // Tape follwing QRDs
 /*q0:far left, q1:left centre, q2right centre, q3: far right*/
-#define q0 4
+#define q0 5
 #define q1 6
-#define q2 5
+#define q2 4
 #define q3 7
 int qrdVals[4];
 
