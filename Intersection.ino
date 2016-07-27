@@ -1,6 +1,6 @@
 void AreWeThereYet(){
   if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) && loopsSinceLastInt > 1000) {
-    statusCount++;
+    //statusCount++;
     if (qrdVals[0]) {
       leftTurnPossible++;
     }
@@ -14,10 +14,10 @@ void AreWeThereYet(){
       rightTurnPossible--;
     }
 
-  } else if (statusCount > 10) {
-    statusCount-=10;
-  }
-  if (statusCount == 50) {
+  }/* else if (statusCount) {
+    statusCount--;
+  }*/
+  if (leftTurnPossible > pathConfidence || rightTurnPossible > pathConfidence) { // Makes harder to see intersection
     motor.speed(LEFT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.speed(RIGHT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.stop_all();
@@ -58,34 +58,17 @@ void ProcessIntersection() {
   */
   countInIntersection++;
 
-  if(turnActual == BACK){ // Need to deal with cases where QRDs cross tape or never leave tape.
-    // Currently only works with dead ends
-    if(!lostTape){
-      motor.speed(LEFT_MOTOR,-1*MAX_MOTOR_SPEED/2);
-      motor.speed(RIGHT_MOTOR,1*MAX_MOTOR_SPEED/2);
-    }else{
-      motor.speed(LEFT_MOTOR,-1*MAX_MOTOR_SPEED);
-      motor.speed(RIGHT_MOTOR,1*MAX_MOTOR_SPEED);
-    }
-    if(qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW){
-      lostTape = 1;
-    }else if(qrdVals[1] == LOW || qrdVals[2] == LOW){
-      lostTape = 0;
-      atIntersection = 0;
-    }
-  }
-
   if (!turning && !(turnActual==BACK)) {
     // Check if 180 is desired.  This is always possible
     if(desiredTurn == BACK){
       turnActual == BACK; //once this executes the rest of this if statement will execute as well. this is not good. -Ryan
     }
 
-    if (countInIntersection > maxInIntersection) {
+    /*if (countInIntersection > maxInIntersection) {
       atIntersection = 0;
       LCD.clear();
       LCD.print("Leaving");
-    }
+    }*/
 
     // Collect error values so that Tape Following continues nicely after intersection - do we really need this?
     // Only if not under leaving circumstances - not tape following yet
@@ -261,7 +244,7 @@ void ProcessIntersection() {
     leavingCount = 0;
 
     loopsSinceLastInt = 0;
-
+    tapeFollowVel = vel;
     loopNum = 1;
     lostTape = 0;
   }

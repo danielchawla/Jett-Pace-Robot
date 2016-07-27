@@ -91,9 +91,9 @@ int divisors[] = {8, 8, 8, 1, 2}; //divides gains and speeds by this number
 // Digital:
 // Tape follwing QRDs
 /*q0:far left, q1:left centre, q2right centre, q3: far right*/
-#define q0 4
+#define q0 5
 #define q1 6
-#define q2 5
+#define q2 4 
 #define q3 7
 int qrdVals[4];
 
@@ -145,6 +145,8 @@ int vel;
 int p;
 int d;
 int correction;
+int statusCountTapeFollow = 0;
+int tapeFollowVel;
 
 //Interrupt Counts:
 volatile unsigned int leftCount = 0;
@@ -213,7 +215,7 @@ int qrdToCheck;
 int loopNum = 1;
 int statusCount = 0;
 int statusLast = 0;
-#define pathConfidence 10
+#define pathConfidence 20
 int loopsSinceLastInt = 0;
 int leavingCount = 0;
 
@@ -244,9 +246,9 @@ int rightInitial = GARBAGE;
 #define clawClose 10
 
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
-//int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, LEFT, LEFT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
+int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, LEFT, LEFT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
-int desiredTurns[] = {LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, RIGHT, STRAIGHT};
+//int desiredTurns[] = {LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, RIGHT, STRAIGHT};
 int turnCount = 0;
 
 /*
@@ -320,6 +322,7 @@ void setup()
   kp = menuItems[1].Value;
   kd = menuItems[2].Value;
   vel = menuItems[3].Value;
+  tapeFollowVel = vel;
   intGain = menuItems[4].Value;
 
   // Home Servos
@@ -418,7 +421,7 @@ void loop() {
     TapeFollow();
   }
 
-  if((currentEdge[0] == 17 && currentEdge[1] == 18) || (currentEdge[0] == 18 & currentEdge[1] == 17)){
+  if((currentEdge[0] == 17 && currentEdge[1] == 18) || (currentEdge[0] == 18 && currentEdge[1] == 17)){
     //Going towards dropoff - count with encoders
     if(leftInitial == GARBAGE && hasPassenger){
       leftInitial = leftCount;
@@ -463,10 +466,17 @@ void loop() {
 void TapeFollow() {
   if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
     if(qrdVals[0] == HIGH){
-      error = 12;
+      statusCountTapeFollow++;
+      if(statusCountTapeFollow > 60){
+        error = 16;
+      }
     }else if(qrdVals[3] == HIGH){
-      error = -12;
-    }else{
+      statusCountTapeFollow--;
+      if(statusCountTapeFollow < -60){
+        error = -16;
+      }
+    }else{ // All low
+      statusCountTapeFollow = 0;
       if (pastError < 0) {
         error = -5;
       } else if (pastError > 0) {
@@ -476,10 +486,13 @@ void TapeFollow() {
       }
     }
   } else if ( qrdVals[2] == HIGH) {
+    statusCountTapeFollow = 0;
     error = -1;
   } else if (qrdVals[1] == HIGH) {
+    statusCountTapeFollow = 0;
     error = 1;
   } else {
+    statusCountTapeFollow = 0;
     error = 0;
   }
 
@@ -496,8 +509,8 @@ void TapeFollow() {
   pastError = error;
   m++;
   if(!passengerPosition){ // If passenger has not been seen, go forward
-    motor.speed(LEFT_MOTOR, vel - correction);
-    motor.speed(RIGHT_MOTOR, vel + correction);
+    motor.speed(LEFT_MOTOR, tapeFollowVel - correction);
+    motor.speed(RIGHT_MOTOR, tapeFollowVel + correction);
   }
 }
 
