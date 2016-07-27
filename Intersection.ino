@@ -97,8 +97,8 @@ void ProcessIntersection() {
       pastError = error;
       m++;
 
-      motor.speed(LEFT_MOTOR, vel / 4 - correction);
-      motor.speed(RIGHT_MOTOR, vel / 4 + correction); // CHANGE may need to have to set back to /4
+      motor.speed(LEFT_MOTOR, vel / 4 - correction*2);
+      motor.speed(RIGHT_MOTOR, vel / 4 + correction*2); // CHANGE may need to have to set back to /4
     }
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {

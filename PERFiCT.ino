@@ -465,12 +465,12 @@ void loop() {
 
 void TapeFollow() {
   if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
-    if(qrdVals[0] == HIGH){
+    if(qrdVals[0] == HIGH && loopsSinceLastInt > 2000){
       statusCountTapeFollow++;
       if(statusCountTapeFollow > 60){
         error = 16;
       }
-    }else if(qrdVals[3] == HIGH){
+    }else if(qrdVals[3] == HIGH && loopsSinceLastInt > 2000){
       statusCountTapeFollow--;
       if(statusCountTapeFollow < -60){
         error = -16;
@@ -504,7 +504,7 @@ void TapeFollow() {
 
   p = kp * error;
   d = (int)((float)kd * (float)(error - recError) / (float)(q + m));
-  correction = p + d;
+  correction = (float)((p + d)*g)/10; //this was a hasty change
 
   pastError = error;
   m++;
