@@ -404,6 +404,8 @@ void loop() {
         ReverseLeft();
       }else if(switchVals[FRONT_RIGHT_BUMPER]){
         ReverseRight();
+      }else if(switchVals[FRONT_BUMPER]){
+        ReverseRight(); // TODO: Make a reverse straight/change this based on currentEdge??
       }
       //TODO: Implement check for passenger at front from dev
     }else if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){

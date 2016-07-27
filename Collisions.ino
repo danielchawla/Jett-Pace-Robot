@@ -145,12 +145,12 @@ void CollisionCheck(){
     switchVals[LEFT_BUMPER] += digitalRead(LEFT_BUMPER_PIN);
     switchVals[FRONT_LEFT_BUMPER] += digitalRead(FRONT_LEFT_BUMPER_PIN);
     if(collisionCount > 20){
-    	switchVals[FRONT_BUMPER] /= 15;
-      switchVals[FRONT_RIGHT_BUMPER] /= 15;
-      switchVals[RIGHT_BUMPER] /= 15;
-      switchVals[REAR_BUMPER] /= 15;
-      switchVals[LEFT_BUMPER] /= 15;
-      switchVals[FRONT_LEFT_BUMPER] /= 15;
+    	switchVals[FRONT_BUMPER] /= 10;
+      switchVals[FRONT_RIGHT_BUMPER] /= 10;
+      switchVals[RIGHT_BUMPER] /= 10;
+      switchVals[REAR_BUMPER] /= 10;
+      switchVals[LEFT_BUMPER] /= 10;
+      switchVals[FRONT_LEFT_BUMPER] /= 10;
       collisionDetected = true;
       collisionCount = 0;
 
@@ -165,8 +165,8 @@ void ReverseSlow(int fastMotor, int slowMotor, volatile unsigned int &encoderCou
 	int initialEncoderCount = encoderCount;
 	while(encoderCount - initialEncoderCount < 100){
 		reverseCount++;
-		motor.speed(fastMotor, -MAX_MOTOR_SPEED*2/3);
-		motor.speed(slowMotor, -MAX_MOTOR_SPEED*7/12);
+		motor.speed(fastMotor, -MAX_MOTOR_SPEED*1/2);
+		motor.speed(slowMotor, -MAX_MOTOR_SPEED*1/3);
 		if(digitalRead(q1) || digitalRead(q2) /*|| reverseCount > 100000*/){ //TODO: Uncomment this
 			break;
 		}
