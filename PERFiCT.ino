@@ -32,6 +32,8 @@ void DropoffPassenger(int);
 void AreWeThereYet(void);
 void irDirection(void);
 void ProcessIntersection(void);
+void checkToSeeIfWeKnowWhereWeAre(void);
+bool sortaEqual(int, int);
 //GetFound
 void determineLocation(void);
 // Decisions
@@ -183,6 +185,18 @@ int lastKnownDir = GARBAGE;
 int leftCountBeforeCol;
 int rightCountBeforeCol;
 
+//checkToSeeIfWeKnowWhereWeAre Variables
+int leftEncoderAtLastInt;
+int rightEncoderAtLastInt;
+int rightDiff;
+int leftDiff;
+int diff;
+#define curveInsideCount 300
+#define curveOutsideCount 350
+#define straightCount 450
+
+
+
 
 //edge matrix stuff
 int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
@@ -246,7 +260,7 @@ int stopTime2 = 0;
 int leftInitial = GARBAGE;
 int rightInitial = GARBAGE;
 #define countToDropoff 250
-#define dropWidth  80
+#define dropWidth  80 //TODO: rename this so it makes more sense (ask jonah)
 
 // Angles of straight arm and open claw
 #define armHome 80
@@ -429,9 +443,7 @@ void loop(){
   }
 
   // Check if there is a discrepancy in location based on IR/encoders - This currently always returns false
-  if(loopsSinceLastInt == 100){
-    // amILost();
-  }
+
   else if (loopsSinceLastInt == 200) {
     updateProfMatrix();
   } 
