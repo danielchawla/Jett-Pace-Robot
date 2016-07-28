@@ -97,8 +97,8 @@ void ProcessIntersection() {
       pastError = error;
       m++;
 
-      motor.speed(LEFT_MOTOR, vel / 4 - correction);
-      motor.speed(RIGHT_MOTOR, vel / 4 + correction); // TODO: CHANGE may need to have to set back to /4
+      motor.speed(LEFT_MOTOR, vel / 4 - avgCorrection);
+      motor.speed(RIGHT_MOTOR, vel / 4 + avgCorrection); // TODO: CHANGE may need to have to set back to /4
     }
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {
@@ -131,12 +131,12 @@ void ProcessIntersection() {
     if(tapeFollowCountInInt){
       tapeFollowCountInInt++;
       TapeFollow();
-      if(tapeFollowCountInInt > 1200){ // previously 1000
+      if(tapeFollowCountInInt > 600){ // previously 1000
 
-        motor.stop_all();
-        LCD.clear();
-        LCD.print(noStraightCount);
-        delay(2500);
+        // motor.stop_all();
+        // LCD.clear();
+        // LCD.print(noStraightCount);
+        // delay(1200);
         //atIntersection = false; //jonah had this. TODO: remove this if ryan's shit below doesnt work
         //Ryans stuff begins
         //we can't go straight.
@@ -200,11 +200,11 @@ void ProcessIntersection() {
 
       //RYANS NEW CODE
       //check if there is tape after int
-    if(true/*(digitalRead(q0) || digitalRead(q1) || digitalRead(q3) || digitalRead(q2))*/ && tapeFollowCountInInt > 300){
-    //if((qrdVals[0] == HIGH || qrdVals[1] == HIGH || qrdVals[2] == HIGH || qrdVals[3] == HIGH) && tapeFollowCountInInt > 500){
+    //if((digitalRead(q0) || digitalRead(q1) || digitalRead(q3) || digitalRead(q2)) && tapeFollowCountInInt > 300){
+    if((qrdVals[0] == HIGH || qrdVals[1] == HIGH || qrdVals[2] == HIGH || qrdVals[3] == HIGH) && tapeFollowCountInInt > 300){
       noStraightCount+=3; //this should be "straighCount" or equivalent
       
-      if(noStraightCount >= 15){
+      if(noStraightCount >= 50){
         atIntersection = false; //we can turn straight! exit the intersection and keep tape following
       }
       else if(noStraightCount){
@@ -351,6 +351,7 @@ void ProcessIntersection() {
     lostTape = 0;
     noStraightCount = 0;
     tapeFollowCountInInt = 0;
+    avgCorrection = 0;
   }
 }
 

@@ -153,6 +153,7 @@ int d;
 int correction;
 int statusCountTapeFollow = 0;
 int tapeFollowVel;
+int avgCorrection = 0;
 
 //Interrupt Counts:
 volatile unsigned int leftCount = 0;
@@ -501,14 +502,14 @@ void loop() {
 
 void TapeFollow() {
   if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
-    if(qrdVals[0] == HIGH && loopsSinceLastInt > 2000){
+    if(qrdVals[0] == HIGH){
       statusCountTapeFollow++;
-      if(statusCountTapeFollow > 60){
+      if(statusCountTapeFollow > 8){
         error = 12;
       }
-    }else if(qrdVals[3] == HIGH && loopsSinceLastInt > 2000){
+    }else if(qrdVals[3] == HIGH){
       statusCountTapeFollow--;
-      if(statusCountTapeFollow < -60){
+      if(statusCountTapeFollow < 8){
         error = -12;
       }
     }else{ // All low
@@ -541,7 +542,7 @@ void TapeFollow() {
   p = kp * error;
   d = (int)((float)kd * (float)(error - recError) / (float)(q + m));
   correction = (float)((p + d)*g)/10; //this was a hasty change
-
+  avgCorrection = (avgCorrection*19+correction)/20;
   pastError = error;
   m++;
   if(!passengerPosition){ // If passenger has not been seen, go forward
