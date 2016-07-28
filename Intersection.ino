@@ -31,8 +31,8 @@ void AreWeThereYet(){
     turn180 = (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
 
     // TODO: used for check to see if we know where we are function. TODOLOST
-    // rightDiff = rightCount - rightEncoderAtLastInt;
-    // leftDiff = leftCount - leftEncoderAtLastInt; //TODO: Uncomment these 2 lines
+     rightDiff = rightCount - rightEncoderAtLastInt;
+     leftDiff = leftCount - leftEncoderAtLastInt;
   }
 }
 
@@ -317,11 +317,12 @@ void ProcessIntersection() {
         }
       }
     }*/
+
     //TODOLOST - uncomment
-    /*if(discrepancyInLocation){
+    if(discrepancyInLocation){
       motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED/5);
-      checkToSeeIfWeKnowWhereWeAre();
-    }*/
+      checkToSeeIfWeKnowWhereWeAre(); //this is called right after an intersection
+    }
 
     motor.speed(BUZZER_PIN, 0);
     if(desiredTurn != turnActual){
@@ -354,43 +355,66 @@ void ProcessIntersection() {
 }
 
 void checkToSeeIfWeKnowWhereWeAre(void){
-  if(sortaEqual(rightDiff, curveInsideCount) && sortaEqual(leftDiff, curveOutsideCount)){
-    //we know where we are
-    discrepancyInLocation = false;
-    if(leftTurnPossible >= pathConfidence){
-      currentEdge[0] = 12;
-      currentEdge[1] = 7;
+  //Checks to see if we are going along the straight edge by the drop off.
+  
+  if(turnActual == STRAIGHT){
+    numOfCOnsecutiveStraights++;
+
+    if(numOfCOnsecutiveStraights == 2){
+      //we can check differences in encoders to determine where we are.
+      if(leftDiff - rightDiff > diffInCircle || rightDiff - leftDiff > diffInCircle){
+        inCircle = true;
+      }
     }
-    else{
-      discrepancyInLocation = true;
+    /*if(numOfCOnsecutiveStraights == 3){
+      inCircle = true;
+    }*/
+  }
+  else{
+    numOfCOnsecutiveStraights = 0;
+    inCircle = false;
+  }
+
+  if(inCircle){
+    if(leftDiff > curveOutsideCount || rightDiff > curveOutsideCount){
+      if(rightTurnPossible >= pathConfidence && leftTurnPossible < pathConfidence){
+        currentEdge[0] = 13;
+        currentEdge[1] = 7;
+        discrepancyInLocation = false;
+      }
+      else if(leftTurnPossible >= pathConfidence && rightTurnPossible < pathConfidence){
+        currentEdge[0] = 12;
+        currentEdge[1] = 7;
+        discrepancyInLocation = false;
+      }
+      else{
+        discrepancyInLocation = true;
+      }
     }
   }
-  else if(sortaEqual(leftDiff, curveInsideCount) && sortaEqual(rightDiff, curveOutsideCount)){ 
-    discrepancyInLocation = false;
-    if(rightTurnPossible >= pathConfidence){
-      currentEdge[0] = 13;
-      currentEdge[1] = 7;
-    }
-    else{
-      discrepancyInLocation = true;
-    }
-  }
-  else if(sortaEqual(rightDiff, straightCount) && sortaEqual(leftDiff, straightCount)){
-    discrepancyInLocation = false;
+  else if(leftDiff > leftEncMinVal){ //using left diff because that will be largest if we default to turning right if not straight
     if(rightTurnPossible >= pathConfidence && leftTurnPossible < pathConfidence){
       currentEdge[0] = 17;
       currentEdge[1] = 16;
+      discrepancyInLocation = false;
     }
     else if(leftTurnPossible >= pathConfidence && rightTurnPossible < pathConfidence){
       currentEdge[0] = 18;
       currentEdge[1] = 19;
+      discrepancyInLocation = false;
     }
     else{
       discrepancyInLocation = true;
     }
   }
+
+  //reset incircle for next time we are lost
+  if(!discrepancyInLocation){
+    inCircle = false;
+  }
 }
 
+/*
 bool sortaEqual(int a, int b){
   int diff = a-b;
   if (diff < 0){
@@ -401,4 +425,4 @@ bool sortaEqual(int a, int b){
   }
   return false;
 }
-
+*/
