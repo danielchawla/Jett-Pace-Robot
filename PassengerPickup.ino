@@ -13,10 +13,6 @@ int CheckForPassenger() {
   // Stop motors, reset maxima and pick up passenger
   passengerSeenCount++;
     if(passengerSeenCount > 10){
-      motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
-      motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
-      delay(20);
-      motor.stop_all();
       leftIRValMax = -1;
       rightIRValMax = -1;
       return LEFT;
@@ -29,9 +25,6 @@ int CheckForPassenger() {
     // Stop motors, reset maxima and pick up passenger
     passengerSeenCount++;
     if(passengerSeenCount > 10){
-      motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
-      motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
-      delay(20);
       motor.stop_all();
       leftIRValMax = -1;
       rightIRValMax = -1;

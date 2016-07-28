@@ -189,11 +189,11 @@ int profitMatrix[4][20];
 
 //edge matrix stuff
 int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
-  //0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
-  { -1, -1, -1, -1, -1, -1, 1, 2, 3, -1, 0, 6, 7, 7, 8, 4, 10, 11, 14, 15}, //N
-  { -1, -1, -1, -1, -1, 6, -1, 13, 9, -1, 11, 12, -1, 14, 15, -1, 17, 18, 19, -1}, //E
-  {10, 6, 7, 8, 15, -1, 11, -1, 14, -1, 16, 17, 13, 12, 18, 19, -1, -1, -1, -1}, //S
-  { -1, -1, -1, -1, -1, -1, 5, 12, -1, 8, -1, 10, 11, -1, 13, 14, -1, 16, 17, 18} //W
+  // 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
+  { -1, -1, -1, -1, -1, -1,  1,  2,  3, -1,  0,  6,  7,  7,  8,  4, 10, 11, 14, 15}, //N
+  { -1, -1, -1, -1, -1,  6, -1, 13,  9, -1, 11, 12, -1, 14, 15, -1, 17, 18, 19, -1}, //E
+  { 10,  6,  7,  8, 15, -1, 11, -1, 14, -1, 16, 17, 13, 12, 18, 19, -1, -1, -1, -1}, //S
+  { -1, -1, -1, -1, -1, -1,  5, 12, -1,  8, -1, 10, 11, -1, 13, 14, -1, 16, 17, 18} //W
 }; //dont change this
 int rotEncoder[4][20] = {
 	//?? Idk if we need this but it'd be in the same format as theMap.
@@ -324,7 +324,7 @@ void setup()
   //create initialProfitMatrix
   for(int i = 0; i<4; i++){
   	for(int j = i; j <20; j++){
-  		if (theMap[i][j] > 0){
+  		if (theMap[i][j] >= 0){
         initialProfitMatrix[i][j] = 100 - 8*distToDropoff[theMap[i][j]] - 6*stuckLikelyhood[theMap[i][j]];
       }
       else{
@@ -427,6 +427,10 @@ void loop() {
     if(passengerPosition){
       passengerPosition = 0;
       if(!hasPassenger){
+        motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
+        motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
+        delay(20);
+        motor.stop_all();
         hasPassenger = PickupPassenger(passengerPosition);
         if(hasPassenger){
           g = g*1.1;
@@ -505,7 +509,6 @@ void loop() {
         DropoffPassenger((currentEdge[0]*2-35)*-1); // 17 -> 1 or 18 -> -1
         LCD.clear();
         LCD.print(leftCount - leftInitial); LCD.print(" "); LCD.print(rightCount - rightInitial);
-        delay(3000);
         leftInitial = GARBAGE;
         rightInitial = GARBAGE;
         if(passengerSpotted){
@@ -598,8 +601,9 @@ void PrintToLCD() {
     LCD.clear();
     /*LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);*/
-    LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
-    //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
+    //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
+    //LCD.print(hasPassenger); LCD.print("  "); LCD.print(passengerSpotted);
+    LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
     LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
 }
