@@ -129,10 +129,20 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 
 void TurnCW(){
 	TurnAround(LEFT_MOTOR, RIGHT_MOTOR, leftCount, rightCount);
+	// Set currentEdge for special cases - These currentEdges are the already flipped ones as if the turn had been completed on a single edge successfull
+	if(currentEdge[0] == 9 && currentEdge[1] == 8){
+		currentEdge[0] = 8;
+		currentEdge[1] = 14; // I think??? - need to make sure this is correct, all other cases should be handled like this
+	}
 }
 
 void TurnCCW(){
 	TurnAround(RIGHT_MOTOR, LEFT_MOTOR, rightCount, leftCount);
+	// Set currentEdge for special cases - These currentEdges are the already flipped ones as if the turn had been completed on a single edge successfull
+	if(currentEdge[0] == 5 && currentEdge[1] == 6){
+		currentEdge[0] = 6;
+		currentEdge[1] = 11; // I think??? - need to make sure this is correct, all other cases should be handled like this
+	}
 }
 
 void CollisionCheck(){

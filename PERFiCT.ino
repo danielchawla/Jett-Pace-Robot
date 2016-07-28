@@ -290,6 +290,7 @@ int atIntersection = 0;
 int turning = 0;
 int turn180 = 0;
 int hasPassenger = 0;
+int passengerSpotted = 0;
 int lostTape = 0;
 int foundTape = 0; //this should be the opposite of lostTape..
 int positionLost = 0; // Change to 1 if sensor data contradicts what is expected based on currentEdge[][]
@@ -324,7 +325,7 @@ void setup()
   for(int i = 0; i<4; i++){
   	for(int j = i; j <20; j++){
   		if (theMap[i][j] > 0){
-        initialProfitMatrix[i][j] = 100 - 10*distToDropoff[theMap[i][j]] - 8*stuckLikelyhood[theMap[i][j]];
+        initialProfitMatrix[i][j] = 100 - 8*distToDropoff[theMap[i][j]] - 6*stuckLikelyhood[theMap[i][j]];
       }
       else{
         initialProfitMatrix[i][j] = GARBAGE;
@@ -401,22 +402,42 @@ void loop() {
   CollisionCheck();
 
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
-  if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
+  /*if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
     passengerPosition = CheckForPassenger();
     if(passengerPosition){
-      /*if(stopTime1 == stopTime2){
-        stopTime1 == millis();
-      }
-      stopTime2 = millis();
-      if(stopTime2 - stopTime1 > 100){
-        stopTime1 = stopTime2;*/
+      // if(stopTime1 == stopTime2){
+      //   stopTime1 == millis();
+      // }
+      // stopTime2 = millis();
+      // if(stopTime2 - stopTime1 > 100){
+      //   stopTime1 = stopTime2;
         hasPassenger = PickupPassenger(passengerPosition);
         if(hasPassenger){
           passengerPosition = 0;
           g = g*1.1;
           intGain = intGain*1.1;
+          TurnDecision();
         }
       //}
+    }
+  }*/
+
+  if (numOfIttrs%passengerCheckFreq == 0) {
+    passengerPosition = CheckForPassenger();
+    if(passengerPosition){
+      passengerPosition = 0;
+      if(!hasPassenger){
+        hasPassenger = PickupPassenger(passengerPosition);
+        if(hasPassenger){
+          g = g*1.1;
+          intGain = intGain*1.1;
+          TurnDecision();
+        }
+      }else{
+        passengerSpotted = 1;
+        profitMatrix[currentEdge[1]][nodeMat[currentEdge[1]][currentEdge[0]]] == 100; // Set profitability of current edge in both direction very high
+        profitMatrix[currentEdge[0]][nodeMat[currentEdge[0]][currentEdge[1]]] == 100;
+      }
     }
   }
 
@@ -433,13 +454,15 @@ void loop() {
     }else if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
       // Check which way to turn based on currentEdge[1]
       switch(currentEdge[1]){
-      case 0: TurnCW(); break;
-      case 1: TurnCCW(); break;
-      case 2: TurnCCW(); break;
-      case 3: TurnCW(); break;
-      case 4: TurnCCW(); break;
-      default: TurnCCW();
-      }
+        case 0: TurnCW(); break;
+        case 1: TurnCCW(); break;
+        case 2: TurnCCW(); break;
+        case 3: TurnCW(); break;
+        case 4: TurnCCW(); break;
+        case 5: TurnCCW(); break;
+        case 9: TurnCW(); break;
+        default: TurnCCW();
+        }
     }
     for(int i = 0; i<6;i++){
       switchVals[i] = 0;
@@ -452,9 +475,8 @@ void loop() {
   }
 
   if(loopsSinceLastInt == 100){
-    amILost();
-  }
-  else if (loopsSinceLastInt == 200) {
+    UpdateProfitMatrix();
+  } else if (loopsSinceLastInt == 300) {
     TurnDecision();
   }
 
@@ -486,6 +508,12 @@ void loop() {
         delay(3000);
         leftInitial = GARBAGE;
         rightInitial = GARBAGE;
+        if(passengerSpotted){
+          TurnCCW();
+          passengerSpotted = 0;
+          UpdateProfitMatrix();
+          TurnDecision();
+        }
       }else{
         //turnAround(); // Don't think we'll ever get here
       }

@@ -317,6 +317,11 @@ void ProcessIntersection() {
         }
       }
     }*/
+    //TODOLOST - uncomment
+    /*if(discrepancyInLocation){
+      motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED/5);
+      checkToSeeIfWeKnowWhereWeAre();
+    }*/
 
     motor.speed(BUZZER_PIN, 0);
     if(desiredTurn != turnActual){
@@ -324,17 +329,10 @@ void ProcessIntersection() {
     }
 
     // Update the current edge based on turnActual
-    currentEdge[0] = currentEdge[1];
-    currentEdge[1] = theMap[(currentDir + turnActual + 4) % 4][currentEdge[0]];
-    if (currentEdge[1] == -1) {
-      positionLost = 1;
+    if(!discrepancyInLocation){
+      currentEdge[0] = currentEdge[1];
+      currentEdge[1] = theMap[(currentDir + turnActual + 4) % 4][currentEdge[0]];
     }
-
-    //TODOLOST - uncomment
-    /*if(discrepancyInLocation){
-      motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED/5);
-      checkToSeeIfWeKnowWhereWeAre();
-    }*/
 
     desiredTurn = GARBAGE;
     turnActual = GARBAGE;
