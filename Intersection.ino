@@ -318,11 +318,7 @@ void ProcessIntersection() {
       }
     }*/
 
-    //TODOLOST - uncomment
-    if(discrepancyInLocation){
-      motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED/5);
-      checkToSeeIfWeKnowWhereWeAre(); //this is called right after an intersection
-    }
+
 
     motor.speed(BUZZER_PIN, 0);
     if(desiredTurn != turnActual){
@@ -335,6 +331,11 @@ void ProcessIntersection() {
       currentEdge[1] = theMap[(currentDir + turnActual + 4) % 4][currentEdge[0]];
     }
 
+    //TODOLOST - uncomment
+    if(discrepancyInLocation){
+      motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED/5);
+      checkToSeeIfWeKnowWhereWeAre(); //this is called right after an intersection
+    }
     desiredTurn = GARBAGE;
     turnActual = GARBAGE;
 
@@ -377,6 +378,7 @@ void checkToSeeIfWeKnowWhereWeAre(void){
 
   if(inCircle){
     if(leftDiff > curveOutsideCount || rightDiff > curveOutsideCount){
+      //one wheel has gone the long distance
       if(rightTurnPossible >= pathConfidence && leftTurnPossible < pathConfidence){
         currentEdge[0] = 13;
         currentEdge[1] = 7;
@@ -410,7 +412,9 @@ void checkToSeeIfWeKnowWhereWeAre(void){
 
   //reset incircle for next time we are lost
   if(!discrepancyInLocation){
+    //executes right when we find ourselves (just once)
     inCircle = false;
+    LCD.clear(); LCD.print("WE MADE IT!!"); delay(1000);
   }
 }
 
