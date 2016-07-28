@@ -109,20 +109,12 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   while(millis() - startTime < 1200){}
   motor.speed(GM7, 0);
 
-
-  /*if(side == LEFT){
-    if(analogRead(leftIR) > passengerGoneThresh){
-      PickupPassenger(LEFT);
-    }
-  } else if(analogRead(rightIR) > passengerGoneThresh){
-    PickupPassenger(RIGHT);
-  }*/
+  // Checks if pickup attempt was successful
+  if((side == LEFT && analogRead(leftIR) >= sideIRMin) || (side == RIGHT && analogRead(rightIR) >= sideIRMin)){ // TODO: maybe use a passengerGoneThresh if this doesn't work
+    return 0;
+  }
 
 
-
-  // Home Claw
-  //RCServo0.write(clawOpen);
-  //delay(1000);
   return 1;
 }
 

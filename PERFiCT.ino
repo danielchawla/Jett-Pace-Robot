@@ -256,15 +256,16 @@ unsigned long startTime;
 // Passenger Pickup
 #define sideIRMin 650
 #define armIRMin 250
+#define countToDropoff 300
+#define dropWidth  80
+int failedPickup = 0;
 int passengerPosition;
 int passengerSeenCount = 0;
 int stopTime1 = 0;
 int stopTime2 = 0; 
-#define passengerGoneThresh 50
 int leftInitial = GARBAGE;
 int rightInitial = GARBAGE;
-#define countToDropoff 300
-#define dropWidth  80
+
 
 // Angles of straight arm and open claw
 #define armHome 70
@@ -401,7 +402,7 @@ void loop() {
 
   CollisionCheck();
 
-  //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
+  //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted //TODO: delete this if block below works
   /*if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
     passengerPosition = CheckForPassenger();
     if(passengerPosition){
@@ -422,7 +423,7 @@ void loop() {
     }
   }*/
 
-  if (numOfIttrs%passengerCheckFreq == 0) {
+  if (numOfIttrs%passengerCheckFreq == 0 && failedPickup == 0) {
     passengerPosition = CheckForPassenger();
     if(passengerPosition){
       passengerPosition = 0;
@@ -432,11 +433,21 @@ void loop() {
           g = g*1.1;
           intGain = intGain*1.1;
           TurnDecision();
+        } else{
+          failedPickup = 1; 
         }
+
       }else{
         passengerSpotted = 1;
         profitMatrix[currentEdge[1]][nodeMat[currentEdge[1]][currentEdge[0]]] == 100; // Set profitability of current edge in both direction very high
         profitMatrix[currentEdge[0]][nodeMat[currentEdge[0]][currentEdge[1]]] == 100;
+      }
+    }
+    // This code creates a buffer between a failed pickup attempt and a new pickup attempt, eliminating the pickup jitterbug
+    if(failedPickup){
+      failedPickup++;
+      if(failedPickup >= 100){ //TODO: Tweak this value if needed. Reminder: Parents if statement only executes once in 5 loops. This is really 500.
+        failedPickup = 0;
       }
     }
   }
