@@ -2,7 +2,7 @@ void TurnDecision(){
   currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;//direction with which we will enter the next intersection.
   // TODO: Reorganize this like in dev???
   // Make decision
-  if(hasPassenger){
+  if(hasPassenger/* && !discrepancyInLocation TODOLOST add this*/){
     desiredDirection = dirToDropoff[currentEdge[1]];
 
     if((desiredDirection - currentDir+4)%4 == 2){

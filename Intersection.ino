@@ -38,7 +38,7 @@ void AreWeThereYet(){
 
 
 void ProcessIntersection() {
-  motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED*3/4);
+  //motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED*3/4);
   /*
     TAKE ACTION AT INTERSECTION
     When you come to and intersection there are 5 posibilities:
@@ -131,12 +131,18 @@ void ProcessIntersection() {
     if(tapeFollowCountInInt){
       tapeFollowCountInInt++;
       TapeFollow();
-      if(tapeFollowCountInInt > 1000){
+      if(tapeFollowCountInInt > 1200){ // previously 1000
+
+        motor.stop_all();
+        LCD.clear();
+        LCD.print(noStraightCount);
+        delay(2500);
         //atIntersection = false; //jonah had this. TODO: remove this if ryan's shit below doesnt work
         //Ryans stuff begins
         //we can't go straight.
-        motor.stop_all();
-        delay(2000); // TODO get rid of this and stop all
+        // motor.stop_all();
+        // delay(500); // TODO get rid of this and stop all
+        
         // need to turn
         if(leftTurnPossible>=pathConfidence){
           turnActual = LEFT;
@@ -194,15 +200,16 @@ void ProcessIntersection() {
 
       //RYANS NEW CODE
       //check if there is tape after int
-    if((qrdVals[0] == HIGH || qrdVals[1] == HIGH || qrdVals[2] == HIGH || qrdVals[3] == HIGH) && tapeFollowCountInInt > 400 /*this is when I think the insides should be off the tape*/){
-      noStraightCount++; //this should be "straighCount" or equivalent
-      if(noStraightCount >= 50){
-        //we can turn straight! exit the intersection and keep tape following
-        atIntersection = false;
-
+    if(true/*(digitalRead(q0) || digitalRead(q1) || digitalRead(q3) || digitalRead(q2))*/ && tapeFollowCountInInt > 300){
+    //if((qrdVals[0] == HIGH || qrdVals[1] == HIGH || qrdVals[2] == HIGH || qrdVals[3] == HIGH) && tapeFollowCountInInt > 500){
+      noStraightCount+=3; //this should be "straighCount" or equivalent
+      
+      if(noStraightCount >= 15){
+        atIntersection = false; //we can turn straight! exit the intersection and keep tape following
       }
-    } else if(noStraightCount){
-        noStraightCount--;
+      else if(noStraightCount){
+         noStraightCount--;
+      }
     }
 
 
