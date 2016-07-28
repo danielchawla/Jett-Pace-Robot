@@ -87,7 +87,7 @@ void TurnDecision(){
   currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;//direction with which we will enter the next intersection.
   // TODO: Reorganize this like in dev???
   // Make decision
-  if(hasPassenger/* && !discrepancyInLocation TODOLOST add this*/){
+  if(hasPassenger && !discrepancyInLocation){
     desiredDirection = dirToDropoff[currentEdge[1]];
 
     if((desiredDirection - currentDir+4)%4 == 2){
@@ -121,16 +121,19 @@ void TurnDecision(){
       case -3: desiredTurn = RIGHT; break;
       case -2: desiredTurn = BACK; break; 
     }
-    
   }else{
-    if (directionOfDropZone > 0){ //if we're lost and we know the direction of drop zone
-      //we can do something about this. it increases our confidence.
+    topIRBackVal = analogRead(topIRBack);
+    topIRLeftVal = analogRead(topIRLeft);
+    topIRRightVal = analogRead(topIRRight);
+    if(topIRLeftVal > topIRBackVal && topIRLeftVal > topIRRightVal){
+      desiredTurn = LEFT;
+    } else if(topIRRightVal > topIRBackVal && topIRRightVal > topIRLeftVal){
+      desiredTurn = RIGHT;
+    } else{
+      desiredTurn = STRAIGHT;
     }
-    else{
-      //we're facked boys. This'll be interesting... stay tuned!
-    }
-  }    
-  // For testing, turn left, right, straight, left ...
+  }
+  //For testing, turn left, right, straight, left ...
   //desiredTurn = STRAIGHT;//desiredTurns[turnCount];
   //turnCount++;
 }

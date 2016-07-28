@@ -1,4 +1,5 @@
-int CheckForPassenger() { 
+int CheckForPassenger() {
+  //TODO: add countSinceLastPickup here or in PERFiCT to prevent jitterbug 
   leftIRVal = analogRead(leftIR);
   rightIRVal = analogRead(rightIR);
   // Check left side

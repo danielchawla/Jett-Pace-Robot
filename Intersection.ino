@@ -27,7 +27,9 @@ void AreWeThereYet(){
   if (atIntersection == 1) {
     LCD.clear();
     LCD.print("Going Straight");
-
+    if(discrepancyInLocation){
+      turnDecision();
+    }
     turn180 = (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
 
     // TODO: used for check to see if we know where we are function. TODOLOST

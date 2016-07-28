@@ -166,9 +166,9 @@ unsigned int collisionDetected = 0;
 unsigned int collisionCount = 0;
 
 //NAV VARIABLES -- decisions
-int topIR0, ir0 = 0;
-int topIR1, ir1 = 1;
-int topIR2, ir2 = 2;
+int topIRBackVal, ir0 = 0;
+int topIRLeftVal, ir1 = 1;
+int topIRRightVal, ir2 = 2;
 int directionOfDropZone; // 0 to 359 degrees (bearings).
 int topIRSensitivity = 200;
 int offset;
