@@ -132,6 +132,10 @@ int leftIRVal = -1;   int leftIRValMax = -1;
 #define rightIR 5  
 int rightIRVal = -1;  int rightIRValMax = -1;
 
+#define topIRBack 2
+#define topIRLeft 3
+#define topIRRight 0
+
 /*
   GLOBAL VARIABLES
 */
@@ -250,19 +254,22 @@ int loopTime;
 unsigned long startTime;
 
 // Passenger Pickup
-#define sideIRMin 100
+#define sideIRMin 650
+#define armIRMin 250
 int passengerPosition;
+int passengerSeenCount = 0;
 int stopTime1 = 0;
 int stopTime2 = 0; 
 #define passengerGoneThresh 50
 int leftInitial = GARBAGE;
 int rightInitial = GARBAGE;
-#define countToDropoff 250
+#define countToDropoff 300
 #define dropWidth  80
 
 // Angles of straight arm and open claw
-#define armHome 80
+#define armHome 70
 #define clawOpen 160
+#define clawMid 80
 #define clawClose 10
 
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
@@ -394,22 +401,22 @@ void loop() {
   CollisionCheck();
 
   //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
-  if (numOfIttrs%passengerCheckFreq == 0 && false){//!hasPassenger) {
+  if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
     passengerPosition = CheckForPassenger();
     if(passengerPosition){
-      if(stopTime1 == stopTime2){
+      /*if(stopTime1 == stopTime2){
         stopTime1 == millis();
       }
       stopTime2 = millis();
       if(stopTime2 - stopTime1 > 100){
-        stopTime1 = stopTime2;
+        stopTime1 = stopTime2;*/
         hasPassenger = PickupPassenger(passengerPosition);
         if(hasPassenger){
           passengerPosition = 0;
           g = g*1.1;
           intGain = intGain*1.1;
         }
-      }
+      //}
     }
   }
 
@@ -464,7 +471,7 @@ void loop() {
       leftInitial = leftCount;
       rightInitial = rightCount;
     }
-    if(((leftCount - leftInitial > countToDropoff) || (rightCount - rightInitial > countToDropoff))  &&  hasPassenger){
+    if(((leftCount - leftInitial > countToDropoff) && (rightCount - rightInitial > countToDropoff))  &&  hasPassenger){
       // Have reached dropoff zone
       if(true/*(leftCount - leftInitial < countToDropoff + dropWidth) || (rightCount - rightInitial < countToDropoff + dropWidth)*/){
           // Might not need this if depending on passener positions on 17-18 edge
@@ -474,6 +481,9 @@ void loop() {
           stopTime1 = stopTime2;
         }
         DropoffPassenger((currentEdge[0]*2-35)*-1); // 17 -> 1 or 18 -> -1
+        LCD.clear();
+        LCD.print(leftCount - leftInitial); LCD.print(" "); LCD.print(rightCount - rightInitial);
+        delay(3000);
         leftInitial = GARBAGE;
         rightInitial = GARBAGE;
       }else{
@@ -560,7 +570,7 @@ void PrintToLCD() {
     LCD.clear();
     /*LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);*/
-    LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount); LCD.print(" "); LCD.print(collisionCount);
+    LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
     //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
     LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }

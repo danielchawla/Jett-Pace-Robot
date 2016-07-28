@@ -175,14 +175,14 @@ void ViewAnalog()
     int index = knob(6) * 2 / 1024;
     if (index == 0)
     {
-      LCD.print("A0:"); LCD.print(analogRead(0)); LCD.setCursor(8, 0); LCD.print("A1:"); LCD.print(analogRead(1));
+      LCD.print("BL:"); LCD.print(analogRead(leftIR)); LCD.setCursor(8, 0); LCD.print("BR:"); LCD.print(analogRead(rightIR));
       LCD.setCursor(0, 1);
-      LCD.print("A2:"); LCD.print(analogRead(2)); LCD.setCursor(8, 1); LCD.print("A3:"); LCD.print(analogRead(3));
+      LCD.print("k6:"); LCD.print(analogRead(6)); LCD.setCursor(8, 1); LCD.print("k7:"); LCD.print(analogRead(7));
     } else if (index == 1)
     {
-      LCD.print("A4:"); LCD.print(analogRead(4)); LCD.setCursor(8, 0); LCD.print("A5:"); LCD.print(analogRead(5));
+      LCD.print("TB:"); LCD.print(analogRead(topIRBack)); LCD.setCursor(8, 0); LCD.print("AF:"); LCD.print(analogRead(ArmIRpin));
       LCD.setCursor(0, 1);
-      LCD.print("A6:"); LCD.print(analogRead(6)); LCD.setCursor(8, 1); LCD.print("A7:"); LCD.print(analogRead(7)) ;
+      LCD.print("TL:"); LCD.print(analogRead(topIRLeft)); LCD.setCursor(8, 1); LCD.print("TR:"); LCD.print(analogRead(topIRRight)) ;
     }
 
     delay(100);
@@ -217,11 +217,11 @@ void ControlArm()
     armAngle = (int)(knob(6) * 190.0 / 1024.0);
     spd =  -255 + (int)(knob(6) * 512.0 / 1024.0);
 
-    RCServo1.write(clawAngle);
+    RCServo0.write(clawAngle);
 
     if (!startbutton() && !stopbutton()) {
       motor.speed(GM7, 0);
-      RCServo0.write((int)(armAngle));
+      RCServo1.write((int)(armAngle));
     }
 
     else if (stopbutton()) {
@@ -239,8 +239,8 @@ void ControlArm()
 
     if (stopbutton() && !startbutton())
     {
-      RCServo1.write(clawOpen);
-      RCServo0.write(armHome);
+      RCServo0.write(clawOpen);
+      RCServo1.write(armHome);
       LCD.clear(); LCD.home();
       LCD.print("Leaving Arm Control");
       delay(50);

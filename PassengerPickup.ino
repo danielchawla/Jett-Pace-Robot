@@ -2,45 +2,56 @@ int CheckForPassenger() {
   leftIRVal = analogRead(leftIR);
   rightIRVal = analogRead(rightIR);
   // Check left side
-  if (leftIRVal > leftIRValMax) {
-    leftIRValMax = leftIRVal;
-  } else if (leftIRVal < leftIRValMax - 15 && leftIRValMax > sideIRMin) {
-    // Stop motors, reset maxima and pick up passenger
-    motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
-    motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
-    int start = millis();
-    while(millis() - start < 100){}
-    motor.stop_all();
-    leftIRValMax = -1;
-    rightIRValMax = -1;
-    return LEFT;
+  // if((leftIRVal > sideIRMin || rightIRVal > sideIRMin) && !hasPassenger){ // this didn't work
+  //   tapeFollowVel = vel * 0.6;
+  // } else if(tapeFollowVel != vel){
+  //   tapeFollowVel = vel;
+  // }
+  //   leftIRValMax = leftIRVal;
+  // } else if (leftIRVal < leftIRValMax - 15 && leftIRValMax > sideIRMin) { // TODO: check this  
+  if (leftIRVal > sideIRMin){ // not searching for max anymore. 
+  // Stop motors, reset maxima and pick up passenger
+  passengerSeenCount++;
+    if(passengerSeenCount > 10){
+      motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
+      motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
+      delay(20);
+      motor.stop_all();
+      leftIRValMax = -1;
+      rightIRValMax = -1;
+      return LEFT;
+    }
   }
   // Check right side
-  if (rightIRVal > rightIRValMax) {
-    rightIRValMax = rightIRVal;
-  } else if (rightIRVal < rightIRValMax - 15 && rightIRValMax > sideIRMin) {
+  //   rightIRValMax = rightIRVal;
+  // } else if (rightIRVal < rightIRValMax - 15 && rightIRValMax > sideIRMin) { // TODO: check this
+  else if (rightIRVal > sideIRMin){
     // Stop motors, reset maxima and pick up passenger
-    motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
-    motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
-    int start = millis();
-    while(millis() - start < 100){}
-    leftIRValMax = -1;
-    rightIRValMax = -1;
-    motor.stop_all();
-    return RIGHT;
+    passengerSeenCount++;
+    if(passengerSeenCount > 10){
+      motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
+      motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
+      delay(20);
+      motor.stop_all();
+      leftIRValMax = -1;
+      rightIRValMax = -1;
+      return RIGHT;
+    }
+  } else if(passengerSeenCount){
+    passengerSeenCount--;
   }
   return 0;
 }
 
 int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
-  int range = 80;
+  int range = 70;
   int armDelay = 11;
   int maxIR = -1;
   int newIR = -1;
   int finalI = range - 1;
 
   delay(1000);
-  RCServo0.write(clawOpen);
+  RCServo0.write(clawMid);
   RCServo1.write(armHome);
 
   LCD.clear(); LCD.print("Picking Up");
@@ -56,7 +67,7 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
     newIR = analogRead(ArmIRpin);
     if (newIR > maxIR) {
       maxIR = newIR;
-    } else if (newIR < maxIR - 20 && maxIR > 250) {
+    } else if (newIR < maxIR - 20 && maxIR > armIRMin) {
       LCD.clear();
       LCD.print("Found Max"); LCD.setCursor(0,1);LCD.print(maxIR);
       motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED*3/4);
@@ -85,7 +96,7 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   
   motor.speed(GM7, 150);
   startTime = millis();
-  while(millis() - startTime < 400){}
+  while(millis() - startTime < 600){}
   // Rotate claw back to center
   RCServo1.write(armHome);
   /*startTime = millis();

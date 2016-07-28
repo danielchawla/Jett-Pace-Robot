@@ -38,7 +38,7 @@ void AreWeThereYet(){
 
 
 void ProcessIntersection() {
-  //motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED*3/4);
+  motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED*3/4);
   /*
     TAKE ACTION AT INTERSECTION
     When you come to and intersection there are 5 posibilities:
