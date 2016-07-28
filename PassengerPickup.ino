@@ -13,10 +13,6 @@ int CheckForPassenger() {
   // Stop motors, reset maxima and pick up passenger
   passengerSeenCount++;
     if(passengerSeenCount > 10){
-      motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
-      motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
-      delay(20);
-      motor.stop_all();
       leftIRValMax = -1;
       rightIRValMax = -1;
       return LEFT;
@@ -29,9 +25,6 @@ int CheckForPassenger() {
     // Stop motors, reset maxima and pick up passenger
     passengerSeenCount++;
     if(passengerSeenCount > 10){
-      motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
-      motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
-      delay(20);
       motor.stop_all();
       leftIRValMax = -1;
       rightIRValMax = -1;
@@ -110,7 +103,8 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   motor.speed(GM7, 0);
 
   // Checks if pickup attempt was successful
-  if((side == LEFT && analogRead(leftIR) >= sideIRMin) || (side == RIGHT && analogRead(rightIR) >= sideIRMin)){ // TODO: maybe use a passengerGoneThresh if this doesn't work
+  if((side == LEFT && analogRead(leftIR) >= PICKUPSUCCESSTHRESH) || (side == RIGHT && analogRead(rightIR) >= PICKUPSUCCESSTHRESH)){ // TODO: maybe use a passengerGoneThresh if this doesn't work
+    LCD.clear(); LCD.print("returning 0"); delay(500);
     return 0;
   }
 

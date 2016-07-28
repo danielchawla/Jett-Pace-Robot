@@ -258,8 +258,9 @@ unsigned long startTime;
 #define armIRMin 250
 #define countToDropoff 300
 #define dropWidth  80
+#define PICKUPSUCCESSTHRESH 400
 int failedPickup = 0;
-int passengerPosition;
+int passengerSide;
 int passengerSeenCount = 0;
 int stopTime1 = 0;
 int stopTime2 = 0; 
@@ -402,33 +403,15 @@ void loop() {
 
   CollisionCheck();
 
-  //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted //TODO: delete this if block below works
-  /*if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
-    passengerPosition = CheckForPassenger();
-    if(passengerPosition){
-      // if(stopTime1 == stopTime2){
-      //   stopTime1 == millis();
-      // }
-      // stopTime2 = millis();
-      // if(stopTime2 - stopTime1 > 100){
-      //   stopTime1 = stopTime2;
-        hasPassenger = PickupPassenger(passengerPosition);
-        if(hasPassenger){
-          passengerPosition = 0;
-          g = g*1.1;
-          intGain = intGain*1.1;
-          TurnDecision();
-        }
-      //}
-    }
-  }*/
-
   if (numOfIttrs%passengerCheckFreq == 0 && failedPickup == 0) {
-    passengerPosition = CheckForPassenger();
-    if(passengerPosition){
-      passengerPosition = 0;
+    passengerSide = CheckForPassenger();
+    if(passengerSide){
       if(!hasPassenger){
-        hasPassenger = PickupPassenger(passengerPosition);
+        motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
+        motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
+        delay(20);
+        motor.stop_all();
+        hasPassenger = PickupPassenger(passengerSide);
         if(hasPassenger){
           g = g*1.1;
           intGain = intGain*1.1;
@@ -442,14 +425,15 @@ void loop() {
         profitMatrix[currentEdge[1]][nodeMat[currentEdge[1]][currentEdge[0]]] == 100; // Set profitability of current edge in both direction very high
         profitMatrix[currentEdge[0]][nodeMat[currentEdge[0]][currentEdge[1]]] == 100;
       }
+      passengerSide = 0;
     }
-    // This code creates a buffer between a failed pickup attempt and a new pickup attempt, eliminating the pickup jitterbug
-    if(failedPickup){
+  }
+  // This code creates a buffer between a failed pickup attempt and a new pickup attempt, eliminating the pickup jitterbug
+  if(failedPickup){
       failedPickup++;
-      if(failedPickup >= 100){ //TODO: Tweak this value if needed. Reminder: Parents if statement only executes once in 5 loops. This is really 500.
+      if(failedPickup >= 500){ //TODO: Tweak this value if needed. 
         failedPickup = 0;
       }
-    }
   }
 
   if(collisionDetected){
@@ -594,7 +578,7 @@ void TapeFollow() {
   avgCorrection = (avgCorrection*19+correction)/20;
   pastError = error;
   m++;
-  if(!passengerPosition){ // If passenger has not been seen, go forward
+  if(!passengerSide){ // If passenger has not been seen, go forward
     motor.speed(LEFT_MOTOR, tapeFollowVel - correction);
     motor.speed(RIGHT_MOTOR, tapeFollowVel + correction);
   }
@@ -609,7 +593,8 @@ void PrintToLCD() {
     LCD.clear();
     /*LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);*/
-    LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
+    LCD.print("Passenger: "); LCD.print(hasPassenger); 
+    //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
     //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
     LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
