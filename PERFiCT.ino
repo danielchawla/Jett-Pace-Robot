@@ -238,9 +238,13 @@ int leftEncoderAtLastInt = 0;
 int rightDiff;
 int leftDiff;
 int diff;
-#define curveInsideCount 300
+//#define curveInsideCount 300
 #define curveOutsideCount 350
-#define straightCount 450
+//#define straightCount 450
+#define diffInCircle 100
+#define leftEncMinVal 450
+int numOfConsecutiveStraights;
+int inCircle = false;
 
 int count180 = 0;
 int statusCount180 = 0;
