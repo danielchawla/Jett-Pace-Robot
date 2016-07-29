@@ -3,10 +3,11 @@ void UpdateProfitMatrix(){
   // profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 0;
   if(!passengerSpotted ){ // 1 in MATLAB
     profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 0;
-    profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 0; // Should this one still go to 0 if a passenger is spotted
+    profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 0;
   }else{ // 5 in MATLAB
+    motor.stop_all(); delay(1000);
     profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 0;
-    profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 100;
+    profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 500;
   }
   for (int i = 0; i <4; i++){
     for (int j = 0; j<20; j++){

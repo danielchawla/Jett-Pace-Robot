@@ -42,7 +42,7 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   int maxIR = -1;
   int newIR = -1;
   int finalI = range - 1;
-
+  LCD.clear();LCD.print("Picking up: ");LCD.print(side);
   delay(1000);
   RCServo0.write(clawMid);
   RCServo1.write(armHome);
@@ -61,14 +61,14 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
     if (newIR > maxIR) {
       maxIR = newIR;
     } else if (newIR < maxIR - 20 && maxIR > armIRMin) {
-      LCD.clear();
-      LCD.print("Found Max"); LCD.setCursor(0,1);LCD.print(maxIR);
-      motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED*3/4);
-      delay(1000);
-      motor.speed(BUZZER_PIN, 0);
-      RCServo1.write(armHome + (i-2)*side);
-      finalI = i;
-      break;
+      // LCD.clear();
+      // LCD.print("Found Max"); LCD.setCursor(0,1);LCD.print(maxIR);
+      // motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED*3/4);
+      // delay(1000);
+      // motor.speed(BUZZER_PIN, 0);
+      // RCServo1.write(armHome + (i-2)*side);
+      // finalI = i;
+      // break;
     }
     LCD.clear(); LCD.print("IR:  "); LCD.print(newIR);
     LCD.setCursor(0, 1); LCD.print("Max: "); LCD.print(maxIR);
@@ -155,8 +155,4 @@ void DropoffPassenger(int side){
   motor.speed(GM7, 0);
 
   hasPassenger = false;
-  // Reset Gains
-  g = g/1.1;
-  intGain = intGain/1.1;
-
 }

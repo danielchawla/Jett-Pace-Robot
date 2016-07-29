@@ -256,7 +256,7 @@ unsigned long startTime;
 // Passenger Pickup
 #define sideIRMin 650
 #define armIRMin 250
-#define countToDropoff 300
+#define countToDropoff 350 // TODO Change
 #define dropWidth  80
 #define PICKUPSUCCESSTHRESH 400
 int failedPickup = 0;
@@ -269,7 +269,7 @@ int rightInitial = GARBAGE;
 
 
 // Angles of straight arm and open claw
-#define armHome 70
+#define armHome 80
 #define clawOpen 160
 #define clawMid 80
 #define clawClose 10
@@ -390,7 +390,6 @@ void loop() {
         ie. ProcessIntersection sets desiredTurn = GARBAGE after successful completion of intersection
   */
 
-
   numOfIttrs++;
   loopsSinceLastInt++;
   /*TAPE FOLLOWING*/
@@ -413,18 +412,18 @@ void loop() {
         motor.stop_all();
         hasPassenger = PickupPassenger(passengerSide);
         if(hasPassenger){
-          g = g*1.1;
-          intGain = intGain*1.1;
+          //g = g*1.1;
+          //intGain = intGain*1.1;
           TurnDecision();
         } else{
           failedPickup = 1; 
         }
 
       }else{
-        passengerSpotted = 1;
-        profitMatrix[currentEdge[1]][nodeMat[currentEdge[1]][currentEdge[0]]] == 100; // Set profitability of current edge in both direction very high
-        profitMatrix[currentEdge[0]][nodeMat[currentEdge[0]][currentEdge[1]]] == 100;
-      }
+        passengerSpotted = true;
+        profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 500; // Set profitability of current edge in both direction very high
+        profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 500;
+      } //TODO had a delay here and it froze the robot - sign of bigger problem???
       passengerSide = 0;
     }
   }
@@ -592,15 +591,9 @@ void PrintToLCD() {
     LCD.clear();
     /*LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);*/
-<<<<<<< HEAD
-    LCD.print("Passenger: "); LCD.print(hasPassenger); 
-    //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
-    //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
-=======
     //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
     //LCD.print(hasPassenger); LCD.print("  "); LCD.print(passengerSpotted);
     LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
->>>>>>> 8ca7527bfdd481f9734b701126a4422458b6eac0
     LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
 }
