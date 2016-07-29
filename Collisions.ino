@@ -50,7 +50,11 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 		if(!offTape){
 			if(!(digitalRead(q1) || digitalRead(q2))) {
 				statusCount180++;
+<<<<<<< HEAD
 				if(statusCount180 > 10){
+=======
+				if(statusCount180 > 30){
+>>>>>>> b651257a8ff4562a83234666c4fa9e8c43b75dbe
 					//we just lost the tape.
 					statusCount180 = 0;
 					offTape = true;
@@ -74,7 +78,13 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 					statusCount180 = 0;
 					stage = 0; // Reset stage
 					offTape = false;
+<<<<<<< HEAD
 					TurnDecision();
+=======
+					if(!passengerSpotted){
+						TurnDecision();
+					}
+>>>>>>> b651257a8ff4562a83234666c4fa9e8c43b75dbe
 					break;
 				}
 			}

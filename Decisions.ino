@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // void TurnDecision(){
 //   currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;//direction with which we will enter the next intersection.
 //   // TODO: Reorganize this like in dev???
@@ -62,15 +63,25 @@
 //   //turnCount++;
 // }
 
+=======
+>>>>>>> b651257a8ff4562a83234666c4fa9e8c43b75dbe
 void UpdateProfitMatrix(){
   // profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 0;
   // profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 0;
   if(!passengerSpotted ){ // 1 in MATLAB
     profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 0;
+<<<<<<< HEAD
     profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 0; // Should this one still go to 0 if a passenger is spotted
   }else{ // 5 in MATLAB
     profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 0;
     profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 100;
+=======
+    profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 0;
+  }else{ // 5 in MATLAB
+    motor.stop_all(); delay(1000);
+    profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 0;
+    profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 500;
+>>>>>>> b651257a8ff4562a83234666c4fa9e8c43b75dbe
   }
   for (int i = 0; i <4; i++){
     for (int j = 0; j<20; j++){
@@ -87,7 +98,11 @@ void TurnDecision(){
   currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;//direction with which we will enter the next intersection.
   // TODO: Reorganize this like in dev???
   // Make decision
+<<<<<<< HEAD
   if(hasPassenger/* && !discrepancyInLocation TODOLOST add this*/){
+=======
+  if(hasPassenger &&!discrepancyInLocation){
+>>>>>>> b651257a8ff4562a83234666c4fa9e8c43b75dbe
     desiredDirection = dirToDropoff[currentEdge[1]];
 
     if((desiredDirection - currentDir+4)%4 == 2){

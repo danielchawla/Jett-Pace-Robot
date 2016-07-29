@@ -189,11 +189,11 @@ int profitMatrix[4][20];
 
 //edge matrix stuff
 int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
-  //0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
-  { -1, -1, -1, -1, -1, -1, 1, 2, 3, -1, 0, 6, 7, 7, 8, 4, 10, 11, 14, 15}, //N
-  { -1, -1, -1, -1, -1, 6, -1, 13, 9, -1, 11, 12, -1, 14, 15, -1, 17, 18, 19, -1}, //E
-  {10, 6, 7, 8, 15, -1, 11, -1, 14, -1, 16, 17, 13, 12, 18, 19, -1, -1, -1, -1}, //S
-  { -1, -1, -1, -1, -1, -1, 5, 12, -1, 8, -1, 10, 11, -1, 13, 14, -1, 16, 17, 18} //W
+  // 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
+  { -1, -1, -1, -1, -1, -1,  1,  2,  3, -1,  0,  6,  7,  7,  8,  4, 10, 11, 14, 15}, //N
+  { -1, -1, -1, -1, -1,  6, -1, 13,  9, -1, 11, 12, -1, 14, 15, -1, 17, 18, 19, -1}, //E
+  { 10,  6,  7,  8, 15, -1, 11, -1, 14, -1, 16, 17, 13, 12, 18, 19, -1, -1, -1, -1}, //S
+  { -1, -1, -1, -1, -1, -1,  5, 12, -1,  8, -1, 10, 11, -1, 13, 14, -1, 16, 17, 18} //W
 }; //dont change this
 int rotEncoder[4][20] = {
 	//?? Idk if we need this but it'd be in the same format as theMap.
@@ -238,6 +238,7 @@ int leftEncoderAtLastInt = 0;
 int rightDiff;
 int leftDiff;
 int diff;
+
 //#define curveInsideCount 300
 #define curveOutsideCount 350
 #define diffInCircle = 100
@@ -260,15 +261,17 @@ unsigned long startTime;
 // Passenger Pickup
 #define sideIRMin 650
 #define armIRMin 250
-int passengerPosition;
+
+#define countToDropoff 350 // TODO Change
+#define dropWidth  80
+#define PICKUPSUCCESSTHRESH 400
+int failedPickup = 0;
+int passengerSide;
 int passengerSeenCount = 0;
 int stopTime1 = 0;
 int stopTime2 = 0; 
-#define passengerGoneThresh 50
 int leftInitial = GARBAGE;
 int rightInitial = GARBAGE;
-#define countToDropoff 300
-#define dropWidth  80
 
 // Angles of straight arm and open claw
 #define armHome 70
@@ -328,7 +331,8 @@ void setup()
   //create initialProfitMatrix
   for(int i = 0; i<4; i++){
   	for(int j = i; j <20; j++){
-  		if (theMap[i][j] > 0){
+
+  		if (theMap[i][j] >= 0){
         initialProfitMatrix[i][j] = 100 - 8*distToDropoff[theMap[i][j]] - 6*stuckLikelyhood[theMap[i][j]];
       }
       else{
@@ -392,7 +396,6 @@ void loop() {
         ie. ProcessIntersection sets desiredTurn = GARBAGE after successful completion of intersection
   */
 
-
   numOfIttrs++;
   loopsSinceLastInt++;
   /*TAPE FOLLOWING*/
@@ -405,44 +408,37 @@ void loop() {
 
   CollisionCheck();
 
-  //Check for passengers on either side and pick it up if 100 ms have passed since it was spotted
-  /*if (numOfIttrs%passengerCheckFreq == 0 && !hasPassenger) {
-    passengerPosition = CheckForPassenger();
-    if(passengerPosition){
-      // if(stopTime1 == stopTime2){
-      //   stopTime1 == millis();
-      // }
-      // stopTime2 = millis();
-      // if(stopTime2 - stopTime1 > 100){
-      //   stopTime1 = stopTime2;
-        hasPassenger = PickupPassenger(passengerPosition);
-        if(hasPassenger){
-          passengerPosition = 0;
-          g = g*1.1;
-          intGain = intGain*1.1;
-          TurnDecision();
-        }
-      //}
-    }
-  }*/
-
-  if (numOfIttrs%passengerCheckFreq == 0) {
-    passengerPosition = CheckForPassenger();
-    if(passengerPosition){
-      passengerPosition = 0;
+  if (numOfIttrs%passengerCheckFreq == 0 && failedPickup == 0) {
+    passengerSide = CheckForPassenger();
+    if(passengerSide){
       if(!hasPassenger){
-        hasPassenger = PickupPassenger(passengerPosition);
+        motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
+        motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
+        delay(20);
+        motor.stop_all();
+        hasPassenger = PickupPassenger(passengerSide);
         if(hasPassenger){
-          g = g*1.1;
-          intGain = intGain*1.1;
+          //g = g*1.1;
+          //intGain = intGain*1.1;
           TurnDecision();
+        } else{
+          failedPickup = 1; 
         }
+
       }else{
-        passengerSpotted = 1;
-        profitMatrix[currentEdge[1]][nodeMat[currentEdge[1]][currentEdge[0]]] == 100; // Set profitability of current edge in both direction very high
-        profitMatrix[currentEdge[0]][nodeMat[currentEdge[0]][currentEdge[1]]] == 100;
-      }
+        passengerSpotted = true;
+        profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 500; // Set profitability of current edge in both direction very high
+        profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 500;
+      } //TODO had a delay here and it froze the robot - sign of bigger problem???
+      passengerSide = 0;
     }
+  }
+  // This code creates a buffer between a failed pickup attempt and a new pickup attempt, eliminating the pickup jitterbug
+  if(failedPickup){
+      failedPickup++;
+      if(failedPickup >= 500){ //TODO: Tweak this value if needed. 
+        failedPickup = 0;
+      }
   }
 
   if(collisionDetected){
@@ -587,7 +583,7 @@ void TapeFollow() {
   avgCorrection = (avgCorrection*19+correction)/20;
   pastError = error;
   m++;
-  if(!passengerPosition){ // If passenger has not been seen, go forward
+  if(!passengerSide){ // If passenger has not been seen, go forward
     motor.speed(LEFT_MOTOR, tapeFollowVel - correction);
     motor.speed(RIGHT_MOTOR, tapeFollowVel + correction);
   }
@@ -602,9 +598,10 @@ void PrintToLCD() {
     LCD.clear();
     /*LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);*/
-    LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
     //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
-    LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
+    LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
+    //LCD.print(hasPassenger); LCD.print("  "); LCD.print(passengerSpotted);
+    //LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
 }
 

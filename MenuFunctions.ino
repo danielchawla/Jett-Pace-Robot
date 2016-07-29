@@ -214,7 +214,7 @@ void ControlArm()
   }
   while (true) {
     clawAngle = (int)(knob(7) * 110.0 / 1024.0);
-    armAngle = (int)(knob(6) * 190.0 / 1024.0);
+    armAngle = (int)(knob(6) * 200.0 / 1024.0);
     spd =  -255 + (int)(knob(6) * 512.0 / 1024.0);
 
     RCServo0.write(clawAngle);

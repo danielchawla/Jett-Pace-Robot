@@ -31,8 +31,8 @@ void AreWeThereYet(){
     turn180 = (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
 
     // TODO: used for check to see if we know where we are function. TODOLOST
-     rightDiff = rightCount - rightEncoderAtLastInt;
-     leftDiff = leftCount - leftEncoderAtLastInt;
+    rightDiff = rightCount - rightEncoderAtLastInt;
+    leftDiff = leftCount - leftEncoderAtLastInt;
   }
 }
 
@@ -173,6 +173,38 @@ void ProcessIntersection() {
       if(noStraightCount > 1200){
         motor.stop_all();
         delay(2000); // TODO get rid of this and stop all
+>>>>>>> b651257a8ff4562a83234666c4fa9e8c43b75dbe
+        // need to turn
+        if(leftTurnPossible>=pathConfidence){
+          turnActual = LEFT;
+          turning = 1;
+          qrdToCheck = q0;
+          loopNum = 2;
+          LCD.clear();
+          LCD.print("Turning Left");
+        } else if(rightTurnPossible>=pathConfidence){
+          turnActual = RIGHT;
+          turning = 1;
+          qrdToCheck = q3;
+          loopNum = 2;
+          LCD.clear();
+          LCD.print("Turning Right");
+        } else{ // THIS SHOULD NEVER HAPPEN
+          LCD.print("No straight or turn");
+          motor.stop_all();
+          while(true){} // TODO 
+        }
+        //ryans stuff ends
+      }
+<<<<<<< HEAD
+    }
+
+    // Check if all QRDs are lost
+    /*if((qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW) && tapeFollowCountInInt){
+      noStraightCount++;
+      if(noStraightCount > 1200){
+        motor.stop_all();
+        delay(2000); // TODO get rid of this and stop all
         // need to turn
         if(leftTurnPossible>=pathConfidence){
           turnActual = LEFT;
@@ -194,6 +226,8 @@ void ProcessIntersection() {
           while(true){} // TODO 
         }
       }
+=======
+>>>>>>> b651257a8ff4562a83234666c4fa9e8c43b75dbe
     }else if((qrdVals[0] == HIGH || qrdVals[1] == HIGH || qrdVals[2] == HIGH || qrdVals[3] == HIGH) && noStraightCount>0){
       noStraightCount-=100;
     }*/
@@ -317,8 +351,16 @@ void ProcessIntersection() {
         }
       }
     }*/
+<<<<<<< HEAD
 
 
+=======
+    //TODOLOST - uncomment
+    /*if(discrepancyInLocation){
+      motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED/5);
+      checkToSeeIfWeKnowWhereWeAre();
+    }*/
+>>>>>>> b651257a8ff4562a83234666c4fa9e8c43b75dbe
 
     motor.speed(BUZZER_PIN, 0);
     if(desiredTurn != turnActual){
@@ -352,7 +394,59 @@ void ProcessIntersection() {
     noStraightCount = 0;
     tapeFollowCountInInt = 0;
     avgCorrection = 0;
+<<<<<<< HEAD
+=======
   }
+}
+
+void checkToSeeIfWeKnowWhereWeAre(void){
+  if(sortaEqual(rightDiff, curveInsideCount) && sortaEqual(leftDiff, curveOutsideCount)){
+    //we know where we are
+    discrepancyInLocation = false;
+    if(leftTurnPossible >= pathConfidence){
+      currentEdge[0] = 12;
+      currentEdge[1] = 7;
+    }
+    else{
+      discrepancyInLocation = true;
+    }
+  }
+  else if(sortaEqual(leftDiff, curveInsideCount) && sortaEqual(rightDiff, curveOutsideCount)){ 
+    discrepancyInLocation = false;
+    if(rightTurnPossible >= pathConfidence){
+      currentEdge[0] = 13;
+      currentEdge[1] = 7;
+    }
+    else{
+      discrepancyInLocation = true;
+    }
+  }
+  else if(sortaEqual(rightDiff, straightCount) && sortaEqual(leftDiff, straightCount)){
+    discrepancyInLocation = false;
+    if(rightTurnPossible >= pathConfidence && leftTurnPossible < pathConfidence){
+      currentEdge[0] = 17;
+      currentEdge[1] = 16;
+    }
+    else if(leftTurnPossible >= pathConfidence && rightTurnPossible < pathConfidence){
+      currentEdge[0] = 18;
+      currentEdge[1] = 19;
+    }
+    else{
+      discrepancyInLocation = true;
+    }
+  }
+}
+
+bool sortaEqual(int a, int b){
+  int diff = a-b;
+  if (diff < 0){
+    diff = -1*diff;
+  }
+  if(diff < 30){
+    return true;
+>>>>>>> b651257a8ff4562a83234666c4fa9e8c43b75dbe
+  }
+  return false;
 }
 
 void checkToSeeIfWeKnowWhereWeAre(void){
