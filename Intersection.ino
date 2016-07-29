@@ -144,20 +144,20 @@ void ProcessIntersection() {
         // delay(500); // TODO get rid of this and stop all
         
         // need to turn
-        if(leftTurnPossible>=pathConfidence){
-          turnActual = LEFT;
-          turning = 1;
-          qrdToCheck = q0;
-          loopNum = 2;
-          LCD.clear();
-          LCD.print("Turning Left");
-        } else if(rightTurnPossible>=pathConfidence){
+        if(rightTurnPossible>=pathConfidence){
           turnActual = RIGHT;
           turning = 1;
           qrdToCheck = q3;
           loopNum = 2;
           LCD.clear();
           LCD.print("Turning Right");
+        }else if(leftTurnPossible>=pathConfidence){
+          turnActual = LEFT;
+          turning = 1;
+          qrdToCheck = q0;
+          loopNum = 2;
+          LCD.clear();
+          LCD.print("Turning Left");
         } else{ // THIS SHOULD NEVER HAPPEN
           LCD.print("No straight or turn");
           motor.stop_all();
@@ -289,34 +289,35 @@ void ProcessIntersection() {
       Currently, we can always go straight even at an L or T intersection, so this is not 100% reliable but will (should) never give false positives
     */
       //TODOLOST - uncomment and see if works
-    /*
+
     rightEncoderAtLastInt = rightCount;
     leftEncoderAtLastInt = leftCount;
     if(desiredTurn != turnActual){
       discrepancyInLocation = true;
-    }
-    if(leftTurnPossible >= pathConfidence){
-      if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] == -1){
-        discrepancyInLocation = true;
-      }
-    }
-    if(rightTurnPossible >= pathConfidence){
-      if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] == -1){
-        discrepancyInLocation = true;
-      }
-    }
-    if(turnActual == STRAIGHT){
-      if(leftTurnPossible <pathConfidence){
-        if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] != -1){
+    } else{
+      if(leftTurnPossible >= pathConfidence){
+        if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] == -1){
           discrepancyInLocation = true;
         }
       }
-      if(rightTurnPossible < pathConfidence){
-        if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] != -1){
+      if(rightTurnPossible >= pathConfidence){
+        if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] == -1){
           discrepancyInLocation = true;
         }
       }
-    }*/
+      if(turnActual == STRAIGHT){
+        if(leftTurnPossible <pathConfidence){
+          if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] != -1){
+            discrepancyInLocation = true;
+          }
+        }
+        if(rightTurnPossible < pathConfidence){
+          if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] != -1){
+            discrepancyInLocation = true;
+          }
+        }
+      }
+    }
 
     motor.speed(BUZZER_PIN, 0);
     if(desiredTurn != turnActual){
@@ -357,7 +358,7 @@ void ProcessIntersection() {
 void checkToSeeIfWeKnowWhereWeAre(void){
   //Checks to see if we are going along the straight edge by the drop off.
  
-  if(turnActual == STRAIGHT){
+  /*if(turnActual == STRAIGHT){
     numOfConsecutiveStraights++;
      if(numOfConsecutiveStraights == 2){
       //we can check differences in encoders to determine where we are.
@@ -365,16 +366,27 @@ void checkToSeeIfWeKnowWhereWeAre(void){
         inCircle = true;
       }
     }
-     /*if(numOfConsecutiveStraights == 3){
-      inCircle = true;
-    }*/
+    //  if(numOfConsecutiveStraights == 3){
+    //   inCircle = true;
+    // }
   }
   else{
     numOfConsecutiveStraights = 0;
     inCircle = false;
-  }
+  }*/
 
-  if(inCircle){
+  if(leftDiff > curveOutsideCount && rightDiff < leftDiff*0.7){
+    motor.stop_all(); LCD.clear(); LCD.print("On 12-7"); delay(1000);
+    currentEdge[0] = 12;
+    currentEdge[1] = 7;
+    discrepancyInLocation = false;
+  } else if(rightDiff > curveOutsideCount && leftDiff < rightDiff*0.7){
+    motor.stop_all(); LCD.clear(); LCD.print("On 13-7"); delay(1000);
+    currentEdge[0] = 13;
+    currentEdge[1] = 7;
+    discrepancyInLocation = false;    
+  }
+  /*if(inCircle){
     if(leftDiff > curveOutsideCount || rightDiff > curveOutsideCount){
       //either wheel has gone the long distance
       if(rightTurnPossible >= pathConfidence && leftTurnPossible < pathConfidence){
@@ -391,8 +403,9 @@ void checkToSeeIfWeKnowWhereWeAre(void){
         discrepancyInLocation = true;
       }  
     }
-  }
+  }*/
   else if(leftDiff > leftEncMinVal){ //using left diff because that will be largest if we default to turning right if not straight
+    motor.stop_all(); LCD.clear(); LCD.print("On 17-18"); delay(1000);
     if(rightTurnPossible >= pathConfidence && leftTurnPossible < pathConfidence){
       currentEdge[0] = 17;
       currentEdge[1] = 16;
@@ -402,9 +415,6 @@ void checkToSeeIfWeKnowWhereWeAre(void){
       currentEdge[0] = 18;
       currentEdge[1] = 19;
       discrepancyInLocation = false;
-    }
-    else{
-      discrepancyInLocation = true;
     }
     //reset incircle for next time we are lost
     if(!discrepancyInLocation){

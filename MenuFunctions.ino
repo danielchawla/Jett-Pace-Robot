@@ -278,11 +278,17 @@ void PickupPassengerMain(){
 
 void altMotor(void){
   int altCount = 0;
+  int motorSpeed = 0;
   while(true){
     altCount++;
-    motor.speed(LEFT_MOTOR, 255*((altCount%2)*2-1));
-    motor.speed(RIGHT_MOTOR, 255*((altCount%2)*2-1));
-    delay(2000);
+    for(int i = 0; i < 100; i++){
+      motorSpeed = knob(6)*255.0/1024.0;
+      motor.speed(LEFT_MOTOR, motorSpeed);
+      motor.speed(RIGHT_MOTOR, motorSpeed);
+      LCD.clear(); LCD.print("Speed: "); LCD.print(motorSpeed);
+      LCD.setCursor(0,1); LCD.print("L: "); LCD.print(leftCount); LCD.print(" R: "); LCD.print(rightCount);
+      delay(50);
+    }
   }
 }
 

@@ -75,6 +75,11 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 					stage = 0; // Reset stage
 					offTape = false;
 					loopsSinceLastInt = 0;
+					leftEncoderAtLastInt = leftCount;
+					rightEncoderAtLastInt = rightCount;
+					if(discrepancyInLocation){
+						motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED/5);
+					}
 					break;
 				}
 			}
@@ -155,7 +160,7 @@ void TurnCW(){
 		currentEdge[0] = 7;
 		currentEdge[1] = 13; 
 	}	
-	
+
 	if(!passengerSpotted){
 		TurnDecision();
 	}

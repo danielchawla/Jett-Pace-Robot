@@ -60,12 +60,7 @@ void TurnDecision(){
     }
     
   }else{
-    if (directionOfDropZone > 0){ //if we're lost and we know the direction of drop zone
-      //we can do something about this. it increases our confidence.
-    }
-    else{
-      //we're facked boys. This'll be interesting... stay tuned!
-    }
+    desiredTurn = STRAIGHT;
   }    
   // For testing, turn left, right, straight, left ...
   //desiredTurn = STRAIGHT;//desiredTurns[turnCount];

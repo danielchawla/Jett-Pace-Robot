@@ -239,10 +239,10 @@ int rightDiff;
 int leftDiff;
 int diff;
 //#define curveInsideCount 300
-#define curveOutsideCount 350
+#define curveOutsideCount 400
 //#define straightCount 450
 #define diffInCircle 100
-#define leftEncMinVal 450
+#define leftEncMinVal 490
 int numOfConsecutiveStraights;
 int inCircle = false;
 
@@ -260,7 +260,7 @@ unsigned long startTime;
 // Passenger Pickup
 #define sideIRMin 650
 #define armIRMin 250
-#define countToDropoff 350 // TODO Change
+#define countToDropoff 150 // TODO Change
 #define dropWidth  80
 #define PICKUPSUCCESSTHRESH 400
 int failedPickup = 0;
@@ -577,7 +577,7 @@ void TapeFollow() {
   p = kp * error;
   d = (int)((float)kd * (float)(error - recError) / (float)(q + m));
   correction = (float)((p + d)*g)/10; //this was a hasty change
-  avgCorrection = (avgCorrection*19+correction)/20;
+  avgCorrection = (avgCorrection*49+correction)/50; //TODO Investigate this ratio
   pastError = error;
   m++;
   if(!passengerSide){ // If passenger has not been seen, go forward
@@ -598,7 +598,13 @@ void PrintToLCD() {
     //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
     //LCD.print(hasPassenger); LCD.print("  "); LCD.print(passengerSpotted);
     //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
-    LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
+    LCD.print(leftDiff); LCD.print("  "); LCD.print(rightDiff);
+    if(discrepancyInLocation){
+      LCD.setCursor(0, 1); LCD.print("LOST  "); LCD.print(numOfConsecutiveStraights);
+
+    }else{
+      LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
+    }
   }
 }
 
