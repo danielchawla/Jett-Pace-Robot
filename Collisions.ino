@@ -74,9 +74,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 					statusCount180 = 0;
 					stage = 0; // Reset stage
 					offTape = false;
-					if(!passengerSpotted){
-						TurnDecision();
-					}
+					loopsSinceLastInt = 0;
 					break;
 				}
 			}
@@ -129,21 +127,37 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 }
 	
 
-void TurnCW(){
-	TurnAround(LEFT_MOTOR, RIGHT_MOTOR, leftCount, rightCount);
-	// Set currentEdge for special cases - These currentEdges are the already flipped ones as if the turn had been completed on a single edge successfull
-	if(currentEdge[0] == 9 && currentEdge[1] == 8){
-		currentEdge[0] = 8;
-		currentEdge[1] = 14; // I think??? - need to make sure this is correct, all other cases should be handled like this
+void TurnCCW(){
+	TurnAround(LEFT_MOTOR, RIGHT_MOTOR, leftCount, rightCount);	// Set currentEdge for special cases - These currentEdges are the already flipped ones as if the turn had been completed on a single edge successfull
+	
+	// special cases for nodes we know are dead ends
+	if(currentEdge[0] == 5 && currentEdge[1] == 6){
+		currentEdge[0] = 6;
+		currentEdge[1] = 11; 
+	} else if(currentEdge[0] == 2 && currentEdge[1] == 7){
+		currentEdge[0] = 7;
+		currentEdge[1] = 12; 
+	}	
+
+	if(!passengerSpotted){
+		TurnDecision();
 	}
 }
 
-void TurnCCW(){
+void TurnCW(){
 	TurnAround(RIGHT_MOTOR, LEFT_MOTOR, rightCount, leftCount);
-	// Set currentEdge for special cases - These currentEdges are the already flipped ones as if the turn had been completed on a single edge successfull
-	if(currentEdge[0] == 5 && currentEdge[1] == 6){
-		currentEdge[0] = 6;
-		currentEdge[1] = 11; // I think??? - need to make sure this is correct, all other cases should be handled like this
+	
+	// Special cases for nodes we know are dead ends. CurrentEdges are flipped ones as if the turn had been completed on a single edge successfully
+	if(currentEdge[0] == 9 && currentEdge[1] == 8){
+		currentEdge[0] = 8;
+		currentEdge[1] = 14; 
+	} else if(currentEdge[0] == 2 && currentEdge[1] == 7){
+		currentEdge[0] = 7;
+		currentEdge[1] = 13; 
+	}	
+	
+	if(!passengerSpotted){
+		TurnDecision();
 	}
 }
 

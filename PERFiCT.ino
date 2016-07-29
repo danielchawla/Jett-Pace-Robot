@@ -188,7 +188,7 @@ int initialProfitMatrix[4][20];
 int profitMatrix[4][20];
 
 //edge matrix stuff
-int theMap[4][20] = { // theMap[currentInd][dir] = [toIndex]
+int theMap[4][20] = { // theMap[dir][currentInd] = [toIndex]
   // 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
   { -1, -1, -1, -1, -1, -1,  1,  2,  3, -1,  0,  6,  7,  7,  8,  4, 10, 11, 14, 15}, //N
   { -1, -1, -1, -1, -1,  6, -1, 13,  9, -1, 11, 12, -1, 14, 15, -1, 17, 18, 19, -1}, //E
@@ -450,13 +450,13 @@ void loop() {
       switch(currentEdge[1]){
         case 0: TurnCW(); break;
         case 1: TurnCCW(); break;
-        case 2: TurnCCW(); break;
+        case 2: TurnCCW(); break; // preferably use prof matrix to decide this
         case 3: TurnCW(); break;
         case 4: TurnCCW(); break;
-        case 5: TurnCCW(); break;
-        case 9: TurnCW(); break;
+        case 5: TurnCCW(); break; // preferably use prof matrix to decide this
+        case 9: TurnCW(); break; // preferably use prof matrix to decide this
         default: TurnCCW();
-        }
+      }
     }
     for(int i = 0; i<6;i++){
       switchVals[i] = 0;
@@ -593,7 +593,7 @@ void PrintToLCD() {
     LCD.print(" i: "); LCD.print(turnCount);*/
     //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
     //LCD.print(hasPassenger); LCD.print("  "); LCD.print(passengerSpotted);
-    LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
+    //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
     LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
 }
