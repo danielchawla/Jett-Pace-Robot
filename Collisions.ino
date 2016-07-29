@@ -74,7 +74,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 					statusCount180 = 0;
 					stage = 0; // Reset stage
 					offTape = false;
-					loopsSinceLastInt = 0;
+					loopsSinceLastInt = 700;
 					leftEncoderAtLastInt = leftCount;
 					rightEncoderAtLastInt = rightCount;
 					if(discrepancyInLocation){
