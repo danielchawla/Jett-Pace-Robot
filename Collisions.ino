@@ -71,7 +71,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 					statusCount180 = 0;
 					stage = 0; // Reset stage
 					offTape = false;
-					loopsSinceLastInt = 500;
+					loopsSinceLastInt = 500; // TODO: investigate
 					leftEncoderAtLastInt = leftCount;
 					rightEncoderAtLastInt = rightCount;
 					if(discrepancyInLocation){
@@ -131,6 +131,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 void Turn180Decision(){
 	rightDiff = rightCount - rightEncoderAtLastInt;
   leftDiff = leftCount - leftEncoderAtLastInt;
+  int turnDirection = pastTurn;
 
   if(atIntersection){
   	if(turnActual == STRAIGHT){
@@ -144,14 +145,19 @@ void Turn180Decision(){
   	discrepancyInLocation = true;
   }else{ // if !atIntersection
   	if(leftDiff < closeToIntCount && rightDiff < closeToIntCount && !discrepancyInLocation){// TODO see whether && || || is apropriate
-  		if(pastTurn == LEFT){
-  			turnCCW();
-  		}else if(pastTurn == RIGHT){
-  			turnCW();
-  		}
+  		switch(currentEdge[1]){
+  			case 5: turnCCW(); turnDirection = LEFT; break;
+  			case 9: turnCW; turnDirection = RIGHT; break;
+  			default:
+		  		if(pastTurn == LEFT){
+		  			turnCCW();
+		  		}else if(pastTurn == RIGHT){
+		  			turnCW();
+		  		}
+		  }
   		for(int i = 1; i < 4; i++){
-  			if(theMap[nodeMat[currentEdge[0]][currentEdge[1]]+i*pastTurn] != -1){
-  				currentEdge[1] = theMap[nodeMat[currentEdge[0]][currentEdge[1]]+i*pastTurn];
+  			if(theMap[nodeMat[currentEdge[0]][currentEdge[1]]+i*turnDirection] != -1){
+  				currentEdge[1] = theMap[nodeMat[currentEdge[0]][currentEdge[1]]+i*turnDirection];
   				break;
   			}
   			if(i == 3){
@@ -160,11 +166,16 @@ void Turn180Decision(){
   		}
 
   	}else if(leftDiff > farFromIntCount && rightDiff > farFromIntCount && !discrepancyInLocation){
-  		if(pastTurn == LEFT){
-  			turnCW();
-  		}else if(pastTurn == RIGHT){
-  			turnCCW();
-  		}
+			switch(currentEdge[1]){
+  			case 1: turnCCW(); break;
+  			case 3: turnCW(); break;
+  			default:
+		  		if(pastTurn == LEFT){
+		  			turnCW();
+		  		}else if(pastTurn == RIGHT){
+		  			turnCCW();
+		  		}
+		  }  		
 			tempInt180 = currentEdge[1];
 			currentEdge[1] = currentEdge[0];
 			currentEdge[0] = tempInt180;
