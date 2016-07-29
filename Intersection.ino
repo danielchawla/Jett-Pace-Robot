@@ -281,6 +281,11 @@ void ProcessIntersection() {
   }
 
   if (!atIntersection) { // If no longer at intersection reset apropriate variables
+    ResetIntersection();
+  }
+}
+
+void ResetIntersection(){
     // TODO copy paste lost detection code from DEV - Is below - Uncomment and make sure it works
 
     /*
@@ -328,6 +333,9 @@ void ProcessIntersection() {
     if(!discrepancyInLocation){
       currentEdge[0] = currentEdge[1];
       currentEdge[1] = theMap[(currentDir + turnActual + 4) % 4][currentEdge[0]];
+    } else{
+      currentEdge[0] = GARBAGE;
+      currentEdge[1] = GARBAGE;
     }
 
     //TODOLOST - uncomment
@@ -335,7 +343,10 @@ void ProcessIntersection() {
       motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED/5);
       checkToSeeIfWeKnowWhereWeAre();//this is called right after an intersection
     }
-
+    pastAction = turnActual;
+    if(turnActual != STRAIGHT){
+      pastTurn = turnActual;
+    }
     desiredTurn = GARBAGE;
     turnActual = GARBAGE;
 
@@ -352,9 +363,7 @@ void ProcessIntersection() {
     noStraightCount = 0;
     tapeFollowCountInInt = 0;
     avgCorrection = 0;
-  }
 }
-
 void checkToSeeIfWeKnowWhereWeAre(void){
   //Checks to see if we are going along the straight edge by the drop off.
  

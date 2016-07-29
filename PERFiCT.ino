@@ -231,6 +231,8 @@ int loopsSinceLastInt = 0;
 int leavingCount = 0;
 int tapeFollowCountInInt = 0;
 int noStraightCount = 0;
+int pastTurn = LEFT;
+int pastAction = STRAIGHT;
 
 // checkToSeeIfWeKnowWhereWeAre variables
 int rightEncoderAtLastInt = 0;
@@ -250,6 +252,8 @@ int count180 = 0;
 int statusCount180 = 0;
 int countLeft180 = 0;
 int countRight180 = 0;
+#define closeToIntCount 200
+#define farFromIntCount 300
 
 // Loop timing variables
 unsigned long t1 = 0;
@@ -450,18 +454,19 @@ void loop() {
       }
       //TODO: Implement check for passenger at front from dev
     }else if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
-      // Check which way to turn based on currentEdge[1]
-      switch(currentEdge[1]){
-        case 0: TurnCW(); break;
-        case 1: TurnCCW(); break;
-        case 2: TurnCCW(); break; // preferably use prof matrix to decide this
-        case 3: TurnCW(); break;
-        case 4: TurnCCW(); break;
-        case 5: TurnCCW(); break; // preferably use prof matrix to decide this
-        case 9: TurnCW(); break; // preferably use prof matrix to decide this
-        default: TurnCCW();
-      }
-    }
+      Turn180Decision();
+    //   // Check which way to turn based on currentEdge[1]
+    //   switch(currentEdge[1]){
+    //     case 0: TurnCW(); break;
+    //     case 1: TurnCCW(); break;
+    //     case 2: TurnCCW(); break; // preferably use prof matrix to decide this
+    //     case 3: TurnCW(); break;
+    //     case 4: TurnCCW(); break;
+    //     case 5: TurnCCW(); break; // preferably use prof matrix to decide this
+    //     case 9: TurnCW(); break; // preferably use prof matrix to decide this
+    //     default: TurnCCW();
+    //   }
+    // }
     for(int i = 0; i<6;i++){
       switchVals[i] = 0;
     }

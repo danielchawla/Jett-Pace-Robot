@@ -68,13 +68,10 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 
 				if(statusCount180 > 10){
 					//Finished turning around - change currentEdge
-					tempInt180 = currentEdge[1];
-					currentEdge[1] = currentEdge[0];
-					currentEdge[0] = tempInt180;
 					statusCount180 = 0;
 					stage = 0; // Reset stage
 					offTape = false;
-					loopsSinceLastInt = 0;
+					loopsSinceLastInt = 500;
 					leftEncoderAtLastInt = leftCount;
 					rightEncoderAtLastInt = rightCount;
 					if(discrepancyInLocation){
@@ -131,12 +128,62 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 	}
 }
 	
+void Turn180Decision(){
+	rightDiff = rightCount - rightEncoderAtLastInt;
+  leftDiff = leftCount - leftEncoderAtLastInt;
+
+  if(atIntersection){
+  	if(turnActual == STRAIGHT){
+  		switch pastTurn{
+  			case RIGHT: TurnCCW(); break;
+  			case LEFT: TurnCW(); break;
+  			default: TurnCCW(); motor.stop_all(); LCD.clear(); LCD.print("past turn straight"); while(true){} break;
+  		}
+  	}
+  	ResetIntersection();
+  	discrepancyInLocation = true;
+  }else{ // if !atIntersection
+  	if(leftDiff < closeToIntCount && rightDiff < closeToIntCount && !discrepancyInLocation){// TODO see whether && || || is apropriate
+  		if(pastTurn == LEFT){
+  			turnCCW();
+  		}else if(pastTurn == RIGHT){
+  			turnCW();
+  		}
+  		for(int i = 1; i < 4; i++){
+  			if(theMap[nodeMat[currentEdge[0]][currentEdge[1]]+i*pastTurn] != -1){
+  				currentEdge[1] = theMap[nodeMat[currentEdge[0]][currentEdge[1]]+i*pastTurn];
+  				break;
+  			}
+  			if(i == 3){
+  				motor.stop_all(); LCD.clear(); LCD.print("bug #88Ø"); delay(2000);
+  			}
+  		}
+
+  	}else if(leftDiff > farFromIntCount && rightDiff > farFromIntCount && !discrepancyInLocation){
+  		if(pastTurn == LEFT){
+  			turnCW();
+  		}else if(pastTurn == RIGHT){
+  			turnCCW();
+  		}
+			tempInt180 = currentEdge[1];
+			currentEdge[1] = currentEdge[0];
+			currentEdge[0] = tempInt180;
+  	} else{ //grey zone or already lost
+  		if(pastTurn == LEFT){
+  			turnCW();
+  		}else if(pastTurn == RIGHT){
+  			turnCCW();
+  		}
+  		discrepancyInLocation = true;
+  	}
+  }
+}
 
 void TurnCCW(){
 	TurnAround(LEFT_MOTOR, RIGHT_MOTOR, leftCount, rightCount);	// Set currentEdge for special cases - These currentEdges are the already flipped ones as if the turn had been completed on a single edge successfull
 	
 	// special cases for nodes we know are dead ends
-	if(currentEdge[0] == 5 && currentEdge[1] == 6){
+	/*if(currentEdge[0] == 5 && currentEdge[1] == 6){
 		currentEdge[0] = 6;
 		currentEdge[1] = 11; 
 	} else if(currentEdge[0] == 2 && currentEdge[1] == 7){
@@ -146,14 +193,14 @@ void TurnCCW(){
 
 	if(!passengerSpotted){
 		TurnDecision();
-	}
+	}*/
 }
 
 void TurnCW(){
 	TurnAround(RIGHT_MOTOR, LEFT_MOTOR, rightCount, leftCount);
 	
 	// Special cases for nodes we know are dead ends. CurrentEdges are flipped ones as if the turn had been completed on a single edge successfully
-	if(currentEdge[0] == 9 && currentEdge[1] == 8){
+	/*if(currentEdge[0] == 9 && currentEdge[1] == 8){
 		currentEdge[0] = 8;
 		currentEdge[1] = 14; 
 	} else if(currentEdge[0] == 2 && currentEdge[1] == 7){
@@ -163,7 +210,7 @@ void TurnCW(){
 
 	if(!passengerSpotted){
 		TurnDecision();
-	}
+	}*/
 }
 
 void CollisionCheck(){
