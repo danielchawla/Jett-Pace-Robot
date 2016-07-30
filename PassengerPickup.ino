@@ -107,10 +107,14 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
     LCD.clear(); LCD.print("returning 0"); delay(500);
     return 0;
   }
-
-
   return 1;
 }
+
+/*void DistanceDetectPassenger(){
+  if(digitalRead(leftDistanceIR) > passengerInDistanceThreshold && analogRead(rightIRDistance) < ){
+    desiredTurn = LEFT;
+  } else if(digitalRead)
+}*/
 
 void DropoffPassenger(int side){
   LCD.clear(); LCD.print("Dropping off");
