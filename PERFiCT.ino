@@ -149,6 +149,7 @@ int error = 0;
 int kp;
 int kd;
 int g;
+int gActual;
 int pastError = 0;
 int recError;
 int prevError;
@@ -231,6 +232,7 @@ int statusCount = 0;
 int statusLast = 0;
 #define pathConfidence 15
 int loopsSinceLastInt = 0;
+int loopsSinceLastCollision = 0;
 int leavingCount = 0;
 int tapeFollowCountInInt = 0;
 int noStraightCount = 0;
@@ -360,6 +362,7 @@ void setup()
 
   // Initialize important variables with stored values
   g = menuItems[0].Value;
+  gActual = g;
   kp = menuItems[1].Value;
   kd = menuItems[2].Value;
   vel = menuItems[3].Value;
@@ -403,6 +406,14 @@ void loop() {
 
   numOfIttrs++;
   loopsSinceLastInt++;
+  loopsSinceLastCollision++;
+
+  if(loopsSinceLastCollision <= 500){
+    gActual = g*2.5;
+  }
+  else{
+    gActual = g;
+  }
   /*TAPE FOLLOWING*/
   //low reading == white. High reading == black tape.
   qrdVals[0] = digitalRead(q0);
@@ -458,6 +469,7 @@ void loop() {
       //TODO: Implement check for passenger at front from dev
     }else if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
       Turn180Decision();
+      loopsSinceLastCollision = 0;
     //   // Check which way to turn based on currentEdge[1]
     //   switch(currentEdge[1]){
     //     case 0: TurnCW(); break;
@@ -584,7 +596,7 @@ void TapeFollow() {
 
   p = kp * error;
   d = (int)((float)kd * (float)(error - recError) / (float)(q + m));
-  correction = (float)((p + d)*g)/10; //this was a hasty change
+  correction = (float)((p + d)*gActual)/10; //this was a hasty change
   if((error > -10 && error < 10) && loopsSinceLastInt % 200 == 0){
     avgCorrection = (avgCorrection*9+correction)/10; //TODO Investigate this ratio
   }

@@ -136,7 +136,7 @@ void ProcessIntersection() {
         motor.speed(RIGHT_MOTOR, vel / 4 + avgCorrection*1); // TODO: CHANGE may need to have to set back to /4
       }
       if(tapeFollowCountInInt > 600){ // previously 600
-        motor.stop_all(); LCD.clear(); LCD.print(avgCorrection); delay(2000);
+        //motor.stop_all(); LCD.clear(); LCD.print(avgCorrection); delay(2000);
         // motor.stop_all();
         // LCD.clear();
         // LCD.print(noStraightCount);
