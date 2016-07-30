@@ -131,7 +131,7 @@ void ProcessIntersection() {
     if(tapeFollowCountInInt){
       tapeFollowCountInInt++;
       TapeFollow();
-      if(tapeFollowCountInInt > 600){ // previously 1000
+      if(tapeFollowCountInInt > 800){ // previously 600
 
         // motor.stop_all();
         // LCD.clear();
@@ -294,7 +294,6 @@ void ResetIntersection(){
       Currently, we can always go straight even at an L or T intersection, so this is not 100% reliable but will (should) never give false positives
     */
       //TODOLOST - uncomment and see if works
-
     rightEncoderAtLastInt = rightCount;
     leftEncoderAtLastInt = leftCount;
     if(desiredTurn != turnActual){

@@ -34,11 +34,14 @@ void amILost(void);
 void ProcessIntersection(void);
 void checkToSeeIfWeKnowWhereWeAre(void);
 bool sortaEqual(int, int);
+void ResetIntersection(void);
 // Decisions
+void UpdateProfitMatrix(void);
 void TurnDecision(void);
 // Collisions
 void CollisionCheck(void);
 void TurnAround(int, int, volatile unsigned int&, volatile unsigned int&);
+void Turn180Decision();
 void TurnCW(void);
 void TurnCCW(void);
 void ReverseLeft(void);
@@ -226,7 +229,7 @@ int qrdToCheck;
 int loopNum = 1;
 int statusCount = 0;
 int statusLast = 0;
-#define pathConfidence 20
+#define pathConfidence 15
 int loopsSinceLastInt = 0;
 int leavingCount = 0;
 int tapeFollowCountInInt = 0;
@@ -244,7 +247,7 @@ int diff;
 #define curveOutsideCount 400
 //#define straightCount 450
 #define diffInCircle 100
-#define leftEncMinVal 490
+#define leftEncMinVal 450
 int numOfConsecutiveStraights;
 int inCircle = false;
 
@@ -252,8 +255,8 @@ int count180 = 0;
 int statusCount180 = 0;
 int countLeft180 = 0;
 int countRight180 = 0;
-#define closeToIntCount 200
-#define farFromIntCount 300
+#define closeToIntCount 120
+#define farFromIntCount 160
 
 // Loop timing variables
 unsigned long t1 = 0;
@@ -262,7 +265,7 @@ int loopTime;
 unsigned long startTime;
 
 // Passenger Pickup
-#define sideIRMin 650
+#define sideIRMin 600
 #define armIRMin 250
 #define countToDropoff 150 // TODO Change
 #define dropWidth  80
@@ -466,7 +469,7 @@ void loop() {
     //     case 9: TurnCW(); break; // preferably use prof matrix to decide this
     //     default: TurnCCW();
     //   }
-    // }
+    }
     for(int i = 0; i<6;i++){
       switchVals[i] = 0;
     }
@@ -477,9 +480,9 @@ void loop() {
     AreWeThereYet();
   }
 
-  if(loopsSinceLastInt == 100){
+  if(loopsSinceLastInt == 600){
     UpdateProfitMatrix();
-  } else if (loopsSinceLastInt == 300) {
+  } else if (loopsSinceLastInt == 800) {
     TurnDecision();
   }
 
@@ -490,7 +493,7 @@ void loop() {
     TapeFollow();
   }
 
-  if((currentEdge[0] == 17 && currentEdge[1] == 18) || (currentEdge[0] == 18 && currentEdge[1] == 17)){
+  if(((currentEdge[0] == 17 && currentEdge[1] == 18) || (currentEdge[0] == 18 && currentEdge[1] == 17)) && !discrepancyInLocation){
     //Going towards dropoff - count with encoders
     if(leftInitial == GARBAGE && hasPassenger){
       leftInitial = leftCount;

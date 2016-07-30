@@ -21,7 +21,7 @@ void UpdateProfitMatrix(){
       }
     }
   }
-}
+
 void TurnDecision(){
   currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;//direction with which we will enter the next intersection.
   // TODO: Reorganize this like in dev???

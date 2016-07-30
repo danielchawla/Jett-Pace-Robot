@@ -42,15 +42,15 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			// Entering Stage 3: Pivot
 			LCD.clear();LCD.print("Stage 3 "); LCD.print(driveEncoderCount - count180);
 			count180 = driveEncoderCount;
-			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED/3);
+			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED/4);
 			motor.speed(driveMotor, MAX_MOTOR_SPEED*2/3);
 		}
 
 		//Check if offTape
 		if(!offTape){
-			if(!(digitalRead(q1) || digitalRead(q2))) {
+			if(stage > 1 && !digitalRead(q1) && !digitalRead(q2)) {
 				statusCount180++;
-				if(statusCount180 > 30){
+				if(statusCount180 > 200){
 					//we just lost the tape.
 					statusCount180 = 0;
 					offTape = true;
@@ -72,8 +72,6 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 					stage = 0; // Reset stage
 					offTape = false;
 					loopsSinceLastInt = 500; // TODO: investigate
-					leftEncoderAtLastInt = leftCount;
-					rightEncoderAtLastInt = rightCount;
 					if(discrepancyInLocation){
 						motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED/5);
 					}
@@ -131,63 +129,93 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 void Turn180Decision(){
 	rightDiff = rightCount - rightEncoderAtLastInt;
   leftDiff = leftCount - leftEncoderAtLastInt;
-  int turnDirection = pastTurn;
 
+  LCD.clear(); LCD.print("L: "); LCD.print(rightDiff); LCD.print(" R: "); LCD.print(leftDiff);
+  motor.stop_all(); delay(3000);
+  int turnDirection = pastTurn;
+  int distFromIntCase = GARBAGE;
   if(atIntersection){
   	if(turnActual == STRAIGHT){
-  		switch pastTurn{
+  		switch (pastTurn){
   			case RIGHT: TurnCCW(); break;
   			case LEFT: TurnCW(); break;
   			default: TurnCCW(); motor.stop_all(); LCD.clear(); LCD.print("past turn straight"); while(true){} break;
   		}
   	}
   	ResetIntersection();
+  	motor.stop_all(); LCD.clear(); LCD.print("At Intersection ??"); delay(1000);
   	discrepancyInLocation = true;
   }else{ // if !atIntersection
-  	if(leftDiff < closeToIntCount && rightDiff < closeToIntCount && !discrepancyInLocation){// TODO see whether && || || is apropriate
+  	switch(currentEdge[1]){
+  		case 5: distFromIntCase = 1; break; 
+  		case 9: distFromIntCase = 1; break;
+  		case 2: distFromIntCase = 1; break; // Close to Int condition at these nodes
+  		case 1: distFromIntCase = 2; break;
+  		case 3: distFromIntCase = 2; break; // Far from Int condition at thses nodes
+  	}
+  	if(distFromIntCase == 1 || (leftDiff < closeToIntCount && rightDiff < closeToIntCount && !discrepancyInLocation)){// TODO see whether && || || is apropriate
   		switch(currentEdge[1]){
-  			case 5: turnCCW(); turnDirection = LEFT; break;
-  			case 9: turnCW; turnDirection = RIGHT; break;
+  			case 5: TurnCCW(); turnDirection = LEFT; break;
+  			case 9: TurnCW(); turnDirection = RIGHT; break;
+  			case 2:
+  				if(pastTurn == LEFT){
+  					TurnCW(); // TODO switch turnDirection??
+  					turnDirection = RIGHT;
+  				}
+  				else{ //if past turn is right
+  					TurnCCW();
+  					turnDirection = LEFT;
+  				}
   			default:
 		  		if(pastTurn == LEFT){
-		  			turnCCW();
+		  			TurnCCW();
 		  		}else if(pastTurn == RIGHT){
-		  			turnCW();
+		  			TurnCW();
 		  		}
 		  }
   		for(int i = 1; i < 4; i++){
-  			if(theMap[nodeMat[currentEdge[0]][currentEdge[1]]+i*turnDirection] != -1){
-  				currentEdge[1] = theMap[nodeMat[currentEdge[0]][currentEdge[1]]+i*turnDirection];
+  			if(theMap[nodeMat[currentEdge[0]][currentEdge[1]]+i*turnDirection][currentEdge[0]] != -1){
+  				currentEdge[1] = theMap[nodeMat[currentEdge[0]][currentEdge[1]]+i*turnDirection][currentEdge[0]];
   				break;
   			}
   			if(i == 3){
-  				motor.stop_all(); LCD.clear(); LCD.print("bug #88Ø"); delay(2000);
+  				motor.stop_all(); LCD.clear(); LCD.print("bug #88Ø"); delay(20000);//TODO get rid of this delay
   			}
   		}
 
-  	}else if(leftDiff > farFromIntCount && rightDiff > farFromIntCount && !discrepancyInLocation){
+  	}else if(distFromIntCase == 2 || (leftDiff > farFromIntCount && rightDiff > farFromIntCount && !discrepancyInLocation)){
 			switch(currentEdge[1]){
-  			case 1: turnCCW(); break;
-  			case 3: turnCW(); break;
+  			case 1: TurnCCW(); break;
+  			case 3: TurnCW(); break;
   			default:
 		  		if(pastTurn == LEFT){
-		  			turnCW();
+		  			TurnCCW();
 		  		}else if(pastTurn == RIGHT){
-		  			turnCCW();
+		  			TurnCW();
 		  		}
 		  }  		
-			tempInt180 = currentEdge[1];
+			int tempInt180 = currentEdge[1];
 			currentEdge[1] = currentEdge[0];
 			currentEdge[0] = tempInt180;
   	} else{ //grey zone or already lost
-  		if(pastTurn == LEFT){
-  			turnCW();
+  		motor.stop_all(); LCD.clear(); LCD.print("In grey zone"); delay(1000);
+  		if(pastTurn == LEFT){ // Jonah switched these directions???
+  			TurnCCW();
   		}else if(pastTurn == RIGHT){
-  			turnCCW();
+  			TurnCW();
   		}
+  		currentEdge[0] = GARBAGE;
+  		currentEdge[1] = GARBAGE;
+  		leftInitial = GARBAGE;
+      rightInitial = GARBAGE;
   		discrepancyInLocation = true;
   	}
   }
+  pastTurn = pastTurn*-1; //Switch pastDirection so that next turn is in proper direction
+	leftEncoderAtLastInt = leftCount;
+	rightEncoderAtLastInt = rightCount;
+  LCD.clear();LCD.print("From: "); LCD.print(currentEdge[0]); LCD.print(" To: ");LCD.print(currentEdge[1]);
+  //motor.stop_all(); delay(1000);
 }
 
 void TurnCCW(){
@@ -225,7 +253,7 @@ void TurnCW(){
 }
 
 void CollisionCheck(){
-	if(digitalRead(OR) && !collisionDetected){
+	if((digitalRead(OR) || digitalRead(FRONT_LEFT_BUMPER_PIN)) && !collisionDetected){
     collisionCount++;
     switchVals[FRONT_BUMPER] += digitalRead(FRONT_BUMPER_PIN);
     switchVals[FRONT_RIGHT_BUMPER] += digitalRead(FRONT_RIGHT_BUMPER_PIN);
@@ -233,13 +261,13 @@ void CollisionCheck(){
     switchVals[REAR_BUMPER] += digitalRead(REAR_BUMPER_PIN);
     switchVals[LEFT_BUMPER] += digitalRead(LEFT_BUMPER_PIN);
     switchVals[FRONT_LEFT_BUMPER] += digitalRead(FRONT_LEFT_BUMPER_PIN);
-    if(collisionCount > 20){
-    	switchVals[FRONT_BUMPER] /= 10;
-      switchVals[FRONT_RIGHT_BUMPER] /= 10;
-      switchVals[RIGHT_BUMPER] /= 10;
-      switchVals[REAR_BUMPER] /= 10;
-      switchVals[LEFT_BUMPER] /= 10;
-      switchVals[FRONT_LEFT_BUMPER] /= 10;
+    if(collisionCount > 10){
+    	switchVals[FRONT_BUMPER] /= 5;
+      switchVals[FRONT_RIGHT_BUMPER] /= 5;
+      switchVals[RIGHT_BUMPER] /= 5;
+      switchVals[REAR_BUMPER] /= 5;
+      switchVals[LEFT_BUMPER] /= 5;
+      switchVals[FRONT_LEFT_BUMPER] /= 5;
       collisionDetected = true;
       collisionCount = 0;
 
