@@ -72,6 +72,8 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 					stage = 0; // Reset stage
 					offTape = false;
 					loopsSinceLastInt = 500; // TODO: investigate
+					leftEncoderAtLastInt = leftCount;
+					rightEncoderAtLastInt = rightCount;
 					if(discrepancyInLocation){
 						motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED/5);
 					}
@@ -131,7 +133,7 @@ void Turn180Decision(){
   leftDiff = leftCount - leftEncoderAtLastInt;
 
   LCD.clear(); LCD.print("L: "); LCD.print(rightDiff); LCD.print(" R: "); LCD.print(leftDiff);
-  motor.stop_all(); delay(3000);
+  // motor.stop_all(); delay(1000);
   int turnDirection = pastTurn;
   int distFromIntCase = GARBAGE;
   if(atIntersection){

@@ -585,7 +585,9 @@ void TapeFollow() {
   p = kp * error;
   d = (int)((float)kd * (float)(error - recError) / (float)(q + m));
   correction = (float)((p + d)*g)/10; //this was a hasty change
-  avgCorrection = (avgCorrection*49+correction)/50; //TODO Investigate this ratio
+  if((error > -10 && error < 10) && loopsSinceLastInt % 200 == 0){
+    avgCorrection = (avgCorrection*9+correction)/10; //TODO Investigate this ratio
+  }
   pastError = error;
   m++;
   if(!passengerSide){ // If passenger has not been seen, go forward

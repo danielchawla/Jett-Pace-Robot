@@ -96,9 +96,8 @@ void ProcessIntersection() {
 
       pastError = error;
       m++;
-
-      motor.speed(LEFT_MOTOR, vel / 4 - avgCorrection);
-      motor.speed(RIGHT_MOTOR, vel / 4 + avgCorrection); // TODO: CHANGE may need to have to set back to /4
+        motor.speed(LEFT_MOTOR, vel / 4 - avgCorrection*1);
+        motor.speed(RIGHT_MOTOR, vel / 4 + avgCorrection*1); // TODO: CHANGE may need to have to set back to /4
     }
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {
@@ -130,9 +129,14 @@ void ProcessIntersection() {
 
     if(tapeFollowCountInInt){
       tapeFollowCountInInt++;
-      TapeFollow();
-      if(tapeFollowCountInInt > 800){ // previously 600
-
+      if(tapeFollowCountInInt > 0){
+        TapeFollow();
+      }else{
+        motor.speed(LEFT_MOTOR, vel / 4 - avgCorrection*1);
+        motor.speed(RIGHT_MOTOR, vel / 4 + avgCorrection*1); // TODO: CHANGE may need to have to set back to /4
+      }
+      if(tapeFollowCountInInt > 600){ // previously 600
+        motor.stop_all(); LCD.clear(); LCD.print(avgCorrection); delay(2000);
         // motor.stop_all();
         // LCD.clear();
         // LCD.print(noStraightCount);
@@ -201,11 +205,12 @@ void ProcessIntersection() {
       //RYANS NEW CODE
       //check if there is tape after int
     //if((digitalRead(q0) || digitalRead(q1) || digitalRead(q3) || digitalRead(q2)) && tapeFollowCountInInt > 300){
-    if((qrdVals[0] == HIGH || qrdVals[1] == HIGH || qrdVals[2] == HIGH || qrdVals[3] == HIGH) && tapeFollowCountInInt > 300){
+    if((qrdVals[0] == HIGH || qrdVals[1] == HIGH || qrdVals[2] == HIGH || qrdVals[3] == HIGH) && tapeFollowCountInInt > 200){
       noStraightCount+=3; //this should be "straighCount" or equivalent
       
       if(noStraightCount >= 50){
         atIntersection = false; //we can turn straight! exit the intersection and keep tape following
+        motor.stop_all(); LCD.clear(); LCD.print(avgCorrection); delay(2000);
       }
       else if(noStraightCount){
          noStraightCount--;
