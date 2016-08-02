@@ -205,7 +205,6 @@ void Turn180Decision(){
   				motor.stop_all(); LCD.clear(); LCD.print("bug #88Ø"); delay(2000);//TODO get rid of this delay
   			}
   		}
-
   	}else if(distFromIntCase == 2 || (leftDiff > farFromIntCount && rightDiff > farFromIntCount && !discrepancyInLocation)){
 			switch(currentEdge[1]){
   			case 1: TurnCCW(); break;
