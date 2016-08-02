@@ -165,7 +165,7 @@ void ProcessIntersection() {
         } else{ // THIS SHOULD NEVER HAPPEN
           LCD.print("No straight or turn");
           motor.stop_all();
-          while(true){} // TODO 
+          //while(true){} // TODO 
         }
         //ryans stuff ends
       }
@@ -210,7 +210,7 @@ void ProcessIntersection() {
       
       if(noStraightCount >= 50){
         atIntersection = false; //we can turn straight! exit the intersection and keep tape following
-        motor.stop_all(); LCD.clear(); LCD.print(avgCorrection); delay(2000);
+        //motor.stop_all(); LCD.clear(); LCD.print(avgCorrection); delay(2000);
       }
       else if(noStraightCount){
          noStraightCount--;

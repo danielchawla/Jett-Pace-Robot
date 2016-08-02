@@ -111,9 +111,11 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
 }
 
 /*void DistanceDetectPassenger(){
-  if(digitalRead(leftDistanceIR) > passengerInDistanceThreshold && analogRead(rightIRDistance) < ){
+  if(digitalRead(leftDistanceIR) > passengerInDistanceThreshold && analogRead(rightIRDistance) < passengerInDistanceThreshold){
     desiredTurn = LEFT;
-  } else if(digitalRead)
+  } else if(digitalRead(leftDistanceIR) < passengerInDistanceThreshold && analogRead(rightIRDistance) > passengerInDistanceThreshold)){
+    desiredTurn = RIGHT;
+  }
 }*/
 
 void DropoffPassenger(int side){

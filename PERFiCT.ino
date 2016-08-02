@@ -206,9 +206,9 @@ int rotEncoder[4][20] = {
 int dirToDropoff[20]        = {S, S, S, S, S, E, S, E, S, W, S, S, W, E, S, S, E, E, W, W}; // Direction of dropoff zone from each intersection
 int secondDirToDropoff[20]  = {S, S, S, S, S, E, N, W, N, W, E, W, S, S, E, W, N, N, N, N};
 int bearingToDropoff[20] = {120, 160, 180, 200, 240, 120, 150, 180, 210, 240, 110, 120, 160, 200, 240, 250, 100, 100, 260, 260}; // gives bearing to dropoff from each node
-int distToDropoff[20] = {4, 4, 5, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 3, 2, 1, 1, 2};
-int stuckLikelyhood[20] = {8, 8, 8, 8, 8, 8, 7, 4, 7, 8, 5, 1, 4, 4, 1, 5, 4, 2, 2, 4};
-int numOfDolls[20] = {2, 3, 2, 3, 2, 3, 8, 6, 8, 3, 6, 7, 5, 5, 7, 6, 3, 7, 7, 3};
+int distToDropoff[20] =       {4, 4, 5, 4, 4, 4, 3, 4, 3, 4, 3, 2, 3, 3, 2, 3, 2, 1, 1, 2};
+int stuckLikelyhood[20] =     {8, 8, 8, 8, 8, 8, 7, 4, 7, 8, 5, 1, 4, 4, 1, 5, 4, 2, 2, 4};
+int numOfDolls[20] =          {2, 3, 2, 3, 2, 3, 8, 6, 8, 3, 6, 7, 5, 5, 7, 6, 3, 7, 7, 3};
 int intersectionType[20]; // stores type of each intersection ie. 4-way, 4 bit boolean {NSEW} T/F values
 
 int currentEdge[2];
@@ -230,7 +230,7 @@ int qrdToCheck;
 int loopNum = 1;
 int statusCount = 0;
 int statusLast = 0;
-#define pathConfidence 15
+#define pathConfidence 12
 int loopsSinceLastInt = 0;
 int loopsSinceLastCollision = 0;
 int leavingCount = 0;
@@ -246,9 +246,9 @@ int rightDiff;
 int leftDiff;
 int diff;
 //#define curveInsideCount 300
-#define curveOutsideCount 400
+#define curveOutsideCount 390
 //#define straightCount 450
-#define diffInCircle 100
+//#define diffInCircle 100
 #define leftEncMinVal 450
 int numOfConsecutiveStraights;
 int inCircle = false;
@@ -268,8 +268,10 @@ unsigned long startTime;
 
 // Passenger Pickup
 #define sideIRMin 600
+#define frontIRMin 200
 #define armIRMin 250
-#define countToDropoff 150 // TODO Change
+#define countToDropoff 180 // TODO Change
+#define countMaxToDropoff 300
 #define dropWidth  80
 #define PICKUPSUCCESSTHRESH 400
 int failedPickup = 0;
@@ -284,7 +286,7 @@ int rightInitial = GARBAGE;
 // Angles of straight arm and open claw
 #define armHome 80
 #define clawOpen 160
-#define clawMid 80
+#define clawMid 75
 #define clawClose 10
 
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
@@ -309,6 +311,7 @@ int passengerSpotted = 0;
 int lostTape = 0;
 int foundTape = 0; //this should be the opposite of lostTape..
 int positionLost = 0; // Change to 1 if sensor data contradicts what is expected based on currentEdge[][]
+int pickingUp = 0;
 
 void setup()
 {
@@ -340,7 +343,7 @@ void setup()
   for(int i = 0; i<4; i++){
   	for(int j = i; j <20; j++){
   		if (theMap[i][j] >= 0){
-        initialProfitMatrix[i][j] = 100 - 8*distToDropoff[theMap[i][j]] - 6*stuckLikelyhood[theMap[i][j]];
+        initialProfitMatrix[i][j] = 100 - 8*distToDropoff[theMap[i][j]] - 6*stuckLikelyhood[theMap[i][j]] + 3*numOfDolls[theMap[i][j]];
       }
       else{
         initialProfitMatrix[i][j] = GARBAGE;
@@ -406,14 +409,16 @@ void loop() {
 
   numOfIttrs++;
   loopsSinceLastInt++;
-  loopsSinceLastCollision++;
 
-  if(loopsSinceLastCollision <= 500){
-    gActual = g*2.5;
+
+  /*if(loopsSinceLastCollision <= 500){
+    gActual = g*5;
+    loopsSinceLastCollision++;
   }
   else{
     gActual = g;
-  }
+  }*/
+
   /*TAPE FOLLOWING*/
   //low reading == white. High reading == black tape.
   qrdVals[0] = digitalRead(q0);
@@ -432,7 +437,13 @@ void loop() {
         motor.speed(RIGHT_MOTOR, -1*MAX_MOTOR_SPEED);
         delay(20);
         motor.stop_all();
+        pickingUp = 1;
         hasPassenger = PickupPassenger(passengerSide);
+        if(!hasPassenger){ //TODO: TEST
+          desiredTurn = passengerSide;
+        }
+        pickingUp = 0;
+        motor.stop_all(); LCD.clear(); LCD.print(leftCount - leftInitial); delay(2000);
         if(hasPassenger){
           //g = g*1.1;
           //intGain = intGain*1.1;
@@ -467,7 +478,7 @@ void loop() {
         ReverseRight(); // TODO: Make a reverse straight/change this based on currentEdge??
       }
       //TODO: TEST check for passenger at front from dev
-    }else if(switchVals[FRONT_BUMPER] && (currentEdge[0] == 6 || currentEdge[0] == 8) && analogRead(ArmIRpin) > FRONT_IR_MIN && !hasPassenger){
+    }else if(switchVals[FRONT_BUMPER] && (currentEdge[0] == 6 || currentEdge[0] == 8) && analogRead(ArmIRpin) > frontIRMin && !hasPassenger){
       hasPassenger = PickupPassenger(0);
     }
     else if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
@@ -499,13 +510,14 @@ void loop() {
 
   if(((currentEdge[0] == 17 && currentEdge[1] == 18) || (currentEdge[0] == 18 && currentEdge[1] == 17)) && !discrepancyInLocation){
     //Going towards dropoff - count with encoders
-    if(leftInitial == GARBAGE && hasPassenger){
+    /*if(leftInitial == GARBAGE && hasPassenger){
+      motor.stop_all(); LCD.clear(); LCD.print("Setting initial"); delay(2000);
       leftInitial = leftCount;
       rightInitial = rightCount;
-    }
-    if(((leftCount - leftInitial > countToDropoff) && (rightCount - rightInitial > countToDropoff))  &&  hasPassenger){
+    }*/
+    if(((leftCount - leftEncoderAtLastInt > countToDropoff) && (rightCount - rightEncoderAtLastInt > countToDropoff))  &&  hasPassenger){
       // Have reached dropoff zone
-      if((leftCount - leftInitial < countMaxToDropOff) || (rightCount - rightInitial < countMaxToDropoff)){
+      if((leftCount - leftEncoderAtLastInt < countMaxToDropoff) || (rightCount - rightEncoderAtLastInt < countMaxToDropoff)){
           // Might not need this if depending on passener positions on 17-18 edge
         motor.stop_all();
         stopTime2 = millis();
@@ -518,15 +530,16 @@ void loop() {
         leftInitial = GARBAGE;
         rightInitial = GARBAGE;
         if(passengerSpotted){
-          TurnCCW();
-          passengerSpotted = 0;
+          Turn180Decision();
+          passengerSpotted = false;
           UpdateProfitMatrix();
           TurnDecision();
         }
       }else{
-        turnAround(); // Turn around and reset counts.  We will drop the passenger off countToDropoff # of pulses from where the passenger was picked up (hopefully)
-        leftInitial = GARBAGE;
-        rightInitial = GARBAGE;
+        motor.stop_all(); LCD.clear(); LCD.print("too far"); delay(2000);
+        Turn180Decision(); // Turn around and reset counts.  We will drop the passenger off countToDropoff # of pulses from where the passenger was picked up (hopefully)
+        //leftInitial = GARBAGE;
+        //rightInitial = GARBAGE;
       }
     }
 
@@ -594,6 +607,11 @@ void TapeFollow() {
   if((error > -10 && error < 10) && loopsSinceLastInt % 200 == 0){
     avgCorrection = (avgCorrection*9+correction)/10; //TODO Investigate this ratio
   }
+  /*if(correction > 150){
+    correction = 150;
+  }else if(correction < -150){
+    correction = -150;
+  }*/
   pastError = error;
   m++;
   if(!passengerSide){ // If passenger has not been seen, go forward
@@ -638,8 +656,8 @@ void enableExternalInterrupt(unsigned int INTX, unsigned int mode)
   sei();
 }
 
-ISR(INT1_vect) {rightCount++;};
-ISR(INT3_vect) {leftCount++;};
+ISR(INT1_vect) {if(!pickingUp)rightCount++;};
+ISR(INT3_vect) {if(!pickingUp)leftCount++;};
 
 
 
