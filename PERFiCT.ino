@@ -466,21 +466,13 @@ void loop() {
       }else if(switchVals[FRONT_BUMPER]){
         ReverseRight(); // TODO: Make a reverse straight/change this based on currentEdge??
       }
-      //TODO: Implement check for passenger at front from dev
-    }else if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
+      //TODO: TEST check for passenger at front from dev
+    }else if(switchVals[FRONT_BUMPER] && (currentEdge[0] == 6 || currentEdge[0] == 8) && analogRead(ArmIRpin) > FRONT_IR_MIN && !hasPassenger){
+      hasPassenger = PickupPassenger(0);
+    }
+    else if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
       Turn180Decision();
       loopsSinceLastCollision = 0;
-    //   // Check which way to turn based on currentEdge[1]
-    //   switch(currentEdge[1]){
-    //     case 0: TurnCW(); break;
-    //     case 1: TurnCCW(); break;
-    //     case 2: TurnCCW(); break; // preferably use prof matrix to decide this
-    //     case 3: TurnCW(); break;
-    //     case 4: TurnCCW(); break;
-    //     case 5: TurnCCW(); break; // preferably use prof matrix to decide this
-    //     case 9: TurnCW(); break; // preferably use prof matrix to decide this
-    //     default: TurnCCW();
-    //   }
     }
     for(int i = 0; i<6;i++){
       switchVals[i] = 0;
@@ -513,7 +505,7 @@ void loop() {
     }
     if(((leftCount - leftInitial > countToDropoff) && (rightCount - rightInitial > countToDropoff))  &&  hasPassenger){
       // Have reached dropoff zone
-      if(true/*(leftCount - leftInitial < countToDropoff + dropWidth) || (rightCount - rightInitial < countToDropoff + dropWidth)*/){
+      if((leftCount - leftInitial < countMaxToDropOff) || (rightCount - rightInitial < countMaxToDropoff)){
           // Might not need this if depending on passener positions on 17-18 edge
         motor.stop_all();
         stopTime2 = millis();
@@ -532,7 +524,9 @@ void loop() {
           TurnDecision();
         }
       }else{
-        //turnAround(); // Don't think we'll ever get here
+        turnAround(); // Turn around and reset counts.  We will drop the passenger off countToDropoff # of pulses from where the passenger was picked up (hopefully)
+        leftInitial = GARBAGE;
+        rightInitial = GARBAGE;
       }
     }
 
