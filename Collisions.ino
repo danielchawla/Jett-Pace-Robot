@@ -1,6 +1,6 @@
 #define stage1 15 // 10
 #define stage2 90 // maybe 95 and stage1 15 is better
-#define stage3 70000 //<--add 0's to make a three stage u-turn
+#define stage3 70 //<--add 0's to make a three stage u-turn
 #define tooManyRevs 100
 
 int offTape = false;
@@ -24,6 +24,11 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			LCD.clear(); LCD.print("Stage 1");
 			count180 = reverseEncoderCount;
 			//TODO accelerate to this speed using for loop??
+			// for (int i = 1; i<=50; i++){
+			// 	motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*2.0/3.0*(float)i/50.0);
+			// 	startTime = millis();
+  	// 		while(millis() - startTime < 2){}
+			// }
 			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*2/3);
 		}
 
@@ -34,6 +39,11 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			//Entering Stage 2: Reverse both
 			LCD.clear();LCD.print("Stage 2 "); LCD.print(stuck);
 			count180 = reverseEncoderCount;
+			// for (int i = 1; i<=50; i++){
+			// 	motor.speed(reverseMotor,  -1*MAX_MOTOR_SPEED*2/3*(float)i/50.0);
+			// 	startTime = millis();
+  	// 		while(millis() - startTime < 5){}
+			// }
 			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*2/3);
 			motor.speed(driveMotor, -1*MAX_MOTOR_SPEED/7);
 		}
@@ -45,12 +55,19 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			// Entering Stage 3: Pivot
 			LCD.clear();LCD.print("Stage 3 "); LCD.print(stuck);
 			count180 = driveEncoderCount;
-			motor.speed(reverseMotor, 0/* -1*MAX_MOTOR_SPEED/4*/);
+			// motor.speed(reverseMotor, 0/* -1*MAX_MOTOR_SPEED/4*/);
+			// for (int i = 1; i<=50; i++){
+			// 	motor.speed(driveMotor, MAX_MOTOR_SPEED*2/3*(float)i/50.0);
+			// 	startTime = millis();
+  	// 		while(millis() - startTime < 2){}
+			// }
+			// motor.speed(driveMotor, MAX_MOTOR_SPEED*2/3);
+			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED/4);
 			motor.speed(driveMotor, MAX_MOTOR_SPEED*2/3);
 			stuck = false;
 		}
 
-		if(stage == 3 && driveEncoderCount - count180 > stage3){
+		/*if(stage == 3 && driveEncoderCount - count180 > stage3){
 			stage++;
 			motor.stop_all();
 			// delay(100);
@@ -59,7 +76,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			count180 = reverseEncoderCount;
 			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*2/3);
 			motor.speed(driveMotor, 0);
-		}
+		}*/
 
 		if(stage == 3 && driveEncoderCount - count180 > tooManyRevs){
 			//set to stage 2:

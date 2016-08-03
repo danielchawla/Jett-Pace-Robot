@@ -250,7 +250,7 @@ int diff;
 //#define straightCount 450
 //#define diffInCircle 100
 #define leftEncMinVal 450
-#define sixEightThresh 400
+#define sixEightThresh 380
 int numOfConsecutiveStraights;
 int inCircle = false;
 
