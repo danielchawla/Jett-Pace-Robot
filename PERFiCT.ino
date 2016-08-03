@@ -390,7 +390,7 @@ void setup()
     currentEdge[1] = (int)((float)knob(7)/1024.0*20.0);
     LCD.clear();
     LCD.print("Press Start"); LCD.setCursor(0,1);
-    LCD.print("E0: "); LCD.print(currentEdge[0]); LCD.print(" E1: "); LCD.print(currentEdge[1]); LCD.print(" R: "); LCD.print(startRoute);
+    LCD.print("E0:"); LCD.print(currentEdge[0]); LCD.setCursor(6,1);LCD.print("E1:"); LCD.print(currentEdge[1]); LCD.setCursor(12,1);LCD.print("R:"); LCD.print(startRoute);
     delay(200);
     if(stopbutton()){
       startRoute = knob(7)/1024.0*5.0;
@@ -401,6 +401,7 @@ void setup()
         if (!startbutton()) {
           LCD.clear();
           if(currentEdge[0] == 0){
+            LCD.clear(); LCD.print("setting profits"); delay(1000);
             switch(startRoute){ // Initialize the hack
               case 0: profitMatrix[S][10] = 100; profitMatrix[E][16] = 100; profitMatrix[E][17] = 100;
               case 1: profitMatrix[E][10] = 100; profitMatrix[S][11] = 100; profitMatrix[E][17] = 100;
@@ -497,9 +498,10 @@ void loop() {
   }
 
   if(collisionDetected){
+    LCD.clear(); LCD.print("L:"); LCD.print(leftCount - leftEncoderAtLastInt); LCD.print(" R:"); LCD.print(rightCount-rightEncoderAtLastInt); motor.stop_all(); delay(1500);
     if(currentEdge[1] == 6 || currentEdge[1] == 8){ // Special case for 1 and 3
-      motor.stop_all(); LCD.clear(); LCD.print("Special Case"); delay(1500);
       if(leftCount - leftEncoderAtLastInt > sixEightThresh && rightCount - rightEncoderAtLastInt > sixEightThresh){
+        motor.stop_all(); LCD.clear(); LCD.print("Special Case"); delay(1500);
         if(currentEdge[1] == 6){
           currentEdge[1] = 1;
           currentEdge[0] = 6;
@@ -677,8 +679,8 @@ void PrintToLCD() {
     /*LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);*/
     //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
-    LCD.print(hasPassenger); LCD.print("  "); LCD.print(passengerSpotted);
-    //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
+    //LCD.print(hasPassenger); LCD.print("  "); LCD.print(passengerSpotted);
+    LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
     //LCD.print(leftDiff); LCD.print("  "); LCD.print(rightDiff);
     if(discrepancyInLocation){
       LCD.setCursor(0, 1); LCD.print("LOST  "); LCD.print(numOfConsecutiveStraights);

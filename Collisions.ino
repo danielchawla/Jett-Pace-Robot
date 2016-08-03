@@ -1,7 +1,7 @@
 #define stage1 15 // 10
 #define stage2 90 // maybe 95 and stage1 15 is better
 #define stage3 70 //<--add 0's to make a three stage u-turn
-#define tooManyRevs 100
+#define tooManyRevs 1200
 
 int offTape = false;
 int outOfCollision = false;
@@ -293,9 +293,6 @@ void Turn180Decision(){
 	leftEncoderAtLastInt = leftCount;
 	rightEncoderAtLastInt = rightCount;
 	currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;//direction with which we will enter the next intersection.
-  LCD.clear();//LCD.print("From: "); LCD.print(currentEdge[0]); LCD.print(" To: ");LCD.print(currentEdge[1]);
-  LCD.print(discrepancyInLocation);
-  motor.stop_all(); delay(1000);
 }
 
 void TurnCCW(){
