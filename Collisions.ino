@@ -60,10 +60,10 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			motor.speed(driveMotor, 0);
 		}
 
-		if(stage == 4 && reverseEncoderCount - count180 > tooManyRevs){
-			//set to stage 3:
-			stage = 2;
-			count180 = -1*stage2; //gonna go into that if statement up there once and will leave in stage 3
+		if(stage == 3 && driveEncoderCount - count180 > tooManyRevs){
+			//set to stage 2:
+			stage = 1;
+			count180 = -1*stage1; //gonna go into that if statement up there once and will leave in stage 3
 			loopsSinceLastChange = 0;
 		}
 
