@@ -238,6 +238,10 @@ int tapeFollowCountInInt = 0;
 int noStraightCount = 0;
 int pastTurn = LEFT;
 int pastAction = STRAIGHT;
+int defaultTurn = RIGHT;
+
+// Set the default turn if lost based on the last known node
+int defaultTurnFromNode[] = {LEFT, LEFT, RIGHT, RIGHT, RIGHT, LEFT, LEFT, RIGHT, RIGHT, RIGHT, LEFT, LEFT, LEFT, RIGHT, RIGHT, RIGHT, LEFT, LEFT, RIGHT, RIGHT}; 
 
 // checkToSeeIfWeKnowWhereWeAre variables
 int rightEncoderAtLastInt = 0;
@@ -249,7 +253,7 @@ int diff;
 #define curveOutsideCount 390
 //#define straightCount 450
 //#define diffInCircle 100
-#define leftEncMinVal 450
+#define longEncMinVal 450
 #define sixEightThresh 380
 int numOfConsecutiveStraights;
 int inCircle = false;

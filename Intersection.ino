@@ -148,24 +148,27 @@ void ProcessIntersection() {
         // delay(500); // TODO get rid of this and stop all
         
         // need to turn
-        if(rightTurnPossible>=pathConfidence){
+        if(rightTurnPossible>=pathConfidence && defaultTurn == RIGHT){
           turnActual = RIGHT;
           turning = 1;
           qrdToCheck = q3;
           loopNum = 2;
           LCD.clear();
           LCD.print("Turning Right");
-        }else if(leftTurnPossible>=pathConfidence){
+        }else if(leftTurnPossible>=pathConfidence){ // and defaultTurn == LEFT || right turn !possible
           turnActual = LEFT;
           turning = 1;
           qrdToCheck = q0;
           loopNum = 2;
           LCD.clear();
           LCD.print("Turning Left");
-        } else{ // THIS SHOULD NEVER HAPPEN
-          LCD.print("No straight or turn");
-          motor.stop_all();
-          //while(true){} // TODO 
+        } else{ // Turn Right if right turn was possible (will only get here if defaultTurn was LEFT and left turn was not possible, assuming one turn is always possible)
+          turnActual = RIGHT;
+          turning = 1;
+          qrdToCheck = q3;
+          loopNum = 2;
+          LCD.clear();
+          LCD.print("Turning Right");
         }
         //ryans stuff ends
       }
@@ -355,6 +358,10 @@ void ResetIntersection(){
     desiredTurn = GARBAGE;
     turnActual = GARBAGE;
 
+    if(!discrepancyInLocation){
+      defaultTurn = defaultTurnFromNode[currentEdge[0]];
+    }
+
     countInIntersection = 0;
     turning = 0;
     leftTurnPossible = 0;
@@ -405,7 +412,7 @@ void checkToSeeIfWeKnowWhereWeAre(void){
     discrepancyInLocation = false;    
   }
 
-  else if(leftDiff > leftEncMinVal){ //using left diff because that will be largest if we default to turning right if not straight
+  else if(leftDiff > longEncMinVal || rightDiff > longEncMinVal){ //using left diff because that will be largest if we default to turning right if not straight
     motor.stop_all(); LCD.clear(); LCD.print("On 17-18"); delay(200);
     if(rightTurnPossible >= pathConfidence && leftTurnPossible < pathConfidence){
       if(hasPassenger){
