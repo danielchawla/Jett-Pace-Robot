@@ -65,6 +65,6 @@ void TurnDecision(){
     desiredTurn = STRAIGHT;
   }    
   // For testing, turn left, right, straight, left ...
-  //desiredTurn = STRAIGHT;//desiredTurns[turnCount];
+  desiredTurn = desiredTurns[turnCount];
   //turnCount++;
 }

@@ -1,6 +1,6 @@
 #define stage1 15 // 10
 #define stage2 90 // maybe 95 and stage1 15 is better
-#define stage3 70
+#define stage3 700000
 
 int offTape = false;
 int outOfCollision = false;
@@ -105,7 +105,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			}
 		}
 
-		if(loopsSinceLastChange > 20000 || loopsSinceLastStageChange > 200000){ //Previously was 40000
+		if(loopsSinceLastChange > 20000 || loopsSinceLastStageChange > 100000){ //Previously was 40000
 			LCD.clear(); LCD.print("STUCK");
 			motor.stop_all();
 			//do something with regards wto changing stage back to one that would be appropriate.
@@ -170,8 +170,8 @@ void Turn180Decision(){
   	discrepancyInLocation = true;
   }else{ // if !atIntersection
   	switch(currentEdge[1]){
-  		case 5: distFromIntCase = 1; break; 
-  		case 9: distFromIntCase = 1; break;
+  		//case 5: distFromIntCase = 1; break; 
+  		//case 9: distFromIntCase = 1; break;
   		case 2: distFromIntCase = 1; break; // Close to Int condition at these nodes
   		case 1: distFromIntCase = 2; break;
   		case 3: distFromIntCase = 2; break; // Far from Int condition at thses nodes
@@ -219,27 +219,56 @@ void Turn180Decision(){
 			int tempInt180 = currentEdge[1];
 			currentEdge[1] = currentEdge[0];
 			currentEdge[0] = tempInt180;
-			desiredTurn = -1*pastTurn;
   	} else{ //grey zone or already lost
   		motor.stop_all(); LCD.clear(); LCD.print("In grey zone"); delay(1000);
-  		if(pastTurn == LEFT){ // Jonah switched these directions???
-  			TurnCCW();
-  		}else if(pastTurn == RIGHT){
-  			TurnCW();
-  		}
-  		currentEdge[0] = GARBAGE;
-  		currentEdge[1] = GARBAGE;
-  		leftInitial = GARBAGE;
-      rightInitial = GARBAGE;
-  		discrepancyInLocation = true;
+			switch(currentEdge[1]){
+  			case 5: TurnCCW(); turnDirection = LEFT; break;
+  			case 9: TurnCW(); turnDirection = RIGHT; break;
+  			case 2: // Probably don't need this
+  				if(pastTurn == LEFT){
+  					TurnCW(); // TODO switch turnDirection??
+  					turnDirection = RIGHT;
+  				}
+  				else{ //if past turn is right
+  					TurnCCW();
+  					turnDirection = LEFT;
+  				}
+  			default:
+		  		if(pastTurn == LEFT){
+		  			TurnCCW();
+		  		}else if(pastTurn == RIGHT){
+		  			TurnCW();
+		  		}
+		  }
+  		if(currentEdge[1] == 5 || currentEdge[1] == 9){
+  			int tempInt180 = currentEdge[1];
+				currentEdge[1] = currentEdge[0];
+				currentEdge[0] = tempInt180;
+				desiredTurn = pastTurn;
+				leftTurnPossible = 1234;
+				rightTurnPossible = 1234;
+    	}else{
+    		currentEdge[0] = GARBAGE;
+  			currentEdge[1] = GARBAGE;
+  			leftInitial = GARBAGE;
+      	rightInitial = GARBAGE;
+      	if(discrepancyInLocation){
+      		desiredTurn = STRAIGHT;
+      	}else{
+      		desiredTurn = -1*pastTurn;
+      	}
+      	discrepancyInLocation = true;
+    	}
   		loopsSinceLastInt = 1000; // TODO: investigate
   	}
   }
   pastTurn = pastTurn*-1; //Switch pastDirection so that next turn is in proper direction
 	leftEncoderAtLastInt = leftCount;
 	rightEncoderAtLastInt = rightCount;
-  LCD.clear();LCD.print("From: "); LCD.print(currentEdge[0]); LCD.print(" To: ");LCD.print(currentEdge[1]);
-  //motor.stop_all(); delay(1000);
+	currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;//direction with which we will enter the next intersection.
+  LCD.clear();//LCD.print("From: "); LCD.print(currentEdge[0]); LCD.print(" To: ");LCD.print(currentEdge[1]);
+  LCD.print(discrepancyInLocation);
+  motor.stop_all(); delay(1000);
 }
 
 void TurnCCW(){

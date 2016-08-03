@@ -1,11 +1,11 @@
 void AreWeThereYet(){
-  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) && loopsSinceLastInt > 1000) {
+  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) && loopsSinceLastInt > 600) {
     //statusCount++;
     if (qrdVals[0]) {
-      leftTurnPossible++;
+      leftTurnPossible+=2;
     }
     if (qrdVals[3]) {
-      rightTurnPossible++;
+      rightTurnPossible+=2;
     }
     if (leftTurnPossible && !qrdVals[0] && leftTurnPossible < pathConfidence) {
       leftTurnPossible--;
@@ -101,10 +101,10 @@ void ProcessIntersection() {
     }
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {
-      leftTurnPossible++;
+      leftTurnPossible+=2;
     }
     if (qrdVals[3]) {
-      rightTurnPossible++;
+      rightTurnPossible+=2;
     }
 
     if (leftTurnPossible && !qrdVals[0] && leftTurnPossible < pathConfidence) {
@@ -299,6 +299,7 @@ void ResetIntersection(){
       Currently, we can always go straight even at an L or T intersection, so this is not 100% reliable but will (should) never give false positives
     */
       //TODOLOST - uncomment and see if works
+    //LCD.clear(); motor.stop_all(); LCD.print(leftTurnPossible); LCD.print(" "); LCD.print(rightTurnPossible);LCD.setCursor(0,1);LCD.print(loopsSinceLastInt); delay(1000);
     rightEncoderAtLastInt = rightCount;
     leftEncoderAtLastInt = leftCount;
     if(desiredTurn != turnActual){
