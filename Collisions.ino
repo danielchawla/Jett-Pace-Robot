@@ -1,6 +1,6 @@
 #define stage1 15 // 10
 #define stage2 90 // maybe 95 and stage1 15 is better
-#define stage3 80 //<--add 0's to make a three stage u-turn
+#define stage3 70000 //<--add 0's to make a three stage u-turn
 #define tooManyRevs 100
 
 int offTape = false;
@@ -154,7 +154,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 void Turn180Decision(){
 	rightDiff = rightCount - rightEncoderAtLastInt;
   leftDiff = leftCount - leftEncoderAtLastInt;
-	loopsSinceLastInt = 500; // TODO: investigate
+	loopsSinceLastInt = 0; // TODO: investigate
   LCD.clear(); LCD.print("L: "); LCD.print(rightDiff); LCD.print(" R: "); LCD.print(leftDiff);
   // motor.stop_all(); delay(1000);
   int turnDirection = pastTurn;

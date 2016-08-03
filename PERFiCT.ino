@@ -269,7 +269,7 @@ unsigned long startTime;
 
 // Passenger Pickup
 #define sideIRMin 600
-#define frontIRMin 200
+#define frontIRMin 300
 #define armIRMin 250
 #define countToDropoff 180 // TODO Change
 #define countMaxToDropoff 300
@@ -315,6 +315,7 @@ int lostTape = 0;
 int foundTape = 0; //this should be the opposite of lostTape..
 int positionLost = 0; // Change to 1 if sensor data contradicts what is expected based on currentEdge[][]
 int pickingUp = 0;
+int startRoute = -1;
 
 void setup()
 {
@@ -354,7 +355,7 @@ void setup()
   	}
   }
 
-  //initialProfitMatrix[N][7] = GARBAGE; //never go to 2, we want to go here now
+  // initialProfitMatrix[N][7] = 100; //never go to 2, we want to go here now
 
   currentEdge[0] = 0;
   currentEdge[1] = 10;
@@ -385,13 +386,33 @@ void setup()
     currentEdge[1] = (int)((float)knob(7)/1024.0*20.0);
     LCD.clear();
     LCD.print("Press Start"); LCD.setCursor(0,1);
-    LCD.print("E0: "); LCD.print(currentEdge[0]); LCD.print(" E1: "); LCD.print(currentEdge[1]);
+    LCD.print("E0: "); LCD.print(currentEdge[0]); LCD.print(" E1: "); LCD.print(currentEdge[1]); LCD.print(" R: "); LCD.print(startRoute);
     delay(200);
+    if(stopbutton()){
+      startRoute = knob(7)/1024.0*5.0;
+    }
     if (startbutton())
     {
       while (true) {
         if (!startbutton()) {
           LCD.clear();
+          if(currentEdge[0] == 0){
+            switch(startRoute){ // Initialize the hack
+              case 0: profitMatrix[S][10] = 100; profitMatrix[E][16] = 100; profitMatrix[E][17] = 100;
+              case 1: profitMatrix[E][10] = 100; profitMatrix[S][11] = 100; profitMatrix[E][17] = 100;
+              case 2: profitMatrix[E][10] = 100; profitMatrix[E][11] = 100; profitMatrix[S][12] = 100;
+              case 3: profitMatrix[E][10] = 100; profitMatrix[E][11] = 100; profitMatrix[N][12] = 100;
+              case 4: profitMatrix[E][10] = 100; profitMatrix[N][11] = 100;
+            }
+          } else if(currentEdge[0] == 4){
+            switch(startRoute){ // Initialize the hack
+              case 0: profitMatrix[S][15] = 100; profitMatrix[W][19] = 100; profitMatrix[W][18] = 100;
+              case 1: profitMatrix[W][15] = 100; profitMatrix[S][14] = 100; profitMatrix[W][18] = 100;
+              case 2: profitMatrix[W][15] = 100; profitMatrix[W][14] = 100; profitMatrix[S][13] = 100;
+              case 3: profitMatrix[W][15] = 100; profitMatrix[W][14] = 100; profitMatrix[N][13] = 100;
+              case 4: profitMatrix[W][15] = 100; profitMatrix[N][14] = 100;
+            }
+          }
           return;
         }
         delay(100);
@@ -473,7 +494,7 @@ void loop() {
 
   if(collisionDetected){
     if(currentEdge[1] == 6 || currentEdge[1] == 8){ // Special case for 1 and 3
-      motor.stop_all(); LCD.clear(); LCD.print("Special Case"); delay(2000);
+      motor.stop_all(); LCD.clear(); LCD.print("Special Case"); delay(1500);
       if(leftCount - leftEncoderAtLastInt > sixEightThresh && rightCount - rightEncoderAtLastInt > sixEightThresh){
         if(currentEdge[1] == 6){
           currentEdge[1] = 1;
@@ -495,7 +516,9 @@ void loop() {
       }
       //TODO: TEST check for passenger at front from dev
     }else if(switchVals[FRONT_BUMPER] && (currentEdge[0] == 6 || currentEdge[0] == 8) && analogRead(ArmIRpin) > frontIRMin && !hasPassenger){
+      motor.stop_all();
       hasPassenger = PickupPassenger(STRAIGHT);
+      Turn180Decision();
     }
     else if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
       Turn180Decision();
@@ -645,8 +668,8 @@ void PrintToLCD() {
     LCD.clear();
     /*LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);*/
-    LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
-    //LCD.print(hasPassenger); LCD.print("  "); LCD.print(passengerSpotted);
+    //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
+    LCD.print(hasPassenger); LCD.print("  "); LCD.print(passengerSpotted);
     //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
     //LCD.print(leftDiff); LCD.print("  "); LCD.print(rightDiff);
     if(discrepancyInLocation){
