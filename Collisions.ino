@@ -23,6 +23,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			// delay(100);
 			LCD.clear(); LCD.print("Stage 1");
 			count180 = reverseEncoderCount;
+			//TODO accelerate to this speed using for loop??
 			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*2/3);
 		}
 
@@ -62,9 +63,11 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 
 		if(stage == 3 && driveEncoderCount - count180 > tooManyRevs){
 			//set to stage 2:
+			//LCD.clear();LCD.print("too many revs"); LCD.print(driveEncoderCount - count180); delay(2000);
 			stage = 1;
 			count180 = -1*stage1; //gonna go into that if statement up there once and will leave in stage 3
 			loopsSinceLastChange = 0;
+			stuck = true;
 		}
 
 
@@ -90,6 +93,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 
 				if(statusCount180 > 10){
 					//Finished turning around - change currentEdge
+					//LCD.clear();LCD.print("Done Turning"); LCD.print(driveEncoderCount - count180); delay(2000);
 					statusCount180 = 0;
 					stage = 0; // Reset stage
 					offTape = false;
@@ -160,15 +164,20 @@ void Turn180Decision(){
   int turnDirection = pastTurn;
   int distFromIntCase = GARBAGE;
   if(atIntersection){
-  	if(turnActual == STRAIGHT){
+  	if(turnActual == STRAIGHT || turnActual == GARBAGE){
   		switch (pastTurn){
-  			case RIGHT: TurnCCW(); break;
-  			case LEFT: TurnCW(); break;
-  			default: TurnCCW(); motor.stop_all(); LCD.clear(); LCD.print("past turn straight"); while(true){} break;
+  			case RIGHT: TurnCW(); break;
+  			case LEFT: TurnCCW(); break;
+  			default: TurnCCW(); motor.stop_all(); LCD.clear(); LCD.print("past turn straight"); /*while(true){}*/ break;
   		}
+  	}else if(turnActual == LEFT){
+  		TurnCCW();
+  	}else if(turnActual == RIGHT){
+  		TurnCW();
   	}
   	ResetIntersection();
-  	motor.stop_all(); LCD.clear(); LCD.print("At Intersection ??"); delay(1000);
+  	atIntersection = 0;
+  	//motor.stop_all(); LCD.clear(); LCD.print("At Intersection ??"); delay(1000);
   	discrepancyInLocation = true;
   }else{ // if !atIntersection
   	switch(currentEdge[1]){
@@ -186,27 +195,33 @@ void Turn180Decision(){
   				if(pastTurn == LEFT){
   					TurnCW(); // TODO switch turnDirection??
   					turnDirection = RIGHT;
+  					currentEdge[0] = 7;
+  					currentEdge[1] = 13;
   				}
   				else{ //if past turn is right
   					TurnCCW();
   					turnDirection = LEFT;
-  				}
+  					currentEdge[0] = 7;
+  					currentEdge[1] = 12;  					
+  				} break;
   			default:
 		  		if(pastTurn == LEFT){
 		  			TurnCCW();
-		  		}else if(pastTurn == RIGHT){
+		  		}else{
 		  			TurnCW();
 		  		}
 		  }
-  		for(int i = 1; i < 4; i++){
-  			if(theMap[nodeMat[currentEdge[0]][currentEdge[1]]+i*turnDirection][currentEdge[0]] != -1){
-  				currentEdge[1] = theMap[nodeMat[currentEdge[0]][currentEdge[1]]+i*turnDirection][currentEdge[0]];
-  				break;
-  			}
-  			if(i == 3){
-  				motor.stop_all(); LCD.clear(); LCD.print("bug #88Ø"); delay(2000);//TODO get rid of this delay
-  			}
-  		}
+		  if(currentEdge[0] != 7){
+	  		for(int i = 1; i < 4; i++){
+	  			if(theMap[nodeMat[currentEdge[0]][currentEdge[1]]+i*turnDirection][currentEdge[0]] != -1){
+	  				currentEdge[1] = theMap[nodeMat[currentEdge[0]][currentEdge[1]]+i*turnDirection][currentEdge[0]];
+	  				break;
+	  			}
+	  			if(i == 3){
+	  				motor.stop_all(); LCD.clear(); LCD.print("bug #88Ø"); delay(2000);//TODO get rid of this delay
+	  			}
+	  		}
+	  	}
   	}else if(distFromIntCase == 2 || (leftDiff > farFromIntCount && rightDiff > farFromIntCount && !discrepancyInLocation)){
 			switch(currentEdge[1]){
   			case 1: TurnCCW(); break;
@@ -214,7 +229,7 @@ void Turn180Decision(){
   			default:
 		  		if(pastTurn == LEFT){
 		  			TurnCCW();
-		  		}else if(pastTurn == RIGHT){
+		  		}else{
 		  			TurnCW();
 		  		}
 		  }  		
@@ -222,23 +237,16 @@ void Turn180Decision(){
 			currentEdge[1] = currentEdge[0];
 			currentEdge[0] = tempInt180;
   	} else{ //grey zone or already lost
-  		motor.stop_all(); LCD.clear(); LCD.print("In grey zone"); delay(1000);
+  		if(!discrepancyInLocation){
+  			motor.stop_all(); LCD.clear(); LCD.print("In grey zone"); delay(1000);
+  		}
 			switch(currentEdge[1]){
   			case 5: TurnCCW(); turnDirection = LEFT; break;
   			case 9: TurnCW(); turnDirection = RIGHT; break;
-  			case 2: // Probably don't need this
-  				if(pastTurn == LEFT){
-  					TurnCW(); // TODO switch turnDirection??
-  					turnDirection = RIGHT;
-  				}
-  				else{ //if past turn is right
-  					TurnCCW();
-  					turnDirection = LEFT;
-  				}
   			default:
 		  		if(pastTurn == LEFT){
 		  			TurnCCW();
-		  		}else if(pastTurn == RIGHT){
+		  		}else{
 		  			TurnCW();
 		  		}
 		  }

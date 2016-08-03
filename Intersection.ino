@@ -349,7 +349,7 @@ void ResetIntersection(){
       checkToSeeIfWeKnowWhereWeAre();//this is called right after an intersection
     }
     pastAction = turnActual;
-    if(turnActual != STRAIGHT){
+    if(turnActual != STRAIGHT && turnActual != GARBAGE){
       pastTurn = turnActual;
     }
     desiredTurn = GARBAGE;

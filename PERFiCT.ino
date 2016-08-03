@@ -575,11 +575,17 @@ void loop() {
           TurnDecision();
         }
       }else{
-        motor.stop_all(); LCD.clear(); LCD.print("too far"); delay(2000);
+        motor.stop_all(); LCD.clear(); LCD.print("too far"); delay(200);
         Turn180Decision(); // Turn around and reset counts.  We will drop the passenger off countToDropoff # of pulses from where the passenger was picked up (hopefully)
         //leftInitial = GARBAGE;
         //rightInitial = GARBAGE;
       }
+      /*if(((leftCount - leftEncoderAtLastInt > farFromIntCount) && (rightCount - rightEncoderAtLastInt > farFromIntCount))  &&  passengerSpotted){
+        Turn180Decision();
+        passengerSpotted = false;
+        UpdateProfitMatrix();
+        TurnDecision();
+      }*/
     }
 
 
