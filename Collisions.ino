@@ -1,7 +1,7 @@
 #define stage1 15 // 10
 #define stage2 90 // maybe 95 and stage1 15 is better
 #define stage3 70 //<--add 0's to make a three stage u-turn
-#define tooManyRevs 1200
+#define tooManyRevs 150
 
 int offTape = false;
 int outOfCollision = false;
@@ -78,7 +78,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			motor.speed(driveMotor, 0);
 		}*/
 
-		if(stage == 3 && driveEncoderCount - count180 > tooManyRevs){
+		if(stage == 3 && (driveEncoderCount - count180 > tooManyRevs || digitalRead(FRONT_BUMPER_PIN) || digitalRead(FRONT_LEFT_BUMPER_PIN) || digitalRead(FRONT_RIGHT_BUMPER_PIN))) {
 			//set to stage 2:
 			//LCD.clear();LCD.print("too many revs"); LCD.print(driveEncoderCount - count180); delay(2000);
 			stage = 1;
