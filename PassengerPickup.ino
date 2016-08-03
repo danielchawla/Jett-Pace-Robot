@@ -42,8 +42,7 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   int maxIR = -1;
   int newIR = -1;
   int finalI = range - 1;
-  LCD.clear();LCD.print("Picking up: ");LCD.print(side);
-  delay(1000);
+
   RCServo0.write(clawMid);
   RCServo1.write(armHome);
 
@@ -102,9 +101,13 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   while(millis() - startTime < 1200){}
   motor.speed(GM7, 0);
 
-  // Checks if pickup attempt was successful
-  if((side == LEFT && analogRead(leftIR) >= PICKUPSUCCESSTHRESH) || (side == RIGHT && analogRead(rightIR) >= PICKUPSUCCESSTHRESH)){ // TODO: maybe use a passengerGoneThresh if this doesn't work
-    LCD.clear(); LCD.print("returning 0"); delay(500);
+  // Checks if side pickup attempt was successful
+  if((side == LEFT && analogRead(leftIR) >= SIDEPICKUPSUCCESSTHRESH) || (side == RIGHT && analogRead(rightIR) >= SIDEPICKUPSUCCESSTHRESH)){ // TODO: maybe use a passengerGoneThresh if this doesn't work
+    LCD.clear(); LCD.print("No Passenger"); delay(500);
+    return 0;
+  } // Checks if front pickup attempt was successful
+  else if(side == STRAIGHT && analogRead(ArmIRpin) >= FRONTPICKUPSUCCESSTHRESH){
+    LCD.clear(); LCD.print("No Passenger"); delay(500);
     return 0;
   }
   return 1;

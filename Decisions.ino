@@ -1,12 +1,11 @@
 void UpdateProfitMatrix(){
-  // profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 0;
-  // profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 0;
+  
   if(!discrepancyInLocation){}
     if(!passengerSpotted ){ // 1 in MATLAB
       profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 0;
       profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 0;
     }else{ // 5 in MATLAB
-      motor.stop_all(); delay(1000);
+      // motor.stop_all(); delay(1000);
       profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 0;
       profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 500;
     }
@@ -24,7 +23,6 @@ void UpdateProfitMatrix(){
 
 void TurnDecision(){
   currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;//direction with which we will enter the next intersection.
-  // TODO: Reorganize this like in dev???
   // Make decision
   if(hasPassenger &&!discrepancyInLocation){
     desiredDirection = dirToDropoff[currentEdge[1]];

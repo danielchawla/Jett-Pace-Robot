@@ -390,37 +390,26 @@ void checkToSeeIfWeKnowWhereWeAre(void){
   }*/
 
   if(leftDiff > curveOutsideCount && rightDiff < leftDiff*0.7){
-    motor.stop_all(); LCD.clear(); LCD.print("On 12-7"); delay(1000);
+    motor.stop_all(); LCD.clear(); LCD.print("On 12-7"); delay(200);
+    profitMatrix[nodeMat[13][12]][13] = 0;
+    profitMatrix[nodeMat[12][13]][12] = 0;
     currentEdge[0] = 12;
     currentEdge[1] = 7;
     discrepancyInLocation = false;
   } else if(rightDiff > curveOutsideCount && leftDiff < rightDiff*0.7){
-    motor.stop_all(); LCD.clear(); LCD.print("On 13-7"); delay(1000);
+    motor.stop_all(); LCD.clear(); LCD.print("On 13-7"); delay(200);
+    profitMatrix[nodeMat[13][12]][13] = 0;
+    profitMatrix[nodeMat[12][13]][12] = 0;
     currentEdge[0] = 13;
     currentEdge[1] = 7;
     discrepancyInLocation = false;    
   }
-  /*if(inCircle){
-    if(leftDiff > curveOutsideCount || rightDiff > curveOutsideCount){
-      //either wheel has gone the long distance
-      if(rightTurnPossible >= pathConfidence && leftTurnPossible < pathConfidence){
-        currentEdge[0] = 13;
-        currentEdge[1] = 7;
-        discrepancyInLocation = false;
-      }
-      else if(leftTurnPossible >= pathConfidence && rightTurnPossible < pathConfidence){
-        currentEdge[0] = 12;
-        currentEdge[1] = 7;
-        discrepancyInLocation = false;
-      }
-      else{
-        discrepancyInLocation = true;
-      }  
-    }
-  }*/
+
   else if(leftDiff > leftEncMinVal){ //using left diff because that will be largest if we default to turning right if not straight
-    motor.stop_all(); LCD.clear(); LCD.print("On 17-18"); delay(1000);
+    motor.stop_all(); LCD.clear(); LCD.print("On 17-18"); delay(200);
     if(rightTurnPossible >= pathConfidence && leftTurnPossible < pathConfidence){
+      profitMatrix[nodeMat[17][18]][17] = 0;
+      profitMatrix[nodeMat[18][17]][18] = 0;
       currentEdge[0] = 17;
       currentEdge[1] = 16;
       discrepancyInLocation = false;
@@ -428,12 +417,14 @@ void checkToSeeIfWeKnowWhereWeAre(void){
     else if(leftTurnPossible >= pathConfidence && rightTurnPossible < pathConfidence){
       currentEdge[0] = 18;
       currentEdge[1] = 19;
+      profitMatrix[nodeMat[17][18]][17] = 0;
+      profitMatrix[nodeMat[18][17]][18] = 0;
       discrepancyInLocation = false;
     }
     //reset incircle for next time we are lost
     if(!discrepancyInLocation){
       //executes once when we find ourselves
-      LCD.clear(); LCD.print("WE MADE IT!!"); delay(1000);
+      LCD.clear(); LCD.print("WE MADE IT!!"); delay(200);
       inCircle = false;
     }
   }
