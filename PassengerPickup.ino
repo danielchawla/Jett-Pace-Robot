@@ -137,7 +137,7 @@ void DropoffPassenger(int side){
 
   // Rotate Arm
   RCServo1.write(armHome + range * side);
-  delay(500); // was 300. changed so it rotates all the way
+  delay(800); // was 300. changed so it rotates all the way before letting go
   // startTime = millis();
   // while(millis() - startTime < 300){}
 

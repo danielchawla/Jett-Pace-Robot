@@ -515,8 +515,6 @@ void loop() {
         ReverseLeft();
       }else if(switchVals[FRONT_RIGHT_BUMPER]){
         ReverseRight();
-      }else if(switchVals[FRONT_BUMPER]){
-        ReverseRight(); // TODO: Make a reverse straight/change this based on currentEdge??
       }
       //TODO: TEST check for passenger at front from dev
     }else if(switchVals[FRONT_BUMPER] && (currentEdge[0] == 6 || currentEdge[0] == 8) && analogRead(ArmIRpin) > frontIRMin && !hasPassenger){
