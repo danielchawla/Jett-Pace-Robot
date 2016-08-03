@@ -415,8 +415,10 @@ void checkToSeeIfWeKnowWhereWeAre(void){
   else if(leftDiff > longEncMinVal || rightDiff > longEncMinVal){ //using left diff because that will be largest if we default to turning right if not straight
     motor.stop_all(); LCD.clear(); LCD.print("On 17-18"); delay(200);
     if(rightTurnPossible >= pathConfidence && leftTurnPossible < pathConfidence){
+      discrepancyInLocation = false;
       if(hasPassenger){
         TurnCCW();
+        passengerSpotted = 0;
         currentEdge[0] = 17;
         currentEdge[1] = 18;
       }
@@ -426,11 +428,12 @@ void checkToSeeIfWeKnowWhereWeAre(void){
       }
       profitMatrix[nodeMat[17][18]][17] = 0;
       profitMatrix[nodeMat[18][17]][18] = 0;
-      discrepancyInLocation = false;
     }
     else if(leftTurnPossible >= pathConfidence && rightTurnPossible < pathConfidence){
+      discrepancyInLocation = false;
       if(hasPassenger){
         TurnCW();
+        passengerSpotted = 0;
         currentEdge[0] = 18;
         currentEdge[1] = 17;
       }
@@ -440,7 +443,6 @@ void checkToSeeIfWeKnowWhereWeAre(void){
       }
       profitMatrix[nodeMat[17][18]][17] = 0;
       profitMatrix[nodeMat[18][17]][18] = 0;
-      discrepancyInLocation = false;
     }
     //reset incircle for next time we are lost
     if(!discrepancyInLocation){

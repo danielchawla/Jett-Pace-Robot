@@ -10,6 +10,7 @@ int loopsSinceLastChange = 0;
 int stuck = false;
 
 void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverseEncoderCount, volatile unsigned int &driveEncoderCount){
+	loopsSinceLastInt = 0;
 	//Stage1: Reverse just left
 	int stage = 0;
 	int tempInt180;
@@ -49,7 +50,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			motor.speed(driveMotor, -1*MAX_MOTOR_SPEED/7);
 		}
 
-		if(stage == 2 && (reverseEncoderCount - count180 > stage2 || (stuck && reverseEncoderCount - count180 > stage2/3))) { 
+		if(stage == 2 && (reverseEncoderCount - count180 > stage2 || (stuck && reverseEncoderCount - count180 > stage2/4))) { 
 			stage++;
 			motor.stop_all();
 			// delay(100);
@@ -119,7 +120,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 
 				if(statusCount180 > 10){
 					//Finished turning around - change currentEdge
-					//LCD.clear();LCD.print("Done Turning"); LCD.print(driveEncoderCount - count180); delay(2000);
+					motor.stop_all();//LCD.clear();LCD.print("Done Turning"); LCD.print(driveEncoderCount - count180); delay(2000);
 					statusCount180 = 0;
 					stage = 0; // Reset stage
 					offTape = false;
@@ -367,7 +368,7 @@ void ReverseSlow(int fastMotor, int slowMotor, volatile unsigned int &encoderCou
 	unsigned long reverseStart = millis();
 	int initialEncoderCount = encoderCount;
 	while(encoderCount - initialEncoderCount < 100){
-		reverseCount++;
+		//reverseCount++;
 		motor.speed(fastMotor, -MAX_MOTOR_SPEED*1/2);
 		motor.speed(slowMotor, -MAX_MOTOR_SPEED*1/3);
 		if(digitalRead(q1) || digitalRead(q2) || millis() - reverseStart > 1000){ //TODO: Uncomment this
