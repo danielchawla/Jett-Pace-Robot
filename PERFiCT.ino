@@ -230,7 +230,7 @@ int qrdToCheck;
 int loopNum = 1;
 int statusCount = 0;
 int statusLast = 0;
-#define pathConfidence 30
+#define pathConfidence 50
 int loopsSinceLastInt = 0;
 int loopsSinceLastCollision = 0;
 int leavingCount = 0;

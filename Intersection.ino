@@ -1,11 +1,11 @@
 void AreWeThereYet(){
-  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) && loopsSinceLastInt > 600) {
+  if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) /*&& (qrdVals[1] == HIGH || qrdVals[2] == HIGH)*/ && loopsSinceLastInt > 600) {
     //statusCount++;
     if (qrdVals[0]) {
-      leftTurnPossible+=2;
+      leftTurnPossible++;
     }
     if (qrdVals[3]) {
-      rightTurnPossible+=2;
+      rightTurnPossible++;
     }
     if (leftTurnPossible && !qrdVals[0] && leftTurnPossible < pathConfidence) {
       leftTurnPossible--;
@@ -101,10 +101,10 @@ void ProcessIntersection() {
     }
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {
-      leftTurnPossible+=2;
+      leftTurnPossible++;
     }
     if (qrdVals[3]) {
-      rightTurnPossible+=2;
+      rightTurnPossible++;
     }
 
     if (leftTurnPossible && !qrdVals[0] && leftTurnPossible < pathConfidence) {
@@ -136,11 +136,11 @@ void ProcessIntersection() {
         motor.speed(RIGHT_MOTOR, vel / 4 + avgCorrection*1); // TODO: CHANGE may need to have to set back to /4
       }
       if(tapeFollowCountInInt > 600){ // previously 600
-        //motor.stop_all(); LCD.clear(); LCD.print(avgCorrection); delay(2000);
-        // motor.stop_all();
-        // LCD.clear();
-        // LCD.print(noStraightCount);
-        // delay(1200);
+        motor.stop_all(); LCD.clear(); LCD.print(avgCorrection); delay(2000);
+        motor.stop_all();
+        LCD.clear();
+        LCD.print(noStraightCount);
+        delay(1200);
         //atIntersection = false; //jonah had this. TODO: remove this if ryan's shit below doesnt work
         //Ryans stuff begins
         //we can't go straight.
