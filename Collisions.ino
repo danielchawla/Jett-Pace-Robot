@@ -1,6 +1,7 @@
 #define stage1 15 // 10
 #define stage2 90 // maybe 95 and stage1 15 is better
-#define stage3 700000
+#define stage3 80 //<--add 0's to make a three stage u-turn
+#define tooManyRevs 100
 
 int offTape = false;
 int outOfCollision = false;
@@ -12,7 +13,6 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 	//Stage1: Reverse just left
 	int stage = 0;
 	int tempInt180;
-	int loopsSinceLastStageChange = 0;
 
 	while(true){
 		// While loop is set up with if statements for different stages similar to turning code at intersections
@@ -24,7 +24,6 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			LCD.clear(); LCD.print("Stage 1");
 			count180 = reverseEncoderCount;
 			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*2/3);
-			loopsSinceLastStageChange = 0;
 		}
 
 		if(stage == 1 && reverseEncoderCount - count180 > stage1){ // This is the condition to leave stage 1 - at this point we write Stage 2 speeds and increment stage
@@ -32,11 +31,10 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			motor.stop_all();
 			// delay(100);
 			//Entering Stage 2: Reverse both
-			LCD.clear();LCD.print("Stage 2 "); LCD.print(reverseEncoderCount - count180);
+			LCD.clear();LCD.print("Stage 2 "); LCD.print(stuck);
 			count180 = reverseEncoderCount;
 			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*2/3);
 			motor.speed(driveMotor, -1*MAX_MOTOR_SPEED/7);
-			loopsSinceLastStageChange = 0;
 		}
 
 		if(stage == 2 && (reverseEncoderCount - count180 > stage2 || (stuck && reverseEncoderCount - count180 > stage2/3))) { 
@@ -44,12 +42,11 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			motor.stop_all();
 			// delay(100);
 			// Entering Stage 3: Pivot
-			LCD.clear();LCD.print("Stage 3 "); LCD.print(driveEncoderCount - count180);
+			LCD.clear();LCD.print("Stage 3 "); LCD.print(stuck);
 			count180 = driveEncoderCount;
 			motor.speed(reverseMotor, 0/* -1*MAX_MOTOR_SPEED/4*/);
 			motor.speed(driveMotor, MAX_MOTOR_SPEED*2/3);
 			stuck = false;
-			loopsSinceLastStageChange = 0;
 		}
 
 		if(stage == 3 && driveEncoderCount - count180 > stage3){
@@ -61,10 +58,14 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			count180 = reverseEncoderCount;
 			motor.speed(reverseMotor, -1*MAX_MOTOR_SPEED*2/3);
 			motor.speed(driveMotor, 0);
-			loopsSinceLastStageChange = 0;
 		}
 
-		loopsSinceLastStageChange++;
+		if(stage == 4 && reverseEncoderCount - count180 > tooManyRevs){
+			//set to stage 3:
+			stage = 2;
+			count180 = -1*stage2; //gonna go into that if statement up there once and will leave in stage 3
+			loopsSinceLastChange = 0;
+		}
 
 
 		//Check if offTape
@@ -97,6 +98,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 					if(discrepancyInLocation){
 						motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED/5);
 					}
+					//motor.stop_all(); delay(3000);
 					break;
 				}
 			}
@@ -105,7 +107,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			}
 		}
 
-		if(loopsSinceLastChange > 20000 || loopsSinceLastStageChange > 100000){ //Previously was 40000
+		if(loopsSinceLastChange > 20000){ //Previously was 40000
 			LCD.clear(); LCD.print("STUCK");
 			motor.stop_all();
 			//do something with regards wto changing stage back to one that would be appropriate.

@@ -250,6 +250,7 @@ int diff;
 //#define straightCount 450
 //#define diffInCircle 100
 #define leftEncMinVal 450
+#define sixEightThresh 400
 int numOfConsecutiveStraights;
 int inCircle = false;
 
@@ -293,7 +294,7 @@ int rightInitial = GARBAGE;
 //int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, LEFT, LEFT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
 //int desiredTurns[] = {LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, RIGHT, STRAIGHT};
-int desiredTurns[] = {LEFT, LEFT, STRAIGHT, STRAIGHT, RIGHT, RIGHT};
+int desiredTurns[] = {LEFT, LEFT, STRAIGHT, STRAIGHT, LEFT, LEFT};
 int turnCount = 0;
 
 /*
@@ -470,6 +471,19 @@ void loop() {
   }
 
   if(collisionDetected){
+    if(currentEdge[1] == 6 || currentEdge[1] == 8){ // Special case for 1 and 3
+      motor.stop_all(); LCD.clear(); LCD.print("Special Case"); delay(2000);
+      if(leftCount - leftEncoderAtLastInt > sixEightThresh && rightCount - rightEncoderAtLastInt > sixEightThresh){
+        if(currentEdge[1] == 6){
+          currentEdge[1] = 1;
+          currentEdge[0] = 6;
+        }else{
+          currentEdge[1] = 3;
+          currentEdge[0] = 8;
+        }
+      }
+    }
+    // Process collision normally
     if(!qrdVals[0] && !qrdVals[1] && !qrdVals[2] && !qrdVals[3]){
       if(switchVals[FRONT_LEFT_BUMPER]){
         ReverseLeft();
@@ -630,10 +644,10 @@ void PrintToLCD() {
     LCD.clear();
     /*LCD.print("LT: "); LCD.print(loopTime);
     LCD.print(" i: "); LCD.print(turnCount);*/
-    //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
+    LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
     //LCD.print(hasPassenger); LCD.print("  "); LCD.print(passengerSpotted);
     //LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
-    LCD.print(leftDiff); LCD.print("  "); LCD.print(rightDiff);
+    //LCD.print(leftDiff); LCD.print("  "); LCD.print(rightDiff);
     if(discrepancyInLocation){
       LCD.setCursor(0, 1); LCD.print("LOST  "); LCD.print(numOfConsecutiveStraights);
 
