@@ -1,7 +1,7 @@
 #define stage1 15 // 10
 #define stage2 90 // maybe 95 and stage1 15 is better
-#define stage3 70 //<--add 0's to make a three stage u-turn
-#define tooManyRevs 150
+#define stage3 70 // Doesnt matter what this is. <--add 0's to make a three stage u-turn
+#define tooManyRevs 500
 
 int offTape = false;
 int outOfCollision = false;
@@ -13,6 +13,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 	//Stage1: Reverse just left
 	int stage = 0;
 	int tempInt180;
+	int buttonIn180Confidence = 0;
 
 	while(true){
 		// While loop is set up with if statements for different stages similar to turning code at intersections
@@ -78,12 +79,20 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 			motor.speed(driveMotor, 0);
 		}*/
 
-		if(stage == 3 && (driveEncoderCount - count180 > tooManyRevs || digitalRead(FRONT_BUMPER_PIN) || digitalRead(FRONT_LEFT_BUMPER_PIN) || digitalRead(FRONT_RIGHT_BUMPER_PIN))) {
+
+		if (digitalRead(FRONT_BUMPER_PIN) || digitalRead(FRONT_LEFT_BUMPER_PIN) || digitalRead(FRONT_RIGHT_BUMPER_PIN)){
+			buttonIn180Confidence++;
+		}
+		else if(buttonIn180Confidence > 0){
+			buttonIn180Confidence -= 2;
+		}
+		if(stage == 3 && (driveEncoderCount - count180 > tooManyRevs || buttonIn180Confidence >= 15)) {
 			//set to stage 2:
 			//LCD.clear();LCD.print("too many revs"); LCD.print(driveEncoderCount - count180); delay(2000);
 			stage = 1;
 			count180 = -1*stage1; //gonna go into that if statement up there once and will leave in stage 3
 			loopsSinceLastChange = 0;
+			buttonIn180Confidence = 0;
 			stuck = true;
 		}
 
@@ -272,8 +281,8 @@ void Turn180Decision(){
 				currentEdge[1] = currentEdge[0];
 				currentEdge[0] = tempInt180;
 				desiredTurn = pastTurn;
-				leftTurnPossible = 1234;
-				rightTurnPossible = 1234;
+				// leftTurnPossible = 1234;
+				// rightTurnPossible = 1234;
     	}else{
     		currentEdge[0] = GARBAGE;
   			currentEdge[1] = GARBAGE;
@@ -355,13 +364,13 @@ void CollisionCheck(){
 }
 
 void ReverseSlow(int fastMotor, int slowMotor, volatile unsigned int &encoderCount){
-	int reverseCount = 0;
+	unsigned long reverseStart = millis();
 	int initialEncoderCount = encoderCount;
 	while(encoderCount - initialEncoderCount < 100){
 		reverseCount++;
 		motor.speed(fastMotor, -MAX_MOTOR_SPEED*1/2);
 		motor.speed(slowMotor, -MAX_MOTOR_SPEED*1/3);
-		if(digitalRead(q1) || digitalRead(q2) /*|| reverseCount > 100000*/){ //TODO: Uncomment this
+		if(digitalRead(q1) || digitalRead(q2) || millis() - reverseStart > 1000){ //TODO: Uncomment this
 			break;
 		}
 	}

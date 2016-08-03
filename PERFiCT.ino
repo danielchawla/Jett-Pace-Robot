@@ -402,20 +402,20 @@ void setup()
           LCD.clear();
           if(currentEdge[0] == 0){
             LCD.clear(); LCD.print("setting profits"); delay(1000);
-            switch(startRoute){ // Initialize the hack
-              case 0: profitMatrix[S][10] = 100; profitMatrix[E][16] = 100; profitMatrix[E][17] = 100;
-              case 1: profitMatrix[E][10] = 100; profitMatrix[S][11] = 100; profitMatrix[E][17] = 100;
-              case 2: profitMatrix[E][10] = 100; profitMatrix[E][11] = 100; profitMatrix[S][12] = 100;
-              case 3: profitMatrix[E][10] = 100; profitMatrix[E][11] = 100; profitMatrix[N][12] = 100;
-              case 4: profitMatrix[E][10] = 100; profitMatrix[N][11] = 100;
+            switch(startRoute){
+              case 0: profitMatrix[S][10] = 500; profitMatrix[E][16] = 500; profitMatrix[E][17] = 500;
+              case 1: profitMatrix[E][10] = 500; profitMatrix[S][11] = 500; profitMatrix[E][17] = 500;
+              case 2: profitMatrix[E][10] = 500; profitMatrix[E][11] = 500; profitMatrix[S][12] = 500;
+              case 3: profitMatrix[E][10] = 500; profitMatrix[E][11] = 500; profitMatrix[N][12] = 500;
+              case 4: profitMatrix[E][10] = 500; profitMatrix[N][11] = 500;
             }
           } else if(currentEdge[0] == 4){
-            switch(startRoute){ // Initialize the hack
-              case 0: profitMatrix[S][15] = 100; profitMatrix[W][19] = 100; profitMatrix[W][18] = 100;
-              case 1: profitMatrix[W][15] = 100; profitMatrix[S][14] = 100; profitMatrix[W][18] = 100;
-              case 2: profitMatrix[W][15] = 100; profitMatrix[W][14] = 100; profitMatrix[S][13] = 100;
-              case 3: profitMatrix[W][15] = 100; profitMatrix[W][14] = 100; profitMatrix[N][13] = 100;
-              case 4: profitMatrix[W][15] = 100; profitMatrix[N][14] = 100;
+            switch(startRoute){
+              case 0: profitMatrix[S][15] = 500; profitMatrix[W][19] = 500; profitMatrix[W][18] = 500;
+              case 1: profitMatrix[W][15] = 500; profitMatrix[S][14] = 500; profitMatrix[W][18] = 500;
+              case 2: profitMatrix[W][15] = 500; profitMatrix[W][14] = 500; profitMatrix[S][13] = 500;
+              case 3: profitMatrix[W][15] = 500; profitMatrix[W][14] = 500; profitMatrix[N][13] = 500;
+              case 4: profitMatrix[W][15] = 500; profitMatrix[N][14] = 500;
             }
           }
           return;
