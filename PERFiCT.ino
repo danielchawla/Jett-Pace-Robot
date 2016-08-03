@@ -484,7 +484,7 @@ void loop() {
       }
     }
     // Process collision normally
-    if(!qrdVals[0] && !qrdVals[1] && !qrdVals[2] && !qrdVals[3]){
+    if(!qrdVals[0] && !qrdVals[1] && !qrdVals[2] && !qrdVals[3] && !atIntersection){
       if(switchVals[FRONT_LEFT_BUMPER]){
         ReverseLeft();
       }else if(switchVals[FRONT_RIGHT_BUMPER]){
