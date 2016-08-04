@@ -45,7 +45,8 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   if(currentEdge[1] == 5 && side == LEFT){
     range = 66;
   }else if((currentEdge[1] == 12 && currentEdge[0] == 13) || (currentEdge[0] == 12 && currentEdge[1] == 13)){
-    range = 76;
+    LCD.clear();motor.stop_all();LCD.print("Setting Range"); delay(1000);
+    range = 80;
   }
   RCServo0.write(clawMid);
   RCServo1.write(armHome);

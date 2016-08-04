@@ -532,7 +532,7 @@ void loop() {
     //delay(1500);
     if(currentEdge[1] == 6 || currentEdge[1] == 8){ // Special case for 1 and 3
       if(leftCount - leftEncoderAtLastInt > sixEightThresh && rightCount - rightEncoderAtLastInt > sixEightThresh){
-        motor.stop_all(); LCD.clear(); LCD.print("Special Case"); delay(1500);
+        motor.stop_all(); LCD.clear(); LCD.print("Special Case"); delay(300);
         if(currentEdge[1] == 6){
           currentEdge[1] = 1;
           currentEdge[0] = 6;

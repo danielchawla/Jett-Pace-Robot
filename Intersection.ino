@@ -25,6 +25,9 @@ void AreWeThereYet(){
     statusCount = 0;
   }
   if (atIntersection == 1) {
+    if(currentEdge[1] == 8 && currentEdge[0] == 14){
+      avgCorrection = 0;
+    }
     LCD.clear();
     LCD.print("Going Straight");
 
@@ -129,7 +132,7 @@ void ProcessIntersection() {
 
     if(tapeFollowCountInInt){
       tapeFollowCountInInt++;
-      if (qrdVals[0]) {
+      /*if (qrdVals[0]) {
         leftTurnPossible+=2;
       }
       if (qrdVals[3]) {
@@ -140,7 +143,7 @@ void ProcessIntersection() {
       }
       if (rightTurnPossible && !qrdVals[3] && rightTurnPossible < pathConfidence) {
         rightTurnPossible--;
-      }
+      }*/
       if(tapeFollowCountInInt > 0){
         TapeFollow();
       }else{
@@ -314,7 +317,8 @@ void ResetIntersection(){
       Currently, we can always go straight even at an L or T intersection, so this is not 100% reliable but will (should) never give false positives
     */
       //TODOLOST - uncomment and see if works
-    //LCD.clear(); motor.stop_all(); LCD.print(avgCorrection); delay(1000);
+    //LCD.clear(); motor.stop_all(); LCD.print(leftTurnPossible); LCD.print(" "); LCD.print(rightTurnPossible); LCD.print(" "); LCD.print(turnActual); delay(2000);
+    //motor.stop_all();
     rightEncoderAtLastInt = rightCount;
     leftEncoderAtLastInt = leftCount;
     if(desiredTurn != turnActual){
@@ -330,7 +334,7 @@ void ResetIntersection(){
           discrepancyInLocation = true;
         }
       }
-      if(turnActual == STRAIGHT){
+      if(turnActual == STRAIGHT && currentEdge[1] != 14 && currentEdge[1] != 8){//HACK
         if(leftTurnPossible <pathConfidence){
           if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] != -1){
             discrepancyInLocation = true;
