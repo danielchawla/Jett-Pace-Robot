@@ -369,12 +369,16 @@ void ResetIntersection(){
     leavingCount = 0;
 
     loopsSinceLastInt = 0;
-    tapeFollowVel = vel;
+    //tapeFollowVel = vel;
     loopNum = 1;
     lostTape = 0;
     noStraightCount = 0;
     tapeFollowCountInInt = 0;
     avgCorrection = 0;
+    if(slowedDown){
+      tapeFollowVel = vel;
+      slowedDown = false;
+    }
 }
 void checkToSeeIfWeKnowWhereWeAre(void){
   //Checks to see if we are going along the straight edge by the drop off.

@@ -230,7 +230,7 @@ int qrdToCheck;
 int loopNum = 1;
 int statusCount = 0;
 int statusLast = 0;
-#define pathConfidence 30
+#define pathConfidence 40
 int loopsSinceLastInt = 0;
 int loopsSinceLastCollision = 0;
 int leavingCount = 0;
@@ -254,7 +254,7 @@ int diff;
 //#define straightCount 450
 //#define diffInCircle 100
 #define longEncMinVal 450
-#define sixEightThresh 380
+#define sixEightThresh 350
 int numOfConsecutiveStraights;
 int inCircle = false;
 
@@ -293,7 +293,7 @@ int rightInitial = GARBAGE;
 #define armHome 80
 #define clawOpen 160
 #define clawMid 75
-#define clawClose 10
+#define clawClose 5
 
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
 //int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, LEFT, LEFT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
@@ -322,6 +322,7 @@ int pickingUp = 0;
 int startRoute = -1;
 
 int COMPETETIONMODE = true;
+int slowedDown = false;
 void setup()
 {
 #include <phys253setup.txt>
@@ -512,7 +513,9 @@ void loop() {
   }
 
   if(collisionDetected){
-    //LCD.clear(); LCD.print("L:"); LCD.print(leftCount - leftEncoderAtLastInt); LCD.print(" R:"); LCD.print(rightCount-rightEncoderAtLastInt); motor.stop_all(); delay(1500);
+    //LCD.clear(); LCD.print("L:"); LCD.print(leftCount - leftEncoderAtLastInt); LCD.print(" R:"); LCD.print(rightCount-rightEncoderAtLastInt); 
+    motor.stop_all(); 
+    //delay(1500);
     if(currentEdge[1] == 6 || currentEdge[1] == 8){ // Special case for 1 and 3
       if(leftCount - leftEncoderAtLastInt > sixEightThresh && rightCount - rightEncoderAtLastInt > sixEightThresh){
         motor.stop_all(); LCD.clear(); LCD.print("Special Case"); delay(1500);

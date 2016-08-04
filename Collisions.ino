@@ -10,7 +10,7 @@ int loopsSinceLastChange = 0;
 int stuck = false;
 
 void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverseEncoderCount, volatile unsigned int &driveEncoderCount){
-	loopsSinceLastInt = 0;
+	loopsSinceLastInt = 200;
 	//Stage1: Reverse just left
 	int stage = 0;
 	int tempInt180;
@@ -120,7 +120,7 @@ void TurnAround(int reverseMotor, int driveMotor, volatile unsigned int &reverse
 
 				if(statusCount180 > 10){
 					//Finished turning around - change currentEdge
-					motor.stop_all();//LCD.clear();LCD.print("Done Turning"); LCD.print(driveEncoderCount - count180); delay(2000);
+					motor.stop_all();//LCD.clear();LCD.print("Done Turning"); LCD.print(driveEncoderCount - count180); delay(500);
 					statusCount180 = 0;
 					stage = 0; // Reset stage
 					offTape = false;
@@ -251,8 +251,8 @@ void Turn180Decision(){
 	  	}
   	}else if(distFromIntCase == 2 || (leftDiff > farFromIntCount && rightDiff > farFromIntCount && !discrepancyInLocation)){
 			switch(currentEdge[1]){
-  			case 1: TurnCCW(); break;
-  			case 3: TurnCW(); break;
+  			case 1: TurnCCW(); tapeFollowVel = vel*1/2; slowedDown = true; break;
+  			case 3: TurnCW(); tapeFollowVel = vel*1/2; slowedDown = true; break;
   			default:
 		  		if(pastTurn == LEFT){
 		  			TurnCCW();
@@ -340,7 +340,7 @@ void TurnCW(){
 }
 
 void CollisionCheck(){
-	if((digitalRead(OR) || digitalRead(FRONT_LEFT_BUMPER_PIN)) && !collisionDetected){
+	if((digitalRead(OR) || digitalRead(FRONT_LEFT_BUMPER_PIN)) && !collisionDetected && !passengerSide){
     collisionCount++;
     switchVals[FRONT_BUMPER] += digitalRead(FRONT_BUMPER_PIN);
     switchVals[FRONT_RIGHT_BUMPER] += digitalRead(FRONT_RIGHT_BUMPER_PIN);
