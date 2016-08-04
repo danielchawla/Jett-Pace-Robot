@@ -42,15 +42,19 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   int maxIR = -1;
   int newIR = -1;
   int finalI = range - 1;
-
+  if(currentEdge[1] == 5 && side == LEFT){
+    range = 66;
+  }else if((currentEdge[1] == 12 && currentEdge[0] == 13) || (currentEdge[0] == 12 && currentEdge[1] == 13)){
+    range = 76;
+  }
   RCServo0.write(clawMid);
   RCServo1.write(armHome);
 
   LCD.clear(); LCD.print("Picking Up");
 
   // Rotate arm until max is spotted
-  startTime = millis();
-  for (int i = 0; i <= range; i++) {
+  //startTime = millis();
+  /*for (int i = 0; i <= range; i++) {
     RCServo1.write(armHome + i * side);
 
     while(millis() - startTime < armDelay){}
@@ -71,8 +75,9 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
     }
     LCD.clear(); LCD.print("IR:  "); LCD.print(newIR);
     LCD.setCursor(0, 1); LCD.print("Max: "); LCD.print(maxIR);
-  }
-
+  }*/
+  RCServo1.write(armHome + side * range);
+  delay(600);
 
   LCD.clear(); LCD.print("Closing Claw");
   // Extend claw
@@ -103,8 +108,14 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
 
   // Checks if side pickup attempt was successful
   if((side == LEFT && analogRead(leftIR) >= SIDEPICKUPSUCCESSTHRESH) || (side == RIGHT && analogRead(rightIR) >= SIDEPICKUPSUCCESSTHRESH)){ 
-    LCD.clear(); LCD.print("No Passenger"); delay(500);
-    return 0;
+    delay(1);
+    if((side == LEFT && analogRead(leftIR) >= SIDEPICKUPSUCCESSTHRESH) || (side == RIGHT && analogRead(rightIR) >= SIDEPICKUPSUCCESSTHRESH)){
+      delay(1);
+      if((side == LEFT && analogRead(leftIR) >= SIDEPICKUPSUCCESSTHRESH) || (side == RIGHT && analogRead(rightIR) >= SIDEPICKUPSUCCESSTHRESH)){
+        LCD.clear(); LCD.print("No Passenger"); delay(500);
+        return 0;
+      }
+    }
   } // Checks if front pickup attempt was successful
   else if(side == STRAIGHT && analogRead(ArmIRpin) >= FRONTPICKUPSUCCESSTHRESH){
     LCD.clear(); LCD.print("No Passenger"); delay(500);

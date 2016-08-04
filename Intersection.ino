@@ -129,6 +129,18 @@ void ProcessIntersection() {
 
     if(tapeFollowCountInInt){
       tapeFollowCountInInt++;
+      if (qrdVals[0]) {
+        leftTurnPossible+=2;
+      }
+      if (qrdVals[3]) {
+        rightTurnPossible+=2;
+      }
+      if (leftTurnPossible && !qrdVals[0] && leftTurnPossible < pathConfidence) {
+        leftTurnPossible--;
+      }
+      if (rightTurnPossible && !qrdVals[3] && rightTurnPossible < pathConfidence) {
+        rightTurnPossible--;
+      }
       if(tapeFollowCountInInt > 0){
         TapeFollow();
       }else{

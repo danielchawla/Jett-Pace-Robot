@@ -230,7 +230,7 @@ int qrdToCheck;
 int loopNum = 1;
 int statusCount = 0;
 int statusLast = 0;
-#define pathConfidence 40
+#define pathConfidence 30
 int loopsSinceLastInt = 0;
 int loopsSinceLastCollision = 0;
 int leavingCount = 0;
@@ -239,6 +239,7 @@ int noStraightCount = 0;
 int pastTurn = LEFT;
 int pastAction = STRAIGHT;
 int defaultTurn = RIGHT;
+int bumpToReverseCount = 0;
 
 // Set the default turn if lost based on the last known node
 int defaultTurnFromNode[] = {LEFT, LEFT, RIGHT, RIGHT, RIGHT, LEFT, LEFT, RIGHT, RIGHT, RIGHT, LEFT, LEFT, LEFT, RIGHT, RIGHT, RIGHT, LEFT, LEFT, RIGHT, RIGHT}; 
@@ -272,14 +273,14 @@ int loopTime;
 unsigned long startTime;
 
 // Passenger Pickup
-#define sideIRMin 600
+#define sideIRMin 660
 #define frontIRMin 300
 #define armIRMin 250
 #define countToDropoff 180 // TODO Change
 #define countMaxToDropoff 300
 #define dropWidth  80
 #define SIDEPICKUPSUCCESSTHRESH 200
-#define FRONTPICKUPSUCCESSTHRESH 250 // Determine this
+#define FRONTPICKUPSUCCESSTHRESH 300 // Determine this
 int failedPickup = 0;
 int passengerSide;
 int passengerSeenCount = 0;
@@ -328,6 +329,13 @@ void setup()
 #include <phys253setup.txt>
   LCD.clear();
   LCD.home();
+
+  LCD.clear(); LCD.print("Homing Claw");
+  motor.speed(GM7, 150);
+  startTime = millis();
+  while(millis() - startTime < 500){}
+  motor.speed(GM7, 0);
+  LCD.clear();
 
   // Attach 2 interrupts
   enableExternalInterrupt(INT1, RISING);
@@ -415,7 +423,7 @@ void setup()
         if (!startbutton()) {
           LCD.clear();
           if(currentEdge[0] == 0 && COMPETETIONMODE){
-            LCD.clear(); LCD.print("setting profits"); delay(1000);
+            //LCD.clear(); LCD.print("setting profits"); delay(1000);
             switch(startRoute){
               case 0: profitMatrix[S][10] = 500; profitMatrix[E][16] = 500; profitMatrix[E][17] = 500; break;
               case 1: profitMatrix[E][10] = 500; profitMatrix[S][11] = 500; profitMatrix[E][17] = 500; break;
@@ -512,6 +520,12 @@ void loop() {
       }
   }
 
+  if(!qrdVals[0] && !qrdVals[1] && !qrdVals[2] && !qrdVals[3] && bumpToReverseCount < 50){
+    bumpToReverseCount++;
+  }else if(bumpToReverseCount){
+    bumpToReverseCount--;
+  }
+
   if(collisionDetected){
     //LCD.clear(); LCD.print("L:"); LCD.print(leftCount - leftEncoderAtLastInt); LCD.print(" R:"); LCD.print(rightCount-rightEncoderAtLastInt); 
     motor.stop_all(); 
@@ -529,7 +543,18 @@ void loop() {
       }
     }
     // Process collision normally
-    if(!qrdVals[0] && !qrdVals[1] && !qrdVals[2] && !qrdVals[3] && !atIntersection){
+    if(switchVals[FRONT_BUMPER] && analogRead(leftIR) > 350 && !hasPassenger){
+      pickingUp = 1;
+      hasPassenger = PickupPassenger(LEFT);
+      pickingUp = 0;
+      Turn180Decision();
+    }else if(switchVals[FRONT_BUMPER] && analogRead(rightIR) > 350 && !hasPassenger){
+      pickingUp = 1;
+      hasPassenger = PickupPassenger(RIGHT);
+      pickingUp = 0;
+      Turn180Decision();
+    }
+    else if(bumpToReverseCount > 30 && !atIntersection){
       if(switchVals[FRONT_LEFT_BUMPER]){
         ReverseLeft();
       }else if(switchVals[FRONT_RIGHT_BUMPER]){
