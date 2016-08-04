@@ -278,7 +278,7 @@ unsigned long startTime;
 #define countToDropoff 180 // TODO Change
 #define countMaxToDropoff 300
 #define dropWidth  80
-#define SIDEPICKUPSUCCESSTHRESH 400
+#define SIDEPICKUPSUCCESSTHRESH 200
 #define FRONTPICKUPSUCCESSTHRESH 250 // Determine this
 int failedPickup = 0;
 int passengerSide;
@@ -321,6 +321,7 @@ int positionLost = 0; // Change to 1 if sensor data contradicts what is expected
 int pickingUp = 0;
 int startRoute = -1;
 
+int COMPETETIONMODE = true;
 void setup()
 {
 #include <phys253setup.txt>
@@ -386,36 +387,48 @@ void setup()
   // Probably should home GM7 too
 
   while (true) {
-    currentEdge[0] = (int)((float)knob(6)/1024.0*20.0);
-    currentEdge[1] = (int)((float)knob(7)/1024.0*20.0);
-    LCD.clear();
-    LCD.print("Press Start"); LCD.setCursor(0,1);
-    LCD.print("E0:"); LCD.print(currentEdge[0]); LCD.setCursor(6,1);LCD.print("E1:"); LCD.print(currentEdge[1]); LCD.setCursor(12,1);LCD.print("R:"); LCD.print(startRoute);
-    delay(200);
-    if(stopbutton()){
+    if(!COMPETETIONMODE){
+      currentEdge[0] = (int)((float)knob(6)/1024.0*20.0);
+      currentEdge[1] = (int)((float)knob(7)/1024.0*20.0);
+      LCD.clear();
+      LCD.print("Press Start"); LCD.setCursor(0,1);
+      LCD.print("E0:"); LCD.print(currentEdge[0]); LCD.setCursor(6,1);LCD.print("E1:"); LCD.print(currentEdge[1]); LCD.setCursor(12,1);;
+      delay(200);
+    }else{
       startRoute = knob(7)/1024.0*5.0;
+      if(knob(6) > 512){
+        currentEdge[0] = 0;
+        currentEdge[1] = 10;
+      }else{
+        currentEdge[0] = 4;
+        currentEdge[1] = 15;
+      }
+      LCD.clear();
+      LCD.print("Press Start"); LCD.setCursor(0,1);
+      LCD.print("E0:"); LCD.print(currentEdge[0]); LCD.setCursor(6,1);LCD.print("E1:"); LCD.print(currentEdge[1]); LCD.setCursor(12,1);LCD.print("R:"); LCD.print(startRoute);
+      delay(200);
     }
     if (startbutton())
     {
       while (true) {
         if (!startbutton()) {
           LCD.clear();
-          if(currentEdge[0] == 0){
+          if(currentEdge[0] == 0 && COMPETETIONMODE){
             LCD.clear(); LCD.print("setting profits"); delay(1000);
             switch(startRoute){
-              case 0: profitMatrix[S][10] = 500; profitMatrix[E][16] = 500; profitMatrix[E][17] = 500;
-              case 1: profitMatrix[E][10] = 500; profitMatrix[S][11] = 500; profitMatrix[E][17] = 500;
-              case 2: profitMatrix[E][10] = 500; profitMatrix[E][11] = 500; profitMatrix[S][12] = 500;
-              case 3: profitMatrix[E][10] = 500; profitMatrix[E][11] = 500; profitMatrix[N][12] = 500;
-              case 4: profitMatrix[E][10] = 500; profitMatrix[N][11] = 500;
+              case 0: profitMatrix[S][10] = 500; profitMatrix[E][16] = 500; profitMatrix[E][17] = 500; break;
+              case 1: profitMatrix[E][10] = 500; profitMatrix[S][11] = 500; profitMatrix[E][17] = 500; break;
+              case 2: profitMatrix[E][10] = 500; profitMatrix[E][11] = 500; profitMatrix[S][12] = 500; break;
+              case 3: profitMatrix[E][10] = 500; profitMatrix[E][11] = 500; profitMatrix[N][12] = 500; break;
+              case 4: profitMatrix[E][10] = 500; profitMatrix[N][11] = 500; break;
             }
-          } else if(currentEdge[0] == 4){
+          } else if(currentEdge[0] == 4 && COMPETETIONMODE){
             switch(startRoute){
-              case 0: profitMatrix[S][15] = 500; profitMatrix[W][19] = 500; profitMatrix[W][18] = 500;
-              case 1: profitMatrix[W][15] = 500; profitMatrix[S][14] = 500; profitMatrix[W][18] = 500;
-              case 2: profitMatrix[W][15] = 500; profitMatrix[W][14] = 500; profitMatrix[S][13] = 500;
-              case 3: profitMatrix[W][15] = 500; profitMatrix[W][14] = 500; profitMatrix[N][13] = 500;
-              case 4: profitMatrix[W][15] = 500; profitMatrix[N][14] = 500;
+              case 0: profitMatrix[S][15] = 500; profitMatrix[W][19] = 500; profitMatrix[W][18] = 500; break;
+              case 1: profitMatrix[W][15] = 500; profitMatrix[S][14] = 500; profitMatrix[W][18] = 500; break;
+              case 2: profitMatrix[W][15] = 500; profitMatrix[W][14] = 500; profitMatrix[S][13] = 500; break;
+              case 3: profitMatrix[W][15] = 500; profitMatrix[W][14] = 500; profitMatrix[N][13] = 500; break;
+              case 4: profitMatrix[W][15] = 500; profitMatrix[N][14] = 500; break; 
             }
           }
           return;
@@ -472,7 +485,8 @@ void loop() {
           desiredTurn = passengerSide;
         }
         pickingUp = 0;
-        // motor.stop_all(); LCD.clear(); LCD.print(leftCount - leftInitial); delay(2000);
+
+
         if(hasPassenger){
           //g = g*1.1;
           //intGain = intGain*1.1;
@@ -498,7 +512,7 @@ void loop() {
   }
 
   if(collisionDetected){
-    LCD.clear(); LCD.print("L:"); LCD.print(leftCount - leftEncoderAtLastInt); LCD.print(" R:"); LCD.print(rightCount-rightEncoderAtLastInt); motor.stop_all(); delay(1500);
+    //LCD.clear(); LCD.print("L:"); LCD.print(leftCount - leftEncoderAtLastInt); LCD.print(" R:"); LCD.print(rightCount-rightEncoderAtLastInt); motor.stop_all(); delay(1500);
     if(currentEdge[1] == 6 || currentEdge[1] == 8){ // Special case for 1 and 3
       if(leftCount - leftEncoderAtLastInt > sixEightThresh && rightCount - rightEncoderAtLastInt > sixEightThresh){
         motor.stop_all(); LCD.clear(); LCD.print("Special Case"); delay(1500);
@@ -524,7 +538,7 @@ void loop() {
       hasPassenger = PickupPassenger(STRAIGHT);
       Turn180Decision();
     }
-    else if(switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]){
+    else if(true/*switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]*/){
       Turn180Decision();
       loopsSinceLastCollision = 0;
     }

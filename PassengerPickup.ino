@@ -102,7 +102,7 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
   motor.speed(GM7, 0);
 
   // Checks if side pickup attempt was successful
-  if((side == LEFT && analogRead(leftIR) >= SIDEPICKUPSUCCESSTHRESH) || (side == RIGHT && analogRead(rightIR) >= SIDEPICKUPSUCCESSTHRESH)){ // TODO: maybe use a passengerGoneThresh if this doesn't work
+  if((side == LEFT && analogRead(leftIR) >= SIDEPICKUPSUCCESSTHRESH) || (side == RIGHT && analogRead(rightIR) >= SIDEPICKUPSUCCESSTHRESH)){ 
     LCD.clear(); LCD.print("No Passenger"); delay(500);
     return 0;
   } // Checks if front pickup attempt was successful
