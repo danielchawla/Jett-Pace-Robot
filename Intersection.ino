@@ -150,7 +150,7 @@ void ProcessIntersection() {
         motor.speed(LEFT_MOTOR, vel / 4 - avgCorrection*0.8);
         motor.speed(RIGHT_MOTOR, vel / 4 + avgCorrection*0.8); // TODO: CHANGE may need to have to set back to /4
       }
-      if(tapeFollowCountInInt > 600){ // previously 600
+      if((tapeFollowCountInInt > 600 && !(currentEdge[1] == 11 && currentEdge[0] == 10)) || tapeFollowCountInInt > 800){ // previously 600
         //motor.stop_all(); LCD.clear(); LCD.print(avgCorrection); delay(2000);
         // motor.stop_all();
         // LCD.clear();
@@ -321,7 +321,8 @@ void ResetIntersection(){
     //motor.stop_all();
     rightEncoderAtLastInt = rightCount;
     leftEncoderAtLastInt = leftCount;
-    if(desiredTurn != turnActual){
+    
+    if(desiredTurn != turnActual /*&& currentEdge[1] != 11*/){
       discrepancyInLocation = true;
     } else{
       if(leftTurnPossible >= pathConfidence){

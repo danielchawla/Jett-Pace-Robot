@@ -277,7 +277,7 @@ unsigned long startTime;
 #define frontIRMin 300
 #define armIRMin 250
 #define countToDropoff 180 // TODO Change
-#define countMaxToDropoff 300
+#define countMaxToDropoff 320
 #define dropWidth  80
 #define SIDEPICKUPSUCCESSTHRESH 200
 #define FRONTPICKUPSUCCESSTHRESH 300 // Determine this
@@ -370,6 +370,7 @@ void setup()
   }
 
   // initialProfitMatrix[N][7] = 100; //never go to 2, we want to go here now
+  initialProfitMatrix[S][13] = 0; //We've seen we cannot pick up any dolls.
 
   currentEdge[0] = 0;
   currentEdge[1] = 10;

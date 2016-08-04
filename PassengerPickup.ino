@@ -135,7 +135,7 @@ int PickupPassenger(int side) { // side=-1 if on left, side=1 if on right
 
 void DropoffPassenger(int side){
   LCD.clear(); LCD.print("Dropping off");
-  delay(1000);
+  //delay(1000);
   int range = 80;
   int armDelay = 15;
   int startTime;
