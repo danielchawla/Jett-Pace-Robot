@@ -603,7 +603,7 @@ void loop() {
     }*/
     if(((leftCount - leftEncoderAtLastInt > countToDropoff) && (rightCount - rightEncoderAtLastInt > countToDropoff))  &&  hasPassenger){
       // Have reached dropoff zone
-      if((leftCount - leftEncoderAtLastInt < countMaxToDropoff) || (rightCount - rightEncoderAtLastInt < countMaxToDropoff)){
+      //if((leftCount - leftEncoderAtLastInt < countMaxToDropoff) || (rightCount - rightEncoderAtLastInt < countMaxToDropoff)){
           // Might not need this if depending on passener positions on 17-18 edge
         motor.stop_all();
         stopTime2 = millis();
@@ -621,12 +621,12 @@ void loop() {
           UpdateProfitMatrix();
           TurnDecision();
         }
-      }else{
+      /*}else{
         motor.stop_all(); LCD.clear(); LCD.print("too far"); delay(200);
         Turn180Decision(); // Turn around and reset counts.  We will drop the passenger off countToDropoff # of pulses from where the passenger was picked up (hopefully)
         //leftInitial = GARBAGE;
         //rightInitial = GARBAGE;
-      }
+      }*/
       /*if(((leftCount - leftEncoderAtLastInt > farFromIntCount) && (rightCount - rightEncoderAtLastInt > farFromIntCount))  &&  passengerSpotted){
         Turn180Decision();
         passengerSpotted = false;

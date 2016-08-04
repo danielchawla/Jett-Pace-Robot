@@ -321,36 +321,37 @@ void ResetIntersection(){
     //motor.stop_all();
     rightEncoderAtLastInt = rightCount;
     leftEncoderAtLastInt = leftCount;
-    
-    if(desiredTurn != turnActual /*&& currentEdge[1] != 11*/){
-      discrepancyInLocation = true;
-    } else{
-      if(leftTurnPossible >= pathConfidence){
-        if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] == -1){
-          discrepancyInLocation = true;
-        }
-      }
-      if(rightTurnPossible >= pathConfidence){
-        if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] == -1){
-          discrepancyInLocation = true;
-        }
-      }
-      if(turnActual == STRAIGHT && currentEdge[1] != 14 && currentEdge[1] != 8){//HACK
-        if(leftTurnPossible <pathConfidence){
-          if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] != -1){
+    if(currentEdge[1] != 7){
+      if(desiredTurn != turnActual /*&& currentEdge[1] != 11*/){
+        discrepancyInLocation = true;
+      } else{
+        if(leftTurnPossible >= pathConfidence){
+          if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] == -1){
             discrepancyInLocation = true;
           }
         }
-        if(rightTurnPossible < pathConfidence){
-          if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] != -1){
+        if(rightTurnPossible >= pathConfidence){
+          if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] == -1){
             discrepancyInLocation = true;
+          }
+        }
+        if(turnActual == STRAIGHT && currentEdge[1] != 14 && currentEdge[1] != 8){//HACK
+          if(leftTurnPossible <pathConfidence){
+            if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] != -1){
+              discrepancyInLocation = true;
+            }
+          }
+          if(rightTurnPossible < pathConfidence){
+            if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] != -1){
+              discrepancyInLocation = true;
+            }
           }
         }
       }
     }
 
     motor.speed(BUZZER_PIN, 0);
-    if(desiredTurn != turnActual){
+    if(desiredTurn != turnActual && currentEdge[1] != 7){
       discrepancyInLocation = true;
     }
 
