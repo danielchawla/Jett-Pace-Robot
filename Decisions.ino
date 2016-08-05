@@ -1,4 +1,4 @@
-void UpdateProfitMatrix(){
+void updateProfitMatrix(){
   
   if(!discrepancyInLocation){}
     if(!passengerSpotted ){ // 1 in MATLAB
@@ -21,7 +21,7 @@ void UpdateProfitMatrix(){
     }
   }
 
-void TurnDecision(){
+void turnDecision(){
   currentDir = (nodeMat[currentEdge[1]][currentEdge[0]] + 2) % 4;//direction with which we will enter the next intersection.
   // Make decision
   if(hasPassenger &&!discrepancyInLocation){
@@ -61,8 +61,5 @@ void TurnDecision(){
     
   }else{
     desiredTurn = STRAIGHT;
-  }    
-  // For testing, turn left, right, straight, left ...
-  //desiredTurn = desiredTurns[turnCount];
-  //turnCount++;
+  }
 }

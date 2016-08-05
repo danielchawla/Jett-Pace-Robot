@@ -17,47 +17,116 @@
 #define GM7 3
 #define GARBAGE -100
 
+#define CURVEOUTSIDECOUNT 390
+#define LONGENCMINVAL 450
+#define SIXEIGHTTHRESH 350
+#define MAXTURNING 3000
+#define MAXININTERSECTION 1300
+#define PATHCONFIDENCE 30
+#define CLOSETOINTCOUNT 120
+#define FARFROMINTCOUNT 160
+#define SIDEIRMIN 660
+#define FRONTIRMIN 300
+#define ARMIRMIN 250
+#define COUNTTODROPOFF 180
+#define COUNTMAXTODROPOFF 320
+#define DROPWIDTH  80
+#define SIDEPICKUPSUCCESSTHRESH 200
+#define FRONTPICKUPSUCCESSTHRESH 300 // Determine this
+// Angles of straight arm and open claw
+#define ARMHOME 80
+#define CLAWOPEN 160
+#define CLAWMID 75
+#define CLAWCLOSE 5
+//Frequency values for different sensor checks
+#define PASSENGERCHECKFREQ 5
+#define PRINTTOLCDFREQ 2000
+/*
+  Define ALL Pins
+*/
+// Digital:
+// Tape follwing QRDs
+/*q0:far left, q1:left centre, q2right centre, q3: far right*/
+#define q0 5
+#define q1 6
+#define q2 4 
+#define q3 7
+int qrdVals[4];
+
+//Switches
+
+
+// These are indices for array
+#define FRONT_BUMPER 0 //change to _INDEX
+#define FRONT_RIGHT_BUMPER 1
+#define RIGHT_BUMPER 2
+#define REAR_BUMPER 3
+#define LEFT_BUMPER 4
+#define FRONT_LEFT_BUMPER 5
+
+// Constants for pin on TINAH
+#define OR 0
+#define FRONT_BUMPER_PIN 9
+#define FRONT_RIGHT_BUMPER_PIN 10
+#define RIGHT_BUMPER_PIN 13
+#define REAR_BUMPER_PIN 12
+#define LEFT_BUMPER_PIN 11
+#define FRONT_LEFT_BUMPER_PIN 8
+int switchVals[6] = {0};
+
+// Analog
+//IR
+#define ARMIRPIN 1
+#define LEFTIR 4  
+int leftIRVal = -1;   int leftIRValMax = -1;
+#define RIGHTIR 5  
+int rightIRVal = -1;  int rightIRValMax = -1;
+
+#define TOPIRBACK 2
+#define TOPIRLEFT 3
+#define TOPIRRIGHT 0
+
 /*
   Function Prototypes by File
 */
 // Main
-void TapeFollow(void);
-void PrintToLCD(void);
+void tapeFollow(void);
+void printToLCD(void);
 void enableExternalInterrupt(unsigned int, unsigned int);
 // PassengerPickup
-int PickupPassenger(int);
-int CheckForPassenger(void);
-void DropoffPassenger(int);
+int pickupPassenger(int);
+int checkForPassenger(void);
+void dropoffPassenger(int);
 // Intersection
-void AreWeThereYet(void);
+void detectIntersection(void);
 void amILost(void);
-void ProcessIntersection(void);
+void processIntersection(void);
 void checkToSeeIfWeKnowWhereWeAre(void);
 bool sortaEqual(int, int);
-void ResetIntersection(void);
+void resetIntersection(void);
 // Decisions
-void UpdateProfitMatrix(void);
-void TurnDecision(void);
+void updateProfitMatrix(void);
+void turnDecision(void);
 // Collisions
-void CollisionCheck(void);
-void TurnAround(int, int, volatile unsigned int&, volatile unsigned int&);
-void Turn180Decision();
-void TurnCW(void);
-void TurnCCW(void);
-void ReverseLeft(void);
-void ReverseRight(void);
+void collisionCheck(void);
+void turnAround(int, int, volatile unsigned int&, volatile unsigned int&);
+void turn180Decision();
+void turnCW(void);
+void turnCCW(void);
+void reverseLeft(void);
+void reverseRight(void);
 // Menu Functions
-void MainMenu(void);
+void mainMenu(void);
 void Menu(void);
-void ViewDigital(void);
-void ViewAnalog(void);
-void ControlArm(void);
+void viewDigital(void);
+void viewAnalog(void);
+void controlArm(void);
 void altMotor(void);
-void PickupPassengerMain(void);
+void pickupPassengerMain(void);
 void jettPace(void);
 
-void (*menuFunctions[])() = {Menu, ViewDigital, ViewAnalog, ControlArm, PickupPassengerMain, altMotor, jettPace};
-int countMainMenu = 7;
+void (*menuFunctions[])() = {Menu, viewDigital, viewAnalog, controlArm, pickupPassengerMain, altMotor, jettPace};
+int countmainMenu = 7;
 const char *mainMenuNames[] = {"Change Vars", "View Digital In", "View Analog In", "Control Arm", "Pickup Passenger", "Alt Motor", "Jett Pace"};
 
 /* Store a variable in TINAH mem*/
@@ -94,50 +163,6 @@ MenuItem menuItems[]      = {Gain, ProportionalGain, DerivativeGain, Speed, Inte
 int divisors[] = {8, 8, 8, 1, 2}; //divides gains and speeds by this number
 
 
-/*
-  Define ALL Pins
-*/
-// Digital:
-// Tape follwing QRDs
-/*q0:far left, q1:left centre, q2right centre, q3: far right*/
-#define q0 5
-#define q1 6
-#define q2 4 
-#define q3 7
-int qrdVals[4];
-
-//Switches
-
-
-// These are indices for array
-#define FRONT_BUMPER 0 //change to _INDEX
-#define FRONT_RIGHT_BUMPER 1
-#define RIGHT_BUMPER 2
-#define REAR_BUMPER 3
-#define LEFT_BUMPER 4
-#define FRONT_LEFT_BUMPER 5
-
-// Constants for pin on TINAH
-#define OR 0
-#define FRONT_BUMPER_PIN 9
-#define FRONT_RIGHT_BUMPER_PIN 10
-#define RIGHT_BUMPER_PIN 13
-#define REAR_BUMPER_PIN 12
-#define LEFT_BUMPER_PIN 11
-#define FRONT_LEFT_BUMPER_PIN 8
-int switchVals[6] = {0};
-
-// Analog
-//IR
-#define ArmIRpin 1
-#define leftIR 4  
-int leftIRVal = -1;   int leftIRValMax = -1;
-#define rightIR 5  
-int rightIRVal = -1;  int rightIRValMax = -1;
-
-#define topIRBack 2
-#define topIRLeft 3
-#define topIRRight 0
 
 /*
   GLOBAL VARIABLES
@@ -159,7 +184,7 @@ int vel;
 int p;
 int d;
 int correction;
-int statusCountTapeFollow = 0;
+int statusCounttapeFollow = 0;
 int tapeFollowVel;
 int avgCorrection = 0;
 
@@ -192,7 +217,7 @@ int initialProfitMatrix[4][20];
 int profitMatrix[4][20];
 
 //edge matrix stuff
-int theMap[4][20] = { // theMap[dir][currentInd] = [toIndex]
+int theMap[4][20] = { // theMap[dir][currentInd] = toIndex
   // 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
   { -1, -1, -1, -1, -1, -1,  1,  2,  3, -1,  0,  6,  7,  7,  8,  4, 10, 11, 14, 15}, //N
   { -1, -1, -1, -1, -1,  6, -1, 13,  9, -1, 11, 12, -1, 14, 15, -1, 17, 18, 19, -1}, //E
@@ -219,9 +244,7 @@ int desiredTurn = GARBAGE;
 int turnActual = GARBAGE;
 int nodeMat[20][20] = {0}; //nodeMat[fromIndex][toIndex] = dir
 int countInIntersection = 0;
-#define maxInIntersection 1300
 int countTurning = 0;
-#define maxTurning 3000
 int leftTurnPossible = 0;
 int rightTurnPossible = 0;
 int intGain;
@@ -230,7 +253,6 @@ int qrdToCheck;
 int loopNum = 1;
 int statusCount = 0;
 int statusLast = 0;
-#define pathConfidence 30
 int loopsSinceLastInt = 0;
 int loopsSinceLastCollision = 0;
 int leavingCount = 0;
@@ -250,12 +272,6 @@ int leftEncoderAtLastInt = 0;
 int rightDiff;
 int leftDiff;
 int diff;
-//#define curveInsideCount 300
-#define curveOutsideCount 390
-//#define straightCount 450
-//#define diffInCircle 100
-#define longEncMinVal 450
-#define sixEightThresh 350
 int numOfConsecutiveStraights;
 int inCircle = false;
 
@@ -263,8 +279,6 @@ int count180 = 0;
 int statusCount180 = 0;
 int countLeft180 = 0;
 int countRight180 = 0;
-#define closeToIntCount 120
-#define farFromIntCount 160
 
 // Loop timing variables
 unsigned long t1 = 0;
@@ -273,14 +287,6 @@ int loopTime;
 unsigned long startTime;
 
 // Passenger Pickup
-#define sideIRMin 660
-#define frontIRMin 300
-#define armIRMin 250
-#define countToDropoff 180 // TODO Change
-#define countMaxToDropoff 320
-#define dropWidth  80
-#define SIDEPICKUPSUCCESSTHRESH 200
-#define FRONTPICKUPSUCCESSTHRESH 300 // Determine this
 int failedPickup = 0;
 int passengerSide;
 int passengerSeenCount = 0;
@@ -290,11 +296,7 @@ int leftInitial = GARBAGE;
 int rightInitial = GARBAGE;
 
 
-// Angles of straight arm and open claw
-#define armHome 80
-#define clawOpen 160
-#define clawMid 75
-#define clawClose 5
+
 
 //int desiredTurns[] = {STRAIGHT, LEFT, LEFT, RIGHT, LEFT, STRAIGHT, LEFT, STRAIGHT, RIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, STRAIGHT, BACK}; //these are temporary and only for testing
 //int desiredTurns[] = {STRAIGHT, LEFT, STRAIGHT, LEFT, LEFT, LEFT, STRAIGHT, STRAIGHT, STRAIGHT, LEFT, STRAIGHT, RIGHT};
@@ -302,12 +304,6 @@ int rightInitial = GARBAGE;
 //int desiredTurns[] = {LEFT, STRAIGHT, RIGHT, STRAIGHT, STRAIGHT, RIGHT, RIGHT, STRAIGHT};
 int desiredTurns[] = {LEFT, LEFT, STRAIGHT, STRAIGHT, LEFT, LEFT};
 int turnCount = 0;
-
-/*
-  Frequency values for different sensor checks
-*/
-#define passengerCheckFreq 5
-#define printToLCDFreq 2000
 
 
 // State Variables
@@ -392,9 +388,8 @@ void setup()
   intGain = menuItems[4].Value;
 
   // Home Servos
-  RCServo0.write(clawOpen);
-  RCServo1.write(armHome);
-  // Probably should home GM7 too
+  RCServo0.write(CLAWOPEN);
+  RCServo1.write(ARMHOME);
 
   while (true) {
     if(!COMPETETIONMODE){
@@ -447,8 +442,9 @@ void setup()
       }
     }
   }
-
 }
+
+
 
 void loop() {
   /*
@@ -456,20 +452,11 @@ void loop() {
       It is expected that functions will be called every loop iteration, so must behave accordingly
       For a function to not always be called, it must alter some variable so it will not be called next loop
       Other functions may also change this variable as appropriate
-        ie. ProcessIntersection sets desiredTurn = GARBAGE after successful completion of intersection
+        ie. processIntersection sets desiredTurn = GARBAGE after successful completion of intersection
   */
 
   numOfIttrs++;
   loopsSinceLastInt++;
-
-
-  /*if(loopsSinceLastCollision <= 500){
-    gActual = g*5;
-    loopsSinceLastCollision++;
-  }
-  else{
-    gActual = g;
-  }*/
 
   /*TAPE FOLLOWING*/
   //low reading == white. High reading == black tape.
@@ -479,10 +466,10 @@ void loop() {
   qrdVals[3] = digitalRead(q3);
 
 
-  CollisionCheck();
+  collisionCheck();
 
-  if (numOfIttrs%passengerCheckFreq == 0 && failedPickup == 0) {
-    passengerSide = CheckForPassenger();
+  if (numOfIttrs%PASSENGERCHECKFREQ == 0 && failedPickup == 0) {
+    passengerSide = checkForPassenger();
     if(passengerSide){
       if(!hasPassenger){
         motor.speed(LEFT_MOTOR, -1*MAX_MOTOR_SPEED);
@@ -490,17 +477,15 @@ void loop() {
         delay(20);
         motor.stop_all();
         pickingUp = 1;
-        hasPassenger = PickupPassenger(passengerSide);
-        if(!hasPassenger){ //TODO: TEST
+        hasPassenger = pickupPassenger(passengerSide);
+        if(!hasPassenger){
           desiredTurn = passengerSide;
         }
         pickingUp = 0;
 
 
         if(hasPassenger){
-          //g = g*1.1;
-          //intGain = intGain*1.1;
-          TurnDecision();
+          turnDecision();
         } else{
           failedPickup = 1; 
         }
@@ -509,14 +494,14 @@ void loop() {
         passengerSpotted = true;
         profitMatrix[nodeMat[currentEdge[1]][currentEdge[0]]][currentEdge[1]] = 500; // Set profitability of current edge in both direction very high
         profitMatrix[nodeMat[currentEdge[0]][currentEdge[1]]][currentEdge[0]] = 500;
-      } //TODO had a delay here and it froze the robot - sign of bigger problem???
+      }
       passengerSide = 0;
     }
   }
   // This code creates a buffer between a failed pickup attempt and a new pickup attempt, eliminating the pickup jitterbug
   if(failedPickup){
       failedPickup++;
-      if(failedPickup >= 500){ //TODO: Tweak this value if needed. 
+      if(failedPickup >= 500){
         failedPickup = 0;
       }
   }
@@ -528,11 +513,9 @@ void loop() {
   }
 
   if(collisionDetected){
-    //LCD.clear(); LCD.print("L:"); LCD.print(leftCount - leftEncoderAtLastInt); LCD.print(" R:"); LCD.print(rightCount-rightEncoderAtLastInt); 
     motor.stop_all(); 
-    //delay(1500);
     if(currentEdge[1] == 6 || currentEdge[1] == 8){ // Special case for 1 and 3
-      if(leftCount - leftEncoderAtLastInt > sixEightThresh && rightCount - rightEncoderAtLastInt > sixEightThresh){
+      if(leftCount - leftEncoderAtLastInt > SIXEIGHTTHRESH && rightCount - rightEncoderAtLastInt > SIXEIGHTTHRESH){
         motor.stop_all(); LCD.clear(); LCD.print("Special Case"); delay(300);
         if(currentEdge[1] == 6){
           currentEdge[1] = 1;
@@ -544,31 +527,30 @@ void loop() {
       }
     }
     // Process collision normally
-    if(switchVals[FRONT_BUMPER] && analogRead(leftIR) > 350 && !hasPassenger){
+    if(switchVals[FRONT_BUMPER] && analogRead(LEFTIR) > 350 && !hasPassenger){
       pickingUp = 1;
-      hasPassenger = PickupPassenger(LEFT);
+      hasPassenger = pickupPassenger(LEFT);
       pickingUp = 0;
-      Turn180Decision();
-    }else if(switchVals[FRONT_BUMPER] && analogRead(rightIR) > 350 && !hasPassenger){
+      turn180Decision();
+    }else if(switchVals[FRONT_BUMPER] && analogRead(RIGHTIR) > 350 && !hasPassenger){
       pickingUp = 1;
-      hasPassenger = PickupPassenger(RIGHT);
+      hasPassenger = pickupPassenger(RIGHT);
       pickingUp = 0;
-      Turn180Decision();
+      turn180Decision();
     }
     else if(bumpToReverseCount > 30 && !atIntersection){
       if(switchVals[FRONT_LEFT_BUMPER]){
-        ReverseLeft();
+        reverseLeft();
       }else if(switchVals[FRONT_RIGHT_BUMPER]){
-        ReverseRight();
+        reverseRight();
       }
-      //TODO: TEST check for passenger at front from dev
-    }else if(switchVals[FRONT_BUMPER] && (currentEdge[0] == 6 || currentEdge[0] == 8) && analogRead(ArmIRpin) > frontIRMin && !hasPassenger){
+    }else if(switchVals[FRONT_BUMPER] && (currentEdge[0] == 6 || currentEdge[0] == 8) && analogRead(ARMIRPIN) > FRONTIRMIN && !hasPassenger){
       motor.stop_all();
-      hasPassenger = PickupPassenger(STRAIGHT);
-      Turn180Decision();
+      hasPassenger = pickupPassenger(STRAIGHT);
+      turn180Decision();
     }
-    else if(true/*switchVals[FRONT_BUMPER] || switchVals[FRONT_LEFT_BUMPER] || switchVals[FRONT_RIGHT_BUMPER]*/){
-      Turn180Decision();
+    else{
+      turn180Decision();
       loopsSinceLastCollision = 0;
     }
     for(int i = 0; i<6;i++){
@@ -578,69 +560,47 @@ void loop() {
   }
 
   if(!atIntersection){
-    AreWeThereYet();
+    detectIntersection();
   }
 
   if(loopsSinceLastInt == 600){
-    UpdateProfitMatrix();
+    updateProfitMatrix();
   } else if (loopsSinceLastInt == 800) {
-    TurnDecision();
+    turnDecision();
   }
 
   //Continue on
   if (atIntersection) {
-    ProcessIntersection();
+    processIntersection();
   } else { //keep tape following
-    TapeFollow();
+    tapeFollow();
   }
 
   if(((currentEdge[0] == 17 && currentEdge[1] == 18) || (currentEdge[0] == 18 && currentEdge[1] == 17)) && !discrepancyInLocation){
-    //Going towards dropoff - count with encoders
-    /*if(leftInitial == GARBAGE && hasPassenger){
-      motor.stop_all(); LCD.clear(); LCD.print("Setting initial"); delay(2000);
-      leftInitial = leftCount;
-      rightInitial = rightCount;
-    }*/
-    if(((leftCount - leftEncoderAtLastInt > countToDropoff) && (rightCount - rightEncoderAtLastInt > countToDropoff))  &&  hasPassenger){
+    if(((leftCount - leftEncoderAtLastInt > COUNTTODROPOFF) && (rightCount - rightEncoderAtLastInt > COUNTTODROPOFF))  &&  hasPassenger){
       // Have reached dropoff zone
-      //if((leftCount - leftEncoderAtLastInt < countMaxToDropoff) || (rightCount - rightEncoderAtLastInt < countMaxToDropoff)){
-          // Might not need this if depending on passener positions on 17-18 edge
-        motor.stop_all();
-        stopTime2 = millis();
-        if(stopTime2 - stopTime1 > 100){
-          stopTime1 = stopTime2;
-        }
-        DropoffPassenger((currentEdge[0]*2-35)*-1); // 17 -> 1 or 18 -> -1
-        LCD.clear();
-        LCD.print(leftCount - leftInitial); LCD.print(" "); LCD.print(rightCount - rightInitial);
-        leftInitial = GARBAGE;
-        rightInitial = GARBAGE;
-        if(passengerSpotted){
-          Turn180Decision();
-          passengerSpotted = false;
-          UpdateProfitMatrix();
-          TurnDecision();
-        }
-      /*}else{
-        motor.stop_all(); LCD.clear(); LCD.print("too far"); delay(200);
-        Turn180Decision(); // Turn around and reset counts.  We will drop the passenger off countToDropoff # of pulses from where the passenger was picked up (hopefully)
-        //leftInitial = GARBAGE;
-        //rightInitial = GARBAGE;
-      }*/
-      /*if(((leftCount - leftEncoderAtLastInt > farFromIntCount) && (rightCount - rightEncoderAtLastInt > farFromIntCount))  &&  passengerSpotted){
-        Turn180Decision();
+      motor.stop_all();
+      stopTime2 = millis();
+      if(stopTime2 - stopTime1 > 100){
+        stopTime1 = stopTime2;
+      }
+      dropoffPassenger((currentEdge[0]*2-35)*-1); // 17 -> 1 or 18 -> -1
+      LCD.clear();
+      LCD.print(leftCount - leftInitial); LCD.print(" "); LCD.print(rightCount - rightInitial);
+      leftInitial = GARBAGE;
+      rightInitial = GARBAGE;
+      if(passengerSpotted){
+        turn180Decision();
         passengerSpotted = false;
-        UpdateProfitMatrix();
-        TurnDecision();
-      }*/
+        updateProfitMatrix();
+        turnDecision();
+      }
     }
-
-
   }
 
   //Print useful information
-  if (numOfIttrs == printToLCDFreq){ 
-    PrintToLCD();
+  if (numOfIttrs == PRINTTOLCDFREQ){ 
+    printToLCD();
   }
 
   // Enter Menu if startbutton
@@ -649,41 +609,40 @@ void loop() {
     delay(100);
     if (startbutton())
     {
-      MainMenu();
+      mainMenu();
     }
   }
 }
 
-void TapeFollow() {
+void tapeFollow() {
   if (qrdVals[1] == LOW && qrdVals[2] == LOW) {
     if(qrdVals[0] == HIGH){
-      statusCountTapeFollow++;
-      if(statusCountTapeFollow > 8){
+      statusCounttapeFollow++;
+      if(statusCounttapeFollow > 8){
         error = 12;
       }
     }else if(qrdVals[3] == HIGH){
-      statusCountTapeFollow--;
-      if(statusCountTapeFollow < 8){
+      statusCounttapeFollow--;
+      if(statusCounttapeFollow < 8){
         error = -12;
       }
     }else{ // All low
-      statusCountTapeFollow = 0;
+      statusCounttapeFollow = 0;
       if (pastError < 0) {
         error = -5;
       } else if (pastError > 0) {
         error = 5;
       } else if (pastError == 0) {
-        // Do we need to do anything? Just go straight?
       }
     }
   } else if ( qrdVals[2] == HIGH) {
-    statusCountTapeFollow = 0;
+    statusCounttapeFollow = 0;
     error = -1;
   } else if (qrdVals[1] == HIGH) {
-    statusCountTapeFollow = 0;
+    statusCounttapeFollow = 0;
     error = 1;
   } else {
-    statusCountTapeFollow = 0;
+    statusCounttapeFollow = 0;
     error = 0;
   }
 
@@ -695,15 +654,10 @@ void TapeFollow() {
 
   p = kp * error;
   d = (int)((float)kd * (float)(error - recError) / (float)(q + m));
-  correction = (float)((p + d)*gActual)/10; //this was a hasty change
+  correction = (float)((p + d)*gActual)/10;
   if((error > -10 && error < 10) && loopsSinceLastInt % 200 == 0){
-    avgCorrection = (avgCorrection*9+correction)/10; //TODO Investigate this ratio
+    avgCorrection = (avgCorrection*9+correction)/10;
   }
-  /*if(correction > 150){
-    correction = 150;
-  }else if(correction < -150){
-    correction = -150;
-  }*/
   pastError = error;
   m++;
   if(!passengerSide){ // If passenger has not been seen, go forward
@@ -712,25 +666,18 @@ void TapeFollow() {
   }
 }
 
-void PrintToLCD() {
+void printToLCD() {
   t2 = millis();
-  loopTime = ((t2 - t1) * 1000) / printToLCDFreq;
+  loopTime = ((t2 - t1) * 1000) / PRINTTOLCDFREQ;
   t1 = t2;
   numOfIttrs = 0;
-  if (1/*!atIntersection*/) {
-    LCD.clear();
-    /*LCD.print("LT: "); LCD.print(loopTime);
-    LCD.print(" i: "); LCD.print(turnCount);*/
-    //LCD.print("Enc: "); LCD.print(leftCount); LCD.print(" "); LCD.print(rightCount);
-    //LCD.print(hasPassenger); LCD.print("  "); LCD.print(passengerSpotted);
-    LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
-    //LCD.print(leftDiff); LCD.print("  "); LCD.print(rightDiff);
-    if(discrepancyInLocation){
-      LCD.setCursor(0, 1); LCD.print("LOST  "); LCD.print(numOfConsecutiveStraights);
+  LCD.clear();
+  LCD.print("P: "); LCD.print(profits[0]); LCD.print(" "); LCD.print(profits[1]); LCD.print(" "); LCD.print(profits[2]);  LCD.print(" "); LCD.print(profits[3]); 
+  if(discrepancyInLocation){
+    LCD.setCursor(0, 1); LCD.print("LOST  "); LCD.print(numOfConsecutiveStraights);
 
-    }else{
-      LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
-    }
+  }else{
+    LCD.setCursor(0, 1); LCD.print("Next: "); LCD.print(currentEdge[1]); LCD.print(" Dir: "); LCD.print(desiredTurn);
   }
 }
 

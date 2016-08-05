@@ -1,4 +1,4 @@
-void AreWeThereYet(){
+void detectIntersection(){
   if ((qrdVals[0] == HIGH || qrdVals[3] == HIGH) && (qrdVals[1] == HIGH || qrdVals[2] == HIGH) && loopsSinceLastInt > 600) {
     //statusCount++;
     if (qrdVals[0]) {
@@ -7,17 +7,15 @@ void AreWeThereYet(){
     if (qrdVals[3]) {
       rightTurnPossible+=2;
     }
-    if (leftTurnPossible && !qrdVals[0] && leftTurnPossible < pathConfidence) {
+    if (leftTurnPossible && !qrdVals[0] && leftTurnPossible < PATHCONFIDENCE) {
       leftTurnPossible--;
     }
-    if (rightTurnPossible && !qrdVals[3] && rightTurnPossible < pathConfidence) {
+    if (rightTurnPossible && !qrdVals[3] && rightTurnPossible < PATHCONFIDENCE) {
       rightTurnPossible--;
     }
 
-  }/* else if (statusCount) {
-    statusCount--;
-  }*/
-  if (leftTurnPossible > pathConfidence || rightTurnPossible > pathConfidence) { // Makes harder to see intersection
+  }
+  if (leftTurnPossible > PATHCONFIDENCE || rightTurnPossible > PATHCONFIDENCE) { // Makes harder to see intersection
     motor.speed(LEFT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.speed(RIGHT_MOTOR, -1 * MAX_MOTOR_SPEED);
     motor.stop_all();
@@ -33,14 +31,13 @@ void AreWeThereYet(){
 
     turn180 = (qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW);
 
-    // TODO: used for check to see if we know where we are function. TODOLOST
     rightDiff = rightCount - rightEncoderAtLastInt;
     leftDiff = leftCount - leftEncoderAtLastInt;
   }
 }
 
 
-void ProcessIntersection() {
+void processIntersection() {
   motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED*3/4);
   /*
     TAKE ACTION AT INTERSECTION
@@ -66,12 +63,6 @@ void ProcessIntersection() {
   countInIntersection++;
 
   if (!turning) {
-
-    /*if (countInIntersection > maxInIntersection) {
-      atIntersection = 0;
-      LCD.clear();
-      LCD.print("Leaving");
-    }*/
 
     // Collect error values so that Tape Following continues nicely after intersection - do we really need this?
     // Only if not under leaving circumstances - not tape following yet
@@ -100,7 +91,7 @@ void ProcessIntersection() {
       pastError = error;
       m++;
         motor.speed(LEFT_MOTOR, vel / 4 - avgCorrection*1);
-        motor.speed(RIGHT_MOTOR, vel / 4 + avgCorrection*1); // TODO: CHANGE may need to have to set back to /4
+        motor.speed(RIGHT_MOTOR, vel / 4 + avgCorrection*1);
     }
     // Check if it is possible to turn left or right
     if (qrdVals[0]) {
@@ -110,67 +101,36 @@ void ProcessIntersection() {
       rightTurnPossible+=2;
     }
 
-    if (leftTurnPossible && !qrdVals[0] && leftTurnPossible < pathConfidence) {
+    if (leftTurnPossible && !qrdVals[0] && leftTurnPossible < PATHCONFIDENCE) {
       leftTurnPossible--;
     }
-    if (rightTurnPossible && !qrdVals[3] && rightTurnPossible < pathConfidence) {
+    if (rightTurnPossible && !qrdVals[3] && rightTurnPossible < PATHCONFIDENCE) {
       rightTurnPossible--;
     }
 
     if (!qrdVals[0] && !qrdVals[3] && !tapeFollowCountInInt) {
       leavingCount++;
       LCD.clear(); LCD.print("STRAIGHT");
-      if(leavingCount > 50){ //may need to CHANGE for time trials 200 -> 10.  May try to go straight when not possible though
+      if(leavingCount > 50){ 
         tapeFollowCountInInt = 1;
         turnActual = STRAIGHT;
-        //atIntersection = 0;
       }
-      /*if(leavingCount > 200){
-        atIntersection = 0;
-      }*/
     }
 
     if(tapeFollowCountInInt){
       tapeFollowCountInInt++;
-      /*if (qrdVals[0]) {
-        leftTurnPossible+=2;
-      }
-      if (qrdVals[3]) {
-        rightTurnPossible+=2;
-      }
-      if (leftTurnPossible && !qrdVals[0] && leftTurnPossible < pathConfidence) {
-        leftTurnPossible--;
-      }
-      if (rightTurnPossible && !qrdVals[3] && rightTurnPossible < pathConfidence) {
-        rightTurnPossible--;
-      }*/
-      if(tapeFollowCountInInt > 0){
-        TapeFollow();
-      }else{
-        motor.speed(LEFT_MOTOR, vel / 4 - avgCorrection*0.8);
-        motor.speed(RIGHT_MOTOR, vel / 4 + avgCorrection*0.8); // TODO: CHANGE may need to have to set back to /4
-      }
+      tapeFollow();
       if((tapeFollowCountInInt > 600 && !(currentEdge[1] == 11 && currentEdge[0] == 10)) || tapeFollowCountInInt > 800){ // previously 600
-        //motor.stop_all(); LCD.clear(); LCD.print(avgCorrection); delay(2000);
-        // motor.stop_all();
-        // LCD.clear();
-        // LCD.print(noStraightCount);
-        // delay(1200);
-        //atIntersection = false; //jonah had this. TODO: remove this if ryan's shit below doesnt work
-        //Ryans stuff begins
-        //we can't go straight.
-        // motor.stop_all();
-        // delay(500); // TODO get rid of this and stop all
         
         // need to turn
-        if(rightTurnPossible>=pathConfidence && defaultTurn == RIGHT){
+        if(rightTurnPossible>=PATHCONFIDENCE && defaultTurn == RIGHT){
           turnActual = RIGHT;
           turning = 1;
           qrdToCheck = q3;
           loopNum = 2;
           LCD.clear();
           LCD.print("Turning Right");
-        }else if(leftTurnPossible>=pathConfidence){ // and defaultTurn == LEFT || right turn !possible
+        }else if(leftTurnPossible>=PATHCONFIDENCE){ // and defaultTurn == LEFT || right turn !possible
           turnActual = LEFT;
           turning = 1;
           qrdToCheck = q0;
@@ -185,50 +145,15 @@ void ProcessIntersection() {
           LCD.clear();
           LCD.print("Turning Right");
         }
-        //ryans stuff ends
       }
     }
 
-    // Check if all QRDs are lost
-    /*if((qrdVals[0] == LOW && qrdVals[1] == LOW && qrdVals[2] == LOW && qrdVals[3] == LOW) && tapeFollowCountInInt){
-      noStraightCount++;
-      if(noStraightCount > 1200){
-        motor.stop_all();
-        delay(2000); // TODO get rid of this and stop all
-        // need to turn
-        if(leftTurnPossible>=pathConfidence){
-          turnActual = LEFT;
-          turning = 1;
-          qrdToCheck = q0;
-          loopNum = 2;
-          LCD.clear();
-          LCD.print("Turning Left");
-        } else if(rightTurnPossible>=pathConfidence){
-          turnActual = RIGHT;
-          turning = 1;
-          qrdToCheck = q3;
-          loopNum = 2;
-          LCD.clear();
-          LCD.print("Turning Right");
-        } else{ // THIS SHOULD NEVER HAPPEN
-          LCD.print("No straight or turn");
-          motor.stop_all();
-          while(true){} // TODO 
-        }
-      }
-    }else if((qrdVals[0] == HIGH || qrdVals[1] == HIGH || qrdVals[2] == HIGH || qrdVals[3] == HIGH) && noStraightCount>0){
-      noStraightCount-=100;
-    }*/
-
       //RYANS NEW CODE
-      //check if there is tape after int
-    //if((digitalRead(q0) || digitalRead(q1) || digitalRead(q3) || digitalRead(q2)) && tapeFollowCountInInt > 300){
     if((qrdVals[0] == HIGH || qrdVals[1] == HIGH || qrdVals[2] == HIGH || qrdVals[3] == HIGH) && tapeFollowCountInInt > 200){
       noStraightCount+=3; //this should be "straighCount" or equivalent
       
       if(noStraightCount >= 50){
         atIntersection = false; //we can turn straight! exit the intersection and keep tape following
-        //motor.stop_all(); LCD.clear(); LCD.print(avgCorrection); delay(2000);
       }
       else if(noStraightCount){
          noStraightCount--;
@@ -238,7 +163,7 @@ void ProcessIntersection() {
 
     // Determine if we can turn the desired direction
     if (desiredTurn == LEFT){
-      if(leftTurnPossible > pathConfidence) {
+      if(leftTurnPossible > PATHCONFIDENCE) {
         turnActual = LEFT;
         turning = 1;
         qrdToCheck = q0;
@@ -247,7 +172,7 @@ void ProcessIntersection() {
       }
     }
     if (desiredTurn == RIGHT){
-      if(rightTurnPossible > pathConfidence) {
+      if(rightTurnPossible > PATHCONFIDENCE) {
         turnActual = RIGHT;
         turning = 1;
         qrdToCheck = q3;
@@ -304,44 +229,39 @@ void ProcessIntersection() {
   }
 
   if (!atIntersection) { // If no longer at intersection reset apropriate variables
-    ResetIntersection();
+    resetIntersection();
   }
 }
 
-void ResetIntersection(){
-    // TODO copy paste lost detection code from DEV - Is below - Uncomment and make sure it works
-
+void resetIntersection(){
     /*
       Check if we could not turn the way we wanted to - if we couldn't and decision making is working correctly, then we're lost
       Could be updated to be a bit smarter, and use what was actually seen if we went straight to further determine if we're lost
       Currently, we can always go straight even at an L or T intersection, so this is not 100% reliable but will (should) never give false positives
     */
-      //TODOLOST - uncomment and see if works
-    //LCD.clear(); motor.stop_all(); LCD.print(leftTurnPossible); LCD.print(" "); LCD.print(rightTurnPossible); LCD.print(" "); LCD.print(turnActual); delay(2000);
-    //motor.stop_all();
     rightEncoderAtLastInt = rightCount;
     leftEncoderAtLastInt = leftCount;
     if(currentEdge[1] != 7){
       if(desiredTurn != turnActual /*&& currentEdge[1] != 11*/){
         discrepancyInLocation = true;
       } else{
-        if(leftTurnPossible >= pathConfidence){
+        if(leftTurnPossible >= PATHCONFIDENCE){
           if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] == -1){
             discrepancyInLocation = true;
           }
         }
-        if(rightTurnPossible >= pathConfidence){
+        if(rightTurnPossible >= PATHCONFIDENCE){
           if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] == -1){
             discrepancyInLocation = true;
           }
         }
         if(turnActual == STRAIGHT && currentEdge[1] != 14 && currentEdge[1] != 8){//HACK
-          if(leftTurnPossible <pathConfidence){
+          if(leftTurnPossible <PATHCONFIDENCE){
             if(theMap[(currentDir + LEFT + 4) % 4][currentEdge[1]] != -1){
               discrepancyInLocation = true;
             }
           }
-          if(rightTurnPossible < pathConfidence){
+          if(rightTurnPossible < PATHCONFIDENCE){
             if(theMap[(currentDir + RIGHT + 4) % 4][currentEdge[1]] != -1){
               discrepancyInLocation = true;
             }
@@ -364,7 +284,6 @@ void ResetIntersection(){
       currentEdge[1] = GARBAGE;
     }
 
-    //TODOLOST - uncomment
     if(discrepancyInLocation){
       motor.speed(BUZZER_PIN, MAX_MOTOR_SPEED/5);
       checkToSeeIfWeKnowWhereWeAre();//this is called right after an intersection
@@ -400,32 +319,16 @@ void ResetIntersection(){
 }
 void checkToSeeIfWeKnowWhereWeAre(void){
   //Checks to see if we are going along the straight edge by the drop off.
- 
-  /*if(turnActual == STRAIGHT){
-    numOfConsecutiveStraights++;
-     if(numOfConsecutiveStraights == 2){
-      //we can check differences in encoders to determine where we are.
-      if(leftDiff - rightDiff > diffInCircle || rightDiff - leftDiff > diffInCircle){
-        inCircle = true;
-      }
-    }
-    //  if(numOfConsecutiveStraights == 3){
-    //   inCircle = true;
-    // }
-  }
-  else{
-    numOfConsecutiveStraights = 0;
-    inCircle = false;
-  }*/
 
-  if(leftDiff > curveOutsideCount && rightDiff < leftDiff*0.7){
+
+  if(leftDiff > CURVEOUTSIDECOUNT && rightDiff < leftDiff*0.7){
     motor.stop_all(); LCD.clear(); LCD.print("On 12-7"); delay(200);
     profitMatrix[nodeMat[13][12]][13] = 0;
     profitMatrix[nodeMat[12][13]][12] = 0;
     currentEdge[0] = 12;
     currentEdge[1] = 7;
     discrepancyInLocation = false;
-  } else if(rightDiff > curveOutsideCount && leftDiff < rightDiff*0.7){
+  } else if(rightDiff > CURVEOUTSIDECOUNT && leftDiff < rightDiff*0.7){
     motor.stop_all(); LCD.clear(); LCD.print("On 13-7"); delay(200);
     profitMatrix[nodeMat[13][12]][13] = 0;
     profitMatrix[nodeMat[12][13]][12] = 0;
@@ -434,12 +337,12 @@ void checkToSeeIfWeKnowWhereWeAre(void){
     discrepancyInLocation = false;    
   }
 
-  else if(leftDiff > longEncMinVal || rightDiff > longEncMinVal){ //using left diff because that will be largest if we default to turning right if not straight
+  else if(leftDiff > LONGENCMINVAL || rightDiff > LONGENCMINVAL){ //using left diff because that will be largest if we default to turning right if not straight
     motor.stop_all(); LCD.clear(); LCD.print("On 17-18"); delay(200);
-    if(rightTurnPossible >= pathConfidence && leftTurnPossible < pathConfidence){
+    if(rightTurnPossible >= PATHCONFIDENCE && leftTurnPossible < PATHCONFIDENCE){
       discrepancyInLocation = false;
       if(hasPassenger){
-        TurnCCW();
+        turnCCW();
         passengerSpotted = 0;
         currentEdge[0] = 17;
         currentEdge[1] = 18;
@@ -451,10 +354,10 @@ void checkToSeeIfWeKnowWhereWeAre(void){
       profitMatrix[nodeMat[17][18]][17] = 0;
       profitMatrix[nodeMat[18][17]][18] = 0;
     }
-    else if(leftTurnPossible >= pathConfidence && rightTurnPossible < pathConfidence){
+    else if(leftTurnPossible >= PATHCONFIDENCE && rightTurnPossible < PATHCONFIDENCE){
       discrepancyInLocation = false;
       if(hasPassenger){
-        TurnCW();
+        turnCW();
         passengerSpotted = 0;
         currentEdge[0] = 18;
         currentEdge[1] = 17;
@@ -474,15 +377,4 @@ void checkToSeeIfWeKnowWhereWeAre(void){
     }
   }
 }
-
-/*bool sortaEqual(int a, int b){
-  int diff = a-b;
-  if (diff < 0){
-    diff = -1*diff;
-  }
-  if(diff < 30){
-    return true;
-  }
-  return false;
-}*/
 

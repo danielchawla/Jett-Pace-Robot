@@ -1,13 +1,13 @@
-void MainMenu()
+void mainMenu()
 {
   motor.stop_all();
   LCD.clear(); LCD.home();
   LCD.print("Entering Main Menu");
   delay(500);
   LCD.clear();
-  int menuIndex = countMainMenu - knob(6) * (countMainMenu) / 1024 - 1;
+  int menuIndex = countmainMenu - knob(6) * (countmainMenu) / 1024 - 1;
   int topIndex;
-  if (menuIndex < countMainMenu - 1) {
+  if (menuIndex < countmainMenu - 1) {
     topIndex = menuIndex;
   } else {
     topIndex = menuIndex - 1;
@@ -18,7 +18,7 @@ void MainMenu()
   LCD.cursor();
   while (true)
   {
-    menuIndex = countMainMenu - knob(6) * (countMainMenu) / 1024 - 1;
+    menuIndex = countmainMenu - knob(6) * (countmainMenu) / 1024 - 1;
     if (cursorPosition != menuIndex - topIndex)
     {
       LCD.clear();
@@ -108,7 +108,7 @@ void Menu()
   }
 }
 
-void ViewDigital()
+void viewDigital()
 {
   LCD.clear(); LCD.print("Viewing Digital");
   delay(500);
@@ -146,7 +146,9 @@ void ViewDigital()
     }
   }
 }
-
+/**
+This spells JETT PACE in morse code, using the buzzer (just for fun).
+*/
 void jettPace(){
   LCD.clear();
   LCD.setCursor(0,0);
@@ -165,7 +167,7 @@ void jettPace(){
 
 }
 
-void ViewAnalog()
+void viewAnalog()
 {
   LCD.clear(); LCD.print("Viewing Analog");
   delay(500);
@@ -175,14 +177,14 @@ void ViewAnalog()
     int index = knob(6) * 2 / 1024;
     if (index == 0)
     {
-      LCD.print("BL:"); LCD.print(analogRead(leftIR)); LCD.setCursor(8, 0); LCD.print("BR:"); LCD.print(analogRead(rightIR));
+      LCD.print("BL:"); LCD.print(analogRead(LEFTIR)); LCD.setCursor(8, 0); LCD.print("BR:"); LCD.print(analogRead(RIGHTIR));
       LCD.setCursor(0, 1);
       LCD.print("k6:"); LCD.print(analogRead(6)); LCD.setCursor(8, 1); LCD.print("k7:"); LCD.print(analogRead(7));
     } else if (index == 1)
     {
-      LCD.print("TB:"); LCD.print(analogRead(topIRBack)); LCD.setCursor(8, 0); LCD.print("AF:"); LCD.print(analogRead(ArmIRpin));
+      LCD.print("TB:"); LCD.print(analogRead(TOPIRBACK)); LCD.setCursor(8, 0); LCD.print("AF:"); LCD.print(analogRead(ARMIRPIN));
       LCD.setCursor(0, 1);
-      LCD.print("TL:"); LCD.print(analogRead(topIRLeft)); LCD.setCursor(8, 1); LCD.print("TR:"); LCD.print(analogRead(topIRRight)) ;
+      LCD.print("TL:"); LCD.print(analogRead(TOPIRLEFT)); LCD.setCursor(8, 1); LCD.print("TR:"); LCD.print(analogRead(TOPIRRIGHT)) ;
     }
 
     delay(100);
@@ -197,9 +199,9 @@ void ViewAnalog()
   }
 }
 
-void ControlArm()
+void controlArm()
 {
-  int armAngle = armHome;
+  int armAngle = ARMHOME;
   int clawAngle = 0;
   int spd = 0;
   int count = 0;
@@ -239,8 +241,8 @@ void ControlArm()
 
     if (stopbutton() && !startbutton())
     {
-      RCServo0.write(clawOpen);
-      RCServo1.write(armHome);
+      RCServo0.write(CLAWOPEN);
+      RCServo1.write(ARMHOME);
       LCD.clear(); LCD.home();
       LCD.print("Leaving Arm Control");
       delay(50);
@@ -250,7 +252,7 @@ void ControlArm()
   }
 }
 
-void PickupPassengerMain(){
+void pickupPassengerMain(){
   LCD.clear(); LCD.print("Press start");
   LCD.setCursor(0,1); LCD.print("Pickup on Right");
   delay(500);
@@ -261,7 +263,7 @@ void PickupPassengerMain(){
     }
     delay(50);
   }
-  PickupPassenger(-1);
+  pickupPassenger(-1);
   
   LCD.clear(); LCD.print("Press start");
   LCD.setCursor(0,1); LCD.print("Pickup on Left");
@@ -273,7 +275,7 @@ void PickupPassengerMain(){
     }
     delay(50);
   }
-  PickupPassenger(1);
+  pickupPassenger(1);
 }
 
 void altMotor(void){
